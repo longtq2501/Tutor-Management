@@ -1,3 +1,51 @@
+# MySQL Database Configuration
 spring:
-  application:
-    name: backend
+  datasource:
+    # URL cơ sở dữ liệu: Sử dụng giá trị mặc định.
+    url: jdbc:mysql://localhost:3315/tutor_management?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    # Tên người dùng MySQL: Sử dụng giá trị mặc định.
+    username: root
+    # Mật khẩu MySQL: Sử dụng giá trị mặc định.
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA/Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  # File upload size
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# JWT Configuration
+jwt:
+  # Khóa bí mật JWT: Sử dụng giá trị mặc định.
+  secret: your-secret-key-change-this-in-production-minimum-256-bits
+  expiration: 86400000
+
+# Server Configuration
+server:
+  # Cổng của ứng dụng Spring Boot: Sử dụng giá trị mặc định.
+  port: 8080
+
+# CORS Configuration
+cors:
+  # Nguồn gốc được phép: Sử dụng giá trị mặc định.
+  allowed-origins: http://localhost:3000,https://your-frontend-domain.vercel.app
+
+# Logging
+logging:
+  level:
+    com:
+      tutormanagement: DEBUG
+    org:
+      springframework:
+        security: DEBUG
