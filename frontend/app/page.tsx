@@ -2,12 +2,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, User, TrendingUp } from 'lucide-react';
+import { Calendar, User, TrendingUp, FileText } from 'lucide-react';
 import Dashboard from '@/components/Dashboard';
 import StudentList from '@/components/StudentList';
 import MonthlyView from '@/components/MonthlyView';
+import DocumentLibrary from '@/components/DocumentLibrary';
 
-type View = 'dashboard' | 'students' | 'monthly';
+type View = 'dashboard' | 'students' | 'monthly' | 'documents';
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -63,6 +64,17 @@ export default function Home() {
               <Calendar className="inline mr-2" size={18} />
               Theo tháng
             </button>
+            <button
+              onClick={() => setCurrentView('documents')}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                currentView === 'documents'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <FileText className="inline mr-2" size={18} />
+              Tài liệu
+            </button>
           </div>
         </div>
 
@@ -70,8 +82,8 @@ export default function Home() {
         {currentView === 'dashboard' && <Dashboard />}
         {currentView === 'students' && <StudentList />}
         {currentView === 'monthly' && <MonthlyView />}
+        {currentView === 'documents' && <DocumentLibrary />}
       </div>
     </div>
   );
 }
-

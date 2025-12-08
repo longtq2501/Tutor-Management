@@ -1,4 +1,3 @@
-// src/lib/api.ts
 import axios from 'axios';
 import type {
   Student,
@@ -7,6 +6,9 @@ import type {
   SessionRecordRequest,
   DashboardStats,
   MonthlyStats,
+  DocumentCategory,
+  DocumentStats,
+  DocumentUploadRequest,
 } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
@@ -43,6 +45,28 @@ export const dashboardApi = {
     params: { currentMonth }
   }),
   getMonthlyStats: () => api.get<MonthlyStats[]>('/dashboard/monthly-stats'),
+};
+
+// Documents API
+export const documentsApi = {
+  getAll: () => api.get<Document[]>('/documents'),
+  getById: (id: number) => api.get<Document>(`/documents/${id}`),
+  getByCategory: (category: DocumentCategory) => api.get<Document[]>(`/documents/category/${category}`),
+  search: (keyword: string) => api.get<Document[]>('/documents/search', { params: { keyword } }),
+  upload: (file: File, data: DocumentUploadRequest) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    return api.post('/documents', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  download: (id: number) => api.get(`/documents/${id}/download`, { 
+    responseType: 'blob' 
+  }),
+  delete: (id: number) => api.delete(`/documents/${id}`),
+  getStats: () => api.get<DocumentStats>('/documents/stats'),
+  getCategories: () => api.get<DocumentCategory[]>('/documents/categories'),
 };
 
 export default api;
