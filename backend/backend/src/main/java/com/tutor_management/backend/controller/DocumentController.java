@@ -68,6 +68,22 @@ public class DocumentController {
                 .body(resource);
     }
 
+    @GetMapping("/{id}/preview")
+    public ResponseEntity<Resource> previewDocument(@PathVariable Long id) {
+        DocumentResponse document = documentService.getDocumentById(id);
+        Resource resource = documentService.previewDocument(id);
+
+        // For preview, use inline instead of attachment
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(document.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + document.getFileName() + "\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .body(resource);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
         documentService.deleteDocument(id);

@@ -113,6 +113,14 @@ public class DocumentService {
         return fileStorageService.loadFileAsResource(document.getFilePath());
     }
 
+    public Resource previewDocument(Long id) {
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        // Don't increment download count for preview
+        return fileStorageService.loadFileAsResource(document.getFilePath());
+    }
+
     public void deleteDocument(Long id) {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
