@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Upload, Download, Trash2, Search, FileText } from 'lucide-react';
+import { Upload, Download, Trash2, Search, FileText, Eye } from 'lucide-react';
 import { documentsApi } from '@/lib/api';
 import type { Document, DocumentCategory } from '@/lib/types';
 import DocumentUploadModal from './DocumentUploadModal';
+import DocumentPreviewModal from './DocumentPreviewModal';
 
 const CATEGORIES = [
   { key: 'GRAMMAR', name: 'Ngữ pháp', icon: '📚', color: 'from-blue-400 to-blue-600' },
@@ -28,6 +29,7 @@ export default function DocumentLibrary() {
   const [selectedCategory, setSelectedCategory] = useState<DocumentCategory | null>(null);
   const [categoryDocs, setCategoryDocs] = useState<Document[]>([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -64,9 +66,9 @@ export default function DocumentLibrary() {
       setDocuments(response.data as unknown as Document[]);
       
       // Calculate stats
-      const total = (response.data as unknown as Document[]).length;
-      const downloads = (response.data as unknown as Document[]).reduce((sum, doc) => sum + (doc as unknown as Document).downloadCount, 0);
-      const totalSize = (response.data as unknown as Document[]).reduce((sum, doc) => sum + (doc as unknown as Document).fileSize, 0);
+      const total = response.data.length;
+      const downloads = response.data.reduce((sum, doc) => sum + (doc as unknown as Document).downloadCount, 0);
+      const totalSize = response.data.reduce((sum, doc) => sum + (doc as unknown as Document).fileSize, 0);
       
       setStats({
         total,
@@ -91,7 +93,7 @@ export default function DocumentLibrary() {
   };
 
   const getCategoryCount = (category: string) => {
-    return documents.filter((doc) => doc.category === category).length;
+    return documents.filter((doc) => doc.category === category as DocumentCategory).length;
   };
 
   const handleCategoryClick = (category: DocumentCategory) => {
@@ -322,17 +324,22 @@ export default function DocumentLibrary() {
             {categoryDocs.map((doc) => (
               <div
                 key={doc.id}
-                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer group"
+                onClick={() => setPreviewDocument(doc)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <FileText className="text-gray-400 flex-shrink-0" size={20} />
-                      <h3 className="font-semibold text-gray-800">{doc.title}</h3>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">
+                          {doc.title}
+                        </h3>
+                        {doc.description && (
+                          <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
+                        )}
+                      </div>
                     </div>
-                    {doc.description && (
-                      <p className="text-sm text-gray-600 mb-2 ml-8">{doc.description}</p>
-                    )}
                     <div className="flex items-center gap-4 text-xs text-gray-500 ml-8">
                       <span>{doc.fileName}</span>
                       <span>•</span>
@@ -346,16 +353,33 @@ export default function DocumentLibrary() {
                       <span>{new Date(doc.createdAt).toLocaleDateString('vi-VN')}</span>
                     </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
+                  <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => handleDownload(doc)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewDocument(doc);
+                      }}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                      title="Xem trước"
+                    >
+                      <Eye size={16} />
+                      Xem
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(doc);
+                      }}
                       className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
                       <Download size={16} />
                       Tải xuống
                     </button>
                     <button
-                      onClick={() => handleDelete(doc.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(doc.id);
+                      }}
                       className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-colors"
                     >
                       <Trash2 size={16} />
@@ -379,6 +403,15 @@ export default function DocumentLibrary() {
             loadDocuments();
           }}
           defaultCategory={selectedCategory}
+        />
+      )}
+
+      {previewDocument && (
+        <DocumentPreviewModal
+          document={previewDocument}
+          onClose={() => setPreviewDocument(null)}
+          onDownload={handleDownload}
+          onDelete={handleDelete}
         />
       )}
     </>
