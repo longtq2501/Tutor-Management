@@ -27,6 +27,7 @@ export const studentsApi = {
   create: (data: StudentRequest) => api.post<Student>('/students', data),
   update: (id: number, data: StudentRequest) => api.put<Student>(`/students/${id}`, data),
   delete: (id: number) => api.delete(`/students/${id}`),
+  toggleActive: (id: number) => api.put<Student>(`/students/${id}/toggle-active`), // 🆕
 };
 
 // Sessions API

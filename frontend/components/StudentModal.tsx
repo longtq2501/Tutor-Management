@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Save } from 'lucide-react';
+import { X, Save, Calendar } from 'lucide-react';
 import { studentsApi } from '@/lib/api';
 import type { Student, StudentRequest } from '@/lib/types';
 
@@ -19,6 +19,8 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
     schedule: '',
     pricePerHour: 200000,
     notes: '',
+    active: true,
+    startMonth: new Date().toISOString().slice(0, 7), // YYYY-MM
   });
   const [loading, setLoading] = useState(false);
 
@@ -30,18 +32,30 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
         schedule: student.schedule,
         pricePerHour: student.pricePerHour,
         notes: student.notes || '',
+        active: student.active,
+        // Đảm bảo startMonth luôn có giá trị, nếu null thì dùng giá trị mặc định
+        startMonth: student.startMonth || new Date().toISOString().slice(0, 7),
       });
     } else {
-      // Reset form khi thêm mới
       setFormData({
         name: '',
         phone: '',
         schedule: '',
         pricePerHour: 200000,
         notes: '',
+        active: true,
+        startMonth: new Date().toISOString().slice(0, 7),
       });
     }
-  }, [student]); // Thêm student vào dependency array
+  }, [student]);
+
+  // Thêm hàm xử lý thay đổi startMonth
+  const handleStartMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ 
+      ...formData, 
+      startMonth: e.target.value || new Date().toISOString().slice(0, 7) 
+    });
+  };
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.schedule) {
@@ -67,15 +81,12 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop with blur */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-5 rounded-t-2xl z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">
@@ -90,10 +101,8 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
           </div>
         </div>
 
-        {/* Form Content */}
         <div className="p-6">
           <div className="space-y-5">
-            {/* Tên học sinh */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Tên học sinh <span className="text-red-500">*</span>
@@ -102,12 +111,11 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
                 placeholder="Nhập tên học sinh"
               />
             </div>
 
-            {/* Số điện thoại */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Số điện thoại
@@ -116,12 +124,11 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
                 placeholder="0901234567"
               />
             </div>
 
-            {/* Lịch học */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Lịch học <span className="text-red-500">*</span>
@@ -130,50 +137,96 @@ export default function StudentModal({ student, onClose, onSuccess }: StudentMod
                 type="text"
                 value={formData.schedule}
                 onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
                 placeholder="Ví dụ: Thứ 2, 4, 6 - 18:00"
               />
             </div>
 
-            {/* Giá mỗi giờ */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Giá mỗi giờ (VNĐ)
               </label>
               <input
                 type="number"
-                value={formData.pricePerHour}
+                value={formData.pricePerHour || 200000}
                 onChange={(e) =>
-                  setFormData({ ...formData, pricePerHour: parseInt(e.target.value) || 0 })
+                  setFormData({ ...formData, pricePerHour: parseInt(e.target.value) || 200000 })
                 }
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
                 placeholder="200000"
                 min="0"
                 step="10000"
               />
             </div>
 
-            {/* Ghi chú */}
+            {/* 🆕 Tháng bắt đầu học */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <Calendar className="inline mr-2" size={16} />
+                Tháng bắt đầu học <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="month"
+                value={formData.startMonth || new Date().toISOString().slice(0, 7)}
+                onChange={handleStartMonthChange}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Tháng bắt đầu học với bạn (có thể chọn tháng quá khứ)
+              </p>
+            </div>
+
+            {/* 🆕 Trạng thái */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Trạng thái
+              </label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, active: true })}
+                  className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                    formData.active
+                      ? 'bg-green-100 border-2 border-green-500 text-green-700'
+                      : 'bg-gray-100 border-2 border-gray-200 text-gray-600'
+                  }`}
+                >
+                  ✓ Đang học
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, active: false })}
+                  className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                    !formData.active
+                      ? 'bg-red-100 border-2 border-red-500 text-red-700'
+                      : 'bg-gray-100 border-2 border-gray-200 text-gray-600'
+                  }`}
+                >
+                  ✕ Đã nghỉ
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Ghi chú
               </label>
               <textarea
-                value={formData.notes}
+                value={formData.notes || ''}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-gray-900 placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none resize-none"
                 placeholder="Ghi chú về học sinh..."
                 rows={4}
               />
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-3 mt-8">
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 text-white px-6 py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 disabled:shadow-none"
+              className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 text-white px-6 py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg"
             >
               <Save size={20} />
               {loading ? 'Đang lưu...' : student ? 'Cập nhật' : 'Thêm học sinh'}
