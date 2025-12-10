@@ -84,7 +84,7 @@ export default function StudentList() {
     sessionsCount: number,
     hoursPerSession: number,
     sessionDate: string,
-    month: string
+    month: string,
   ) => {
     if (!selectedStudentIdForSession) return;
 
