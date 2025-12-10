@@ -19,14 +19,29 @@ export interface Student {
     notes?: string;
   }
   
-  export interface SessionRecordRequest {
-    studentId: number;
-    month: string;
-    sessions: number;
-    hoursPerSession: number; // Thêm field này
-    notes?: string;
-  }
+  // export interface SessionRecordRequest {
+  //   studentId: number;
+  //   month: string;
+  //   sessions: number;
+  //   hoursPerSession: number; // Thêm field này
+  //   notes?: string;
+  // }
   
+  // export interface SessionRecord {
+  //   id: number;
+  //   studentId: number;
+  //   studentName: string;
+  //   month: string;
+  //   sessions: number;
+  //   hours: number;
+  //   pricePerHour: number;
+  //   totalAmount: number;
+  //   paid: boolean;
+  //   paidAt?: string;
+  //   notes?: string;
+  //   createdAt: string;
+  // }
+
   export interface SessionRecord {
     id: number;
     studentId: number;
@@ -39,7 +54,16 @@ export interface Student {
     paid: boolean;
     paidAt?: string;
     notes?: string;
+    sessionDate: string; // 🆕 YYYY-MM-DD
     createdAt: string;
+  }
+  
+  export interface SessionRecordRequest {
+    studentId: number;
+    month: string;
+    sessions: number;
+    sessionDate: string; // 🆕 YYYY-MM-DD
+    notes?: string;
   }
   
   // export interface SessionRecordRequest {

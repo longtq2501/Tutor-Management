@@ -241,7 +241,7 @@ export default function MonthlyView() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {group.sessions
-                    .sort((a, b) => a.sessionDate.localeCompare(b.sessionDate))
+                    .sort((a, b) => a.sessionDate.localeCompare(b.sessionDate))  // 🆕 Sort by date
                     .map((session) => (
                       <div
                         key={session.id}
