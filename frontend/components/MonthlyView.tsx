@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle, XCircle, Trash2, Clock } from 'lucide-react';
 import { sessionsApi } from '@/lib/api';
 import type { SessionRecord } from '@/lib/types';
 
@@ -16,6 +16,15 @@ const formatCurrency = (amount: number) => {
 const getMonthName = (monthStr: string) => {
   const [year, month] = monthStr.split('-');
   return `Tháng ${month}/${year}`;
+};
+
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('vi-VN', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+  });
 };
 
 export default function MonthlyView() {
@@ -58,40 +67,53 @@ export default function MonthlyView() {
   };
 
   const handleDeleteRecord = async (id: number) => {
-    if (!confirm('Xóa bản ghi này?')) return;
+    if (!confirm('Xóa buổi học này?')) return;
 
     try {
       await sessionsApi.delete(id);
       loadRecords();
     } catch (error) {
       console.error('Error deleting record:', error);
-      alert('Không thể xóa bản ghi!');
+      alert('Không thể xóa buổi học!');
     }
   };
 
+  // Group by student
   const groupedRecords = records.reduce((acc, record) => {
     const key = record.studentId;
     if (!acc[key]) {
       acc[key] = {
-        ...record,
-        sessions: 0,
-        hours: 0,
+        studentId: record.studentId,
+        studentName: record.studentName,
+        pricePerHour: record.pricePerHour,
+        sessions: [],
+        totalSessions: 0,
+        totalHours: 0,
         totalAmount: 0,
-        paid: false,  // Có thể set dựa trên logic, ví dụ: nếu tất cả paid thì true
-        recordIds: []  // Để track các record ID nếu cần delete/toggle
+        allPaid: true,
       };
     }
-    acc[key].sessions += record.sessions;
-    acc[key].hours += record.hours;
+    acc[key].sessions.push(record);
+    acc[key].totalSessions += record.sessions;
+    acc[key].totalHours += record.hours;
     acc[key].totalAmount += record.totalAmount;
-    acc[key].recordIds.push(record.id);
-    // Nếu cần, set paid nếu tất cả records của học sinh đều paid
-    if (record.paid) acc[key].paid = true;  // Hoặc logic khác
+    if (!record.paid) {
+      acc[key].allPaid = false;
+    }
     return acc;
-  }, {} as Record<number, SessionRecord & { recordIds: number[] }>);
+  }, {} as Record<number, {
+    studentId: number;
+    studentName: string;
+    pricePerHour: number;
+    sessions: SessionRecord[];
+    totalSessions: number;
+    totalHours: number;
+    totalAmount: number;
+    allPaid: boolean;
+  }>);
 
   const groupedRecordsArray = Object.values(groupedRecords);
-  // Tính tổng tháng từ records gốc (không group)
+
   const totalSessions = records.reduce((sum, r) => sum + r.sessions, 0);
   const totalPaid = records
     .filter((r) => r.paid)
@@ -134,9 +156,7 @@ export default function MonthlyView() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-blue-50 rounded-lg p-4">
           <p className="text-sm text-gray-600 mb-1">Tổng buổi học</p>
-          <p className="text-2xl font-bold text-blue-600">
-            {totalSessions} buổi
-          </p>
+          <p className="text-2xl font-bold text-blue-600">{totalSessions} buổi</p>
         </div>
         <div className="bg-green-50 rounded-lg p-4">
           <p className="text-sm text-gray-600 mb-1">Đã thu trong tháng</p>
@@ -161,44 +181,44 @@ export default function MonthlyView() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {groupedRecordsArray.map((groupedRecord) => (
+        <div className="space-y-4">
+          {groupedRecordsArray.map((group) => (
             <div
-              key={groupedRecord.studentId}
-              className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              key={group.studentId}
+              className="border-2 rounded-xl p-5 hover:shadow-md transition-all"
             >
-              <div className="flex justify-between items-start">
+              {/* Student Header */}
+              <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-bold text-gray-800">
-                      {groupedRecord.studentName}
-                    </h3>
-                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {groupedRecord.sessions} buổi × 2h = {groupedRecord.hours}h
-                    </span>
-                  </div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">
+                    {group.studentName}
+                  </h3>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>{formatCurrency(groupedRecord.pricePerHour)}/giờ</span>
+                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+                      {group.totalSessions} buổi × 2h = {group.totalHours}h
+                    </span>
+                    <span>{formatCurrency(group.pricePerHour)}/giờ</span>
                     <span>•</span>
                     <span className="font-semibold text-gray-800">
-                      Tổng: {formatCurrency(groupedRecord.totalAmount)}
-                    </span>
-                    <span>•</span>
-                    <span>
-                        {new Date(groupedRecord.createdAt).toLocaleDateString('vi-VN')}
+                      Tổng: {formatCurrency(group.totalAmount)}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => groupedRecord.recordIds.forEach(id => handleTogglePayment(id))}
+                    onClick={() => {
+                      // Toggle all sessions for this student
+                      group.sessions.forEach((session) => {
+                        handleTogglePayment(session.id);
+                      });
+                    }}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      groupedRecord.paid
+                      group.allPaid
                         ? 'bg-green-100 text-green-700 hover:bg-green-200'
                         : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                     }`}
                   >
-                    {groupedRecord.paid ? (
+                    {group.allPaid ? (
                       <>
                         <CheckCircle size={16} className="inline mr-1" />
                         Đã thanh toán
@@ -210,16 +230,57 @@ export default function MonthlyView() {
                       </>
                     )}
                   </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Xóa tất cả bản ghi của ${groupedRecord.studentName}?`)) {
-                        groupedRecord.recordIds.forEach(id => handleDeleteRecord(id));
-                      }
-                    }}
-                    className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                </div>
+              </div>
+
+              {/* Session Dates List */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock size={16} className="text-gray-600" />
+                  <h4 className="font-semibold text-gray-700">Ngày dạy:</h4>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {group.sessions
+                    .sort((a, b) => a.sessionDate.localeCompare(b.sessionDate))
+                    .map((session) => (
+                      <div
+                        key={session.id}
+                        className={`relative group border-2 rounded-lg p-3 transition-all ${
+                          session.paid
+                            ? 'bg-green-50 border-green-200'
+                            : 'bg-white border-gray-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Calendar size={14} className="text-gray-600" />
+                              <span className="text-sm font-semibold text-gray-800">
+                                {formatDate(session.sessionDate)}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              {session.sessions} buổi × {session.hours / session.sessions}h
+                            </div>
+                            <div className="text-xs font-medium text-indigo-600 mt-1">
+                              {formatCurrency(session.totalAmount)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteRecord(session.id)}
+                            className="opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 text-red-600 p-1 rounded transition-all"
+                            title="Xóa"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                        {session.paid && (
+                          <div className="absolute top-1 right-1">
+                            <CheckCircle size={14} className="text-green-600" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>

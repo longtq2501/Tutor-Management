@@ -21,7 +21,7 @@ export default function StudentList() {
   const [showModal, setShowModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [showAddSessionModal, setShowAddSessionModal] = useState(false);
-  const [selectedStudentIdForSession, setSelectedStudentIdForSession] = useState<number | null>(null);
+  const [selectedStudentIdForSession, setSelectedStudentIdForSession] = useState<number | null>(null);
 
   useEffect(() => {
     loadStudents();
@@ -29,13 +29,13 @@ export default function StudentList() {
 
   useEffect(() => {
     if (showAddSessionModal || showModal) {
-        document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
     } else {
-        document.body.style.overflow = 'unset';
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-        document.body.style.overflow = 'unset';
+      document.body.style.overflow = 'unset';
     };
   }, [showAddSessionModal, showModal]);
 
@@ -75,34 +75,36 @@ export default function StudentList() {
     }
   };
 
-  // --- 🆕 THAY THẾ HÀM handleAddSession (MỞ MODAL) ---
-    const openAddSessionModal = (studentId: number) => {
-        setSelectedStudentIdForSession(studentId);
-        setShowAddSessionModal(true);
-      };
-      
-      // --- 🆕 HÀM SUBMIT XỬ LÝ DỮ LIỆU TỪ MODAL ---
-      const handleAddSessionSubmit = async (sessionsCount: number, hoursPerSession: number) => {
-      if (!selectedStudentIdForSession) return;
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      const totalHours = sessionsCount * hoursPerSession;  // Tính tổng giờ thực tế
-      try {
-        await sessionsApi.create({
-          studentId: selectedStudentIdForSession,
-          month: currentMonth,
-          sessions: sessionsCount,
-          hoursPerSession: hoursPerSession  // Truyền tổng giờ thay vì giờ mỗi buổi (đảm bảo backend tính đúng)
-        });
-        
-        setShowAddSessionModal(false);  // Đóng modal
-        setSelectedStudentIdForSession(null);
-        loadStudents();  // Reload để cập nhật totals nếu backend tính lại
-        alert(`Đã thêm ${totalHours} giờ thành công!`);  // Alert dựa trên tổng giờ
-      } catch (error) {
-        console.error('Error adding session:', error);
-        alert('Không thể thêm buổi học!');
-      }
-    };
+  const openAddSessionModal = (studentId: number) => {
+    setSelectedStudentIdForSession(studentId);
+    setShowAddSessionModal(true);
+  };
+
+  const handleAddSessionSubmit = async (
+    sessionsCount: number,
+    hoursPerSession: number,
+    sessionDate: string,
+    month: string
+  ) => {
+    if (!selectedStudentIdForSession) return;
+
+    try {
+      await sessionsApi.create({
+        studentId: selectedStudentIdForSession,
+        month: month,
+        sessions: sessionsCount,
+        sessionDate: sessionDate,
+      });
+
+      setShowAddSessionModal(false);
+      setSelectedStudentIdForSession(null);
+      loadStudents();
+      alert(`Đã thêm buổi học ngày ${sessionDate} thành công!`);
+    } catch (error) {
+      console.error('Error adding session:', error);
+      alert('Không thể thêm buổi học!');
+    }
+  };
 
   if (loading) {
     return (
@@ -152,12 +154,8 @@ export default function StudentList() {
                       <User className="text-indigo-600" size={24} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-800">
-                        {student.name}
-                      </h3>
-                      {student.phone && (
-                        <p className="text-sm text-gray-600">{student.phone}</p>
-                      )}
+                      <h3 className="text-lg font-bold text-gray-800">{student.name}</h3>
+                      {student.phone && <p className="text-sm text-gray-600">{student.phone}</p>}
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -188,9 +186,7 @@ export default function StudentList() {
                 </div>
 
                 {student.notes && (
-                  <p className="text-sm text-gray-600 mb-4 italic">
-                    {student.notes}
-                  </p>
+                  <p className="text-sm text-gray-600 mb-4 italic">{student.notes}</p>
                 )}
 
                 <div className="border-t pt-4 mb-4">
@@ -232,13 +228,13 @@ export default function StudentList() {
       )}
 
       {showAddSessionModal && selectedStudentIdForSession && (
-           <AddSessionModal
-           onClose={() => {
-               setShowAddSessionModal(false);
-               setSelectedStudentIdForSession(null); // Đảm bảo reset ID khi đóng
-           }}
-           onSubmit={handleAddSessionSubmit}
-       />
+        <AddSessionModal
+          onClose={() => {
+            setShowAddSessionModal(false);
+            setSelectedStudentIdForSession(null);
+          }}
+          onSubmit={handleAddSessionSubmit}
+        />
       )}
     </>
   );
