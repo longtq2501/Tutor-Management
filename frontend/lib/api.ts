@@ -10,6 +10,8 @@ import type {
   DocumentCategory,
   DocumentStats,
   DocumentUploadRequest,
+  InvoiceRequest,
+  InvoiceResponse,
 } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
@@ -131,6 +133,21 @@ export const documentsApi = {
   },
   getCategories: async (): Promise<DocumentCategory[]> => {
     const response = await api.get('/documents/categories');
+    return response.data;
+  },
+};
+
+// Invoice API
+export const invoicesApi = {
+  generateInvoice: async (request: InvoiceRequest): Promise<InvoiceResponse> => {
+    const response = await api.post('/invoices/generate', request);
+    return response.data;
+  },
+
+  downloadInvoicePDF: async (request: InvoiceRequest): Promise<Blob> => {
+    const response = await api.post('/invoices/download-pdf', request, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 };

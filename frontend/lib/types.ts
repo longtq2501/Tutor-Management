@@ -67,6 +67,41 @@ export interface MonthlyStats {
   totalSessions: number;
 }
 
+export interface InvoiceRequest {
+  studentId: number;
+  month: string;
+  sessionRecordIds?: number[];
+}
+
+export interface InvoiceResponse {
+  invoiceNumber: string;
+  studentName: string;
+  month: string;
+  totalSessions: number;
+  totalHours: number;
+  totalAmount: number;
+  items: InvoiceItem[];
+  bankInfo: BankInfo;
+  qrCodeUrl: string;
+  createdDate: string;
+}
+
+export interface InvoiceItem {
+  date: string;
+  description: string;
+  sessions: number;
+  hours: number;
+  pricePerHour: number;
+  amount: number;
+}
+
+export interface BankInfo {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  swiftCode: string;
+}
+
 export type DocumentCategory = 
   | 'GRAMMAR' | 'VOCABULARY' | 'READING' | 'LISTENING'
   | 'SPEAKING' | 'WRITING' | 'EXERCISES' | 'EXAM'

@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle, XCircle, Trash2, Clock } from 'lucide-react';
-import { sessionsApi } from '@/lib/api';
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle, XCircle, Trash2, Clock, FileText } from 'lucide-react';
+import { sessionsApi, invoicesApi } from '@/lib/api';
 import type { SessionRecord } from '@/lib/types';
 
 const formatCurrency = (amount: number) => {
@@ -41,11 +41,10 @@ export default function MonthlyView() {
   const loadRecords = async () => {
     try {
       setLoading(true);
-      const data = await sessionsApi.getByMonth(selectedMonth);
-      setRecords(data || []); // Đảm bảo luôn là mảng
+      const response = await sessionsApi.getByMonth(selectedMonth);
+      setRecords(response);
     } catch (error) {
       console.error('Error loading records:', error);
-      setRecords([]); // Nếu có lỗi, set thành mảng rỗng
     } finally {
       setLoading(false);
     }
@@ -60,7 +59,7 @@ export default function MonthlyView() {
   const handleTogglePayment = async (id: number) => {
     try {
       await sessionsApi.togglePayment(id);
-      await loadRecords();
+      loadRecords();
     } catch (error) {
       console.error('Error toggling payment:', error);
       alert('Không thể cập nhật trạng thái thanh toán!');
@@ -72,18 +71,37 @@ export default function MonthlyView() {
 
     try {
       await sessionsApi.delete(id);
-      await loadRecords();
+      loadRecords();
     } catch (error) {
       console.error('Error deleting record:', error);
       alert('Không thể xóa buổi học!');
     }
   };
 
-  // Kiểm tra records trước khi reduce
-  const safeRecords = Array.isArray(records) ? records : [];
+  const handleGenerateInvoice = async (studentId: number, sessionIds: number[]) => {
+    try {
+      const response = await invoicesApi.downloadInvoicePDF({
+        studentId,
+        month: selectedMonth,
+        sessionRecordIds: sessionIds,
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Bao-Gia-${selectedMonth}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Không thể tạo báo giá!');
+    }
+  };
 
   // Group by student
-  const groupedRecords = safeRecords.reduce((acc, record) => {
+  const groupedRecords = records.reduce((acc, record) => {
     const key = record.studentId;
     if (!acc[key]) {
       acc[key] = {
@@ -118,11 +136,11 @@ export default function MonthlyView() {
 
   const groupedRecordsArray = Object.values(groupedRecords);
 
-  const totalSessions = safeRecords.reduce((sum, r) => sum + r.sessions, 0);
-  const totalPaid = safeRecords
+  const totalSessions = records.reduce((sum, r) => sum + r.sessions, 0);
+  const totalPaid = records
     .filter((r) => r.paid)
     .reduce((sum, r) => sum + r.totalAmount, 0);
-  const totalUnpaid = safeRecords
+  const totalUnpaid = records
     .filter((r) => !r.paid)
     .reduce((sum, r) => sum + r.totalAmount, 0);
 
@@ -177,7 +195,7 @@ export default function MonthlyView() {
       </div>
 
       {/* Records List */}
-      {safeRecords.length === 0 ? (
+      {records.length === 0 ? (
         <div className="text-center py-16">
           <Calendar className="mx-auto text-gray-300 mb-4" size={64} />
           <p className="text-gray-500 text-lg">
@@ -199,7 +217,7 @@ export default function MonthlyView() {
                   </h3>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
-                      {group.totalSessions} buổi × {group.totalHours / group.totalSessions}h = {group.totalHours}h
+                      {group.totalSessions} buổi × 2h = {group.totalHours}h
                     </span>
                     <span>{formatCurrency(group.pricePerHour)}/giờ</span>
                     <span>•</span>
@@ -210,8 +228,18 @@ export default function MonthlyView() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => handleGenerateInvoice(
+                      group.studentId,
+                      group.sessions.map(s => s.id)
+                    )}
+                    className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    title="Xuất báo giá PDF"
+                  >
+                    <FileText size={16} />
+                    Xuất báo giá
+                  </button>
+                  <button
                     onClick={() => {
-                      // Toggle all sessions for this student
                       group.sessions.forEach((session) => {
                         handleTogglePayment(session.id);
                       });
