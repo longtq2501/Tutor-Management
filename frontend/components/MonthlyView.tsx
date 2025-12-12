@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle, XCircle, Trash2, Clock, FileText } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle, XCircle, Trash2, Clock, FileText, Check, Users } from 'lucide-react';
 import { sessionsApi, invoicesApi } from '@/lib/api';
 import type { SessionRecord } from '@/lib/types';
 
@@ -33,7 +33,9 @@ export default function MonthlyView() {
   );
   const [records, setRecords] = useState<SessionRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [downloadingMonthly, setDownloadingMonthly] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState<number[]>([]); // Array of student IDs
+  const [generatingInvoice, setGeneratingInvoice] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     loadRecords();
@@ -44,6 +46,9 @@ export default function MonthlyView() {
       setLoading(true);
       const response = await sessionsApi.getByMonth(selectedMonth);
       setRecords(response);
+      // Reset selections when month changes
+      setSelectedStudents([]);
+      setSelectAll(false);
     } catch (error) {
       console.error('Error loading records:', error);
     } finally {
@@ -79,54 +84,79 @@ export default function MonthlyView() {
     }
   };
 
-  const handleGenerateInvoice = async (studentId: number, sessionIds: number[]) => {
-    try {
-      const response = await invoicesApi.downloadInvoicePDF({
-        studentId,
-        month: selectedMonth,
-        sessionRecordIds: sessionIds,
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Bao-Gia-${selectedMonth}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error generating invoice:', error);
-      alert('Không thể tạo báo giá!');
+  const toggleStudentSelection = (studentId: number) => {
+    if (selectedStudents.includes(studentId)) {
+      setSelectedStudents(selectedStudents.filter(id => id !== studentId));
+    } else {
+      setSelectedStudents([...selectedStudents, studentId]);
     }
   };
 
-  const handleGenerateMonthlyInvoice = async () => {
-    if (records.length === 0) {
-      alert('Không có buổi học nào trong tháng này!');
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelectedStudents([]);
+    } else {
+      const allStudentIds = Object.keys(groupedRecords).map(Number);
+      setSelectedStudents(allStudentIds);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const handleGenerateCombinedInvoice = async () => {
+    if (selectedStudents.length === 0) {
+      alert('Vui lòng chọn ít nhất một học sinh!');
       return;
     }
-  
+
     try {
-      setDownloadingMonthly(true);
-      const response = await invoicesApi.downloadInvoicePDF({
-        month: selectedMonth,
-        allStudents: true, // FLAG QUAN TRỌNG
+      setGeneratingInvoice(true);
+      
+      // Collect all session IDs from selected students
+      const allSessionIds: number[] = [];
+      selectedStudents.forEach(studentId => {
+        const group = groupedRecords[studentId];
+        if (group) {
+          group.sessions.forEach(session => {
+            allSessionIds.push(session.id);
+          });
+        }
       });
-  
+
+      if (allSessionIds.length === 0) {
+        alert('Không có buổi học nào để tạo báo giá!');
+        return;
+      }
+
+      // For combined invoice, we need to modify the backend to handle multiple students
+      // For now, use the first student as reference (will update backend later)
+      const response = await invoicesApi.downloadInvoicePDF({
+        studentId: selectedStudents[0],
+        month: selectedMonth,
+        sessionRecordIds: allSessionIds,
+        multipleStudents: true, // New flag to indicate multiple students
+        selectedStudentIds: selectedStudents // Send all selected student IDs
+      });
+
+      // Generate filename with selected student count
+      const studentCount = selectedStudents.length;
+      const filename = studentCount === 1 
+        ? `Bao-Gia-${selectedMonth}.pdf`
+        : `Bao-Gia-${selectedMonth}-${studentCount}-hoc-sinh.pdf`;
+
       const url = window.URL.createObjectURL(new Blob([response]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Bao-Gia-Tong-${selectedMonth}.pdf`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+
     } catch (error) {
-      console.error('Error generating monthly invoice:', error);
-      alert('Không thể tạo báo giá tổng tháng!');
+      console.error('Error generating combined invoice:', error);
+      alert('Không thể tạo báo giá chung!');
     } finally {
-      setDownloadingMonthly(false);
+      setGeneratingInvoice(false);
     }
   };
 
@@ -173,6 +203,17 @@ export default function MonthlyView() {
   const totalUnpaid = records
     .filter((r) => !r.paid)
     .reduce((sum, r) => sum + r.totalAmount, 0);
+
+  // Calculate totals for selected students
+  const selectedStudentsTotal = selectedStudents.reduce((acc, studentId) => {
+    const group = groupedRecords[studentId];
+    if (group) {
+      acc.totalSessions += group.totalSessions;
+      acc.totalHours += group.totalHours;
+      acc.totalAmount += group.totalAmount;
+    }
+    return acc;
+  }, { totalSessions: 0, totalHours: 0, totalAmount: 0 });
 
   if (loading) {
     return (
@@ -224,29 +265,75 @@ export default function MonthlyView() {
         </div>
       </div>
 
+      {/* Combined Invoice Section */}
       {records.length > 0 && (
-      <div className="mb-6">
-        <button
-          onClick={handleGenerateMonthlyInvoice}
-          disabled={downloadingMonthly}
-          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {downloadingMonthly ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              Đang tạo báo giá...
-            </>
-          ) : (
-            <>
-              <FileText size={20} />
-              Xuất báo giá tổng tháng (Tất cả học sinh)
-            </>
+        <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Users className="text-blue-600" size={24} />
+              <h3 className="text-xl font-bold text-gray-800">Tạo báo giá chung</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleSelectAll}
+                className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors"
+              >
+                {selectAll ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+              </button>
+              <div className="text-sm text-gray-600">
+                Đã chọn: <span className="font-bold text-blue-600">{selectedStudents.length}/{groupedRecordsArray.length}</span> học sinh
+              </div>
+            </div>
+          </div>
+          
+          {selectedStudents.length > 0 && (
+            <div className="mb-4 p-4 bg-white rounded-xl border border-blue-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Tổng buổi học đã chọn</p>
+                  <p className="text-2xl font-bold text-blue-600">{selectedStudentsTotal.totalSessions} buổi</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Tổng giờ học</p>
+                  <p className="text-2xl font-bold text-green-600">{selectedStudentsTotal.totalHours} giờ</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Tổng tiền</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {formatCurrency(selectedStudentsTotal.totalAmount)}
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 text-center">
+                Báo giá chung sẽ bao gồm tất cả buổi học của {selectedStudents.length} học sinh đã chọn
+              </p>
+            </div>
           )}
-        </button>
-        <p className="text-sm text-gray-500 mt-2 text-center">
-          Tạo 1 file PDF chứa tổng hợp học phí của tất cả học sinh trong tháng
-        </p>
-      </div>
+
+          <button
+            onClick={handleGenerateCombinedInvoice}
+            disabled={generatingInvoice || selectedStudents.length === 0}
+            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {generatingInvoice ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Đang tạo báo giá...
+              </>
+            ) : (
+              <>
+                <FileText size={20} />
+                {selectedStudents.length === 1 
+                  ? 'Tạo báo giá cho 1 học sinh' 
+                  : `Tạo báo giá chung (${selectedStudents.length} học sinh)`}
+              </>
+            )}
+          </button>
+          
+          <p className="text-sm text-gray-500 mt-3 text-center">
+            Lưu ý: Chọn nhiều học sinh để tạo một báo giá chung cho phụ huynh có nhiều con học cùng lúc
+          </p>
+        </div>
       )}
 
       {/* Records List */}
@@ -262,36 +349,49 @@ export default function MonthlyView() {
           {groupedRecordsArray.map((group) => (
             <div
               key={group.studentId}
-              className="border-2 rounded-xl p-5 hover:shadow-md transition-all"
+              className={`border-2 rounded-xl p-5 hover:shadow-md transition-all ${
+                selectedStudents.includes(group.studentId) 
+                  ? 'border-indigo-300 bg-indigo-50' 
+                  : 'border-gray-200'
+              }`}
             >
               {/* Student Header */}
               <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-800 mb-1">
-                    {group.studentName}
-                  </h3>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
-                      {group.totalSessions} buổi × 2h = {group.totalHours}h
-                    </span>
-                    <span>{formatCurrency(group.pricePerHour)}/giờ</span>
-                    <span>•</span>
-                    <span className="font-semibold text-gray-800">
-                      Tổng: {formatCurrency(group.totalAmount)}
-                    </span>
+                <div className="flex items-center gap-3 flex-1">
+                  <input
+                    type="checkbox"
+                    checked={selectedStudents.includes(group.studentId)}
+                    onChange={() => toggleStudentSelection(group.studentId)}
+                    className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
+                  />
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-1">
+                      {group.studentName}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+                        {group.totalSessions} buổi × 2h = {group.totalHours}h
+                      </span>
+                      <span>{formatCurrency(group.pricePerHour)}/giờ</span>
+                      <span>•</span>
+                      <span className="font-semibold text-gray-800">
+                        Tổng: {formatCurrency(group.totalAmount)}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleGenerateInvoice(
-                      group.studentId,
-                      group.sessions.map(s => s.id)
-                    )}
+                    onClick={() => {
+                      // Generate individual invoice
+                      const sessionIds = group.sessions.map(s => s.id);
+                      handleGenerateInvoice(group.studentId, sessionIds);
+                    }}
                     className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-                    title="Xuất báo giá PDF"
+                    title="Xuất báo giá riêng"
                   >
                     <FileText size={16} />
-                    Xuất báo giá
+                    Báo giá riêng
                   </button>
                   <button
                     onClick={() => {
@@ -376,4 +476,27 @@ export default function MonthlyView() {
       )}
     </div>
   );
+
+  // Helper function for individual invoice (kept from previous version)
+  const handleGenerateInvoice = async (studentId: number, sessionIds: number[]) => {
+    try {
+      const response = await invoicesApi.downloadInvoicePDF({
+        studentId,
+        month: selectedMonth,
+        sessionRecordIds: sessionIds,
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Bao-Gia-${selectedMonth}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Không thể tạo báo giá!');
+    }
+  };
 }
