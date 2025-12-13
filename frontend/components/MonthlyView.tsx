@@ -84,6 +84,29 @@ export default function MonthlyView() {
     }
   };
 
+  // Helper function for individual invoice
+  const handleGenerateInvoice = async (studentId: number, sessionIds: number[]) => {
+    try {
+      const response = await invoicesApi.downloadInvoicePDF({
+        studentId,
+        month: selectedMonth,
+        sessionRecordIds: sessionIds,
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Bao-Gia-${selectedMonth}-${studentId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Không thể tạo báo giá!');
+    }
+  };
+
   const toggleStudentSelection = (studentId: number) => {
     if (selectedStudents.includes(studentId)) {
       setSelectedStudents(selectedStudents.filter(id => id !== studentId));
@@ -127,8 +150,7 @@ export default function MonthlyView() {
         return;
       }
 
-      // For combined invoice, we need to modify the backend to handle multiple students
-      // For now, use the first student as reference (will update backend later)
+      // For combined invoice
       const response = await invoicesApi.downloadInvoicePDF({
         studentId: selectedStudents[0],
         month: selectedMonth,
@@ -476,27 +498,4 @@ export default function MonthlyView() {
       )}
     </div>
   );
-
-  // Helper function for individual invoice (kept from previous version)
-  const handleGenerateInvoice = async (studentId: number, sessionIds: number[]) => {
-    try {
-      const response = await invoicesApi.downloadInvoicePDF({
-        studentId,
-        month: selectedMonth,
-        sessionRecordIds: sessionIds,
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Bao-Gia-${selectedMonth}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error generating invoice:', error);
-      alert('Không thể tạo báo giá!');
-    }
-  };
 }
