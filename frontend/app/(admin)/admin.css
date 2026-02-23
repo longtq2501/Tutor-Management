@@ -13,18 +13,70 @@
   --admin-green: #22c55e;
   --admin-red: #ef4444;
   --admin-amber: #f59e0b;
+  --admin-blue: #3b82f6;
+  --admin-shadow: rgba(3, 7, 18, 0.25);
+  --admin-glass-bg: rgba(19, 19, 24, 0.7);
+  --admin-overlay: rgba(2, 6, 23, 0.56);
 
   background-color: var(--admin-bg);
   color: var(--admin-text);
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+:root[data-admin-theme='light'] .admin-theme {
+  --admin-bg: #f8f9fa;
+  --admin-surface: #ffffff;
+  --admin-surface2: #f1f3f5;
+  --admin-surface3: #e9ecef;
+  --admin-border: #dee2e6;
+  --admin-border2: #ced4da;
+  --admin-text: #212529;
+  --admin-text2: #495057;
+  --admin-text3: #868e96;
+  --admin-accent: #6366f1;
+  --admin-accent-dim: rgba(99, 102, 241, 0.1);
+  --admin-green: #10b981;
+  --admin-red: #ef4444;
+  --admin-amber: #f59e0b;
+  --admin-blue: #3b82f6;
+  --admin-shadow: rgba(0, 0, 0, 0.05);
+  --admin-glass-bg: rgba(255, 255, 255, 0.8);
+  --admin-overlay: rgba(0, 0, 0, 0.4);
+}
+
+:root[data-admin-theme='dark'] .admin-theme {
+  --admin-bg: #0c0c0f;
+  --admin-surface: #131318;
+  --admin-surface2: #1a1a22;
+  --admin-surface3: #22222d;
+  --admin-border: rgba(255, 255, 255, 0.07);
+  --admin-border2: rgba(255, 255, 255, 0.12);
+  --admin-text: #f0f0f5;
+  --admin-text2: #8888a0;
+  --admin-text3: #555568;
+  --admin-accent: #6366f1;
+  --admin-accent-dim: rgba(99, 102, 241, 0.15);
+  --admin-green: #22c55e;
+  --admin-red: #ef4444;
+  --admin-amber: #f59e0b;
+  --admin-blue: #3b82f6;
+  --admin-shadow: rgba(3, 7, 18, 0.25);
+  --admin-glass-bg: rgba(19, 19, 24, 0.7);
+  --admin-overlay: rgba(2, 6, 23, 0.56);
 }
 
 .admin-theme * {
   border-color: var(--admin-border);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .admin-glass {
-  background: rgba(19, 19, 24, 0.7);
+  background: var(--admin-glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--admin-border);

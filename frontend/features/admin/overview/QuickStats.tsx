@@ -1,9 +1,12 @@
+'use client';
+
 import {
     UserCheck,
     Crown,
     AlertCircle,
     Clock
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import type { OverviewStats } from '@/lib/types/admin';
 
 interface QuickStatsProps {
@@ -11,6 +14,12 @@ interface QuickStatsProps {
 }
 
 export function QuickStats({ stats }: QuickStatsProps) {
+    const router = useRouter();
+
+    const handleViewDetailedReport = () => {
+        router.push('/system');
+    };
+
     const displayStats = [
         {
             label: 'Gia sư Active',
@@ -80,7 +89,10 @@ export function QuickStats({ stats }: QuickStatsProps) {
             </div>
 
             <div className="mt-auto pt-4 border-t border-[var(--admin-border)]">
-                <button className="w-full py-2 bg-[var(--admin-surface2)] hover:bg-[var(--admin-surface3)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] text-[10px] font-bold rounded-lg transition-all uppercase tracking-widest">
+                <button
+                    onClick={handleViewDetailedReport}
+                    className="w-full py-2 bg-[var(--admin-surface2)] hover:bg-[var(--admin-surface3)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] text-[10px] font-bold rounded-lg transition-all uppercase tracking-widest"
+                >
                     Xem chi tiết báo cáo
                 </button>
             </div>

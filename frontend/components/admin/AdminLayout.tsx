@@ -1,12 +1,16 @@
 'use client';
 
-import { AdminSidebar } from './AdminSidebar';
 import { ModeToggle } from '@/components/shared/ModeToggle';
+import { AdminSidebar } from './AdminSidebar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex h-screen bg-slate-950 text-slate-200">
-            <AdminSidebar />
+        <div className="flex h-screen admin-theme bg-[var(--admin-bg)] text-[var(--admin-text)]">
+            <AdminSidebar collapsed={false} mobileOpen={false} onCloseMobile={function (): void {
+                throw new Error('Function not implemented.');
+            }} onToggleCollapse={function (): void {
+                throw new Error('Function not implemented.');
+            }} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-14 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-950/50 backdrop-blur-md">
                     <div className="flex items-center gap-4">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     UserPlus,
     Crown,
@@ -24,8 +25,13 @@ const activityConfig: Record<string, { icon: React.ElementType; color: string }>
 };
 
 export function ActivityFeed() {
+    const router = useRouter();
     const [activities, setActivities] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const handleViewAllActivity = () => {
+        router.push('/system');
+    };
 
     useEffect(() => {
         const fetchActivities = async () => {
@@ -83,7 +89,10 @@ export function ActivityFeed() {
             </div>
 
             <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface2)]/30">
-                <button className="w-full text-[10px] font-bold text-[var(--admin-accent)] hover:text-[var(--admin-accent)]/80 uppercase tracking-widest transition-colors">
+                <button
+                    onClick={handleViewAllActivity}
+                    className="w-full text-[10px] font-bold text-[var(--admin-accent)] hover:text-[var(--admin-accent)]/80 uppercase tracking-widest transition-colors"
+                >
                     Xem tất cả hoạt động
                 </button>
             </div>

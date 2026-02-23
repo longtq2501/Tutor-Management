@@ -8,6 +8,7 @@ export interface Tutor {
   subscriptionStatus: string;
   studentCount: number; // For list view projection
   createdAt: string;
+  avatarUrl?: string;
 }
 
 export interface TutorRequest {

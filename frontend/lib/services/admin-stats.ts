@@ -3,8 +3,11 @@ import type { OverviewStats, MonthlyRevenue, ActivityLog } from '../types/admin'
 import type { PageResponse } from '../types/common';
 
 export const adminStatsApi = {
-    getOverview: async (): Promise<OverviewStats> => {
-        const response = await api.get('/admin/stats/overview');
+    getOverview: async (startDate?: string, endDate?: string): Promise<OverviewStats> => {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        const response = await api.get(`/admin/stats/overview${params.toString() ? '?' + params.toString() : ''}`);
         return response.data.data;
     },
 

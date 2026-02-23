@@ -10,10 +10,22 @@ interface RevenueData {
 
 interface RevenueChartProps {
     data: RevenueData[];
+    view?: '6m' | '1y';
+    onViewChange?: (view: '6m' | '1y') => void;
+    loading?: boolean;
 }
 
-export function RevenueChart({ data }: RevenueChartProps) {
-    const [view, setView] = useState<'6m' | '1y'>('6m');
+export function RevenueChart({ data, view: controlledView, onViewChange, loading = false }: RevenueChartProps) {
+    const [internalView, setInternalView] = useState<'6m' | '1y'>('6m');
+    const view = controlledView ?? internalView;
+
+    const handleViewChange = (newView: '6m' | '1y') => {
+        if (onViewChange) {
+            onViewChange(newView);
+        } else {
+            setInternalView(newView);
+        }
+    };
 
     const filteredData = useMemo(() => {
         return view === '6m' ? data.slice(-6) : data;
@@ -35,19 +47,21 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
                 <div className="flex bg-[var(--admin-surface2)] p-1 rounded-lg border border-[var(--admin-border)]">
                     <button
-                        onClick={() => setView('6m')}
-                        className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${view === '6m'
-                                ? 'bg-[var(--admin-surface3)] text-[var(--admin-accent)] shadow-sm'
-                                : 'text-[var(--admin-text3)] hover:text-[var(--admin-text2)]'
+                        onClick={() => handleViewChange('6m')}
+                        disabled={loading}
+                        className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all disabled:opacity-50 ${view === '6m'
+                            ? 'bg-[var(--admin-surface3)] text-[var(--admin-accent)] shadow-sm'
+                            : 'text-[var(--admin-text3)] hover:text-[var(--admin-text2)]'
                             }`}
                     >
                         6 THÁNG
                     </button>
                     <button
-                        onClick={() => setView('1y')}
-                        className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${view === '1y'
-                                ? 'bg-[var(--admin-surface3)] text-[var(--admin-accent)] shadow-sm'
-                                : 'text-[var(--admin-text3)] hover:text-[var(--admin-text2)]'
+                        onClick={() => handleViewChange('1y')}
+                        disabled={loading}
+                        className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all disabled:opacity-50 ${view === '1y'
+                            ? 'bg-[var(--admin-surface3)] text-[var(--admin-accent)] shadow-sm'
+                            : 'text-[var(--admin-text3)] hover:text-[var(--admin-text2)]'
                             }`}
                     >
                         1 NĂM
@@ -55,7 +69,12 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 </div>
             </div>
 
-            <div className="h-[200px] flex items-end justify-between gap-2 pt-4">
+            <div className="h-[200px] flex items-end justify-between gap-2 pt-4 relative">
+                {loading && (
+                    <div className="absolute inset-0 bg-[var(--admin-surface)]/80 rounded-lg z-10 flex items-center justify-center backdrop-blur-sm">
+                        <div className="w-8 h-8 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                )}
                 {filteredData.map((item, idx) => {
                     const height = (item.value / maxValue) * 100;
                     const isCurrentMonth = item.month === currentMonth;
@@ -67,9 +86,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                                     initial={{ height: 0 }}
                                     animate={{ height: `${height}%` }}
                                     transition={{ duration: 0.8, delay: idx * 0.05, ease: 'easeOut' }}
-                                    className={`w-full max-w-[32px] rounded-t-lg transition-all duration-300 relative ${isCurrentMonth
-                                            ? 'bg-[var(--admin-accent)] shadow-[0_0_15px_rgba(99,102,241,0.3)]'
-                                            : 'bg-[var(--admin-surface2)] group-hover:bg-[var(--admin-surface3)]'
+                                    className={`w-full max-w-[32px] rounded-t-lg transition-all duration-300 relative group-hover:brightness-125 ${isCurrentMonth ? 'bg-[var(--admin-accent)]' : 'bg-[var(--admin-accent)]/60'
                                         }`}
                                 >
                                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[var(--admin-surface3)] text-[var(--admin-text)] text-[10px] font-bold px-2 py-1 rounded border border-[var(--admin-border2)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">

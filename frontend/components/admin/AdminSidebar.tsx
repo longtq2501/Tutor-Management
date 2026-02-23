@@ -1,139 +1,177 @@
 'use client';
 
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
     Users,
     GraduationCap,
     Calendar,
-    FileText,
+    FolderClosed,
     Settings,
-    Settings2,
     ShieldCheck,
     History,
-    Command
+    ChevronLeft,
+    ChevronRight,
+    Tornado
 } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
-const groups = [
+interface NavItem {
+    label: string;
+    href: string;
+    icon: React.ElementType;
+}
+
+interface NavSection {
+    title: string;
+    items: NavItem[];
+}
+
+const navSections: NavSection[] = [
     {
-        id: 'p0',
+        title: 'Hệ Thống',
         items: [
-            { id: 'overview', icon: LayoutDashboard, href: '/overview', label: 'Overview' },
-            { id: 'tutors', icon: Users, href: '/tutors', label: 'Gia Sư', badge: true },
-            { id: 'students', icon: GraduationCap, href: '/students', label: 'Học Sinh' },
-            { id: 'sessions', icon: Calendar, href: '/sessions', label: 'Lịch Dạy' },
-            { id: 'documents', icon: FileText, href: '/documents', label: 'Tài Liệu' },
+            { label: 'Overview', href: '/overview', icon: LayoutDashboard },
         ]
     },
     {
-        id: 'p1',
+        title: 'Quản Lý',
         items: [
-            { id: 'system', icon: Settings2, href: '/system', label: 'Hệ Thống' },
-            { id: 'permissions', icon: ShieldCheck, href: '/permissions', label: 'Phân Quyền' },
-            { id: 'audit', icon: History, href: '/audit', label: 'Audit Logs' },
+            { label: 'Gia Sư', href: '/tutors', icon: Users },
+            { label: 'Học Sinh', href: '/students', icon: GraduationCap },
+            { label: 'Lịch Dạy', href: '/sessions', icon: Calendar },
+            { label: 'Tài Liệu', href: '/documents', icon: FolderClosed },
+        ]
+    },
+    {
+        title: 'Phân Quyền',
+        items: [
+            { label: 'Permissions', href: '/permissions', icon: ShieldCheck },
+            { label: 'Audit Logs', href: '/audit', icon: History },
+            { label: 'Cài Đặt', href: '/settings', icon: Settings },
         ]
     }
 ];
 
-const bottomItems = [
-    { id: 'settings', icon: Settings, href: '/settings', label: 'Cài Đặt' }
-];
-
-interface SidebarItemProps {
-    item: typeof groups[0]['items'][0];
-    isActive: boolean;
+interface AdminSidebarProps {
+    collapsed: boolean;
+    mobileOpen: boolean;
+    onCloseMobile: () => void;
+    onToggleCollapse: () => void;
 }
 
-function SidebarItem({ item, isActive }: SidebarItemProps) {
-    const [isHovered, setIsHovered] = useState(false);
-
-    return (
-        <div className="relative flex items-center justify-center w-full">
-            <Link
-                href={item.href}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className={`relative p-2.5 rounded-xl transition-all duration-300 group ${isActive
-                        ? 'bg-[var(--admin-accent-dim)] text-[var(--admin-accent)]'
-                        : 'text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)]'
-                    }`}
-            >
-                <item.icon className={`h-6 w-6 transition-transform duration-300 ${isHovered && !isActive ? 'scale-110' : ''}`} />
-
-                {item.badge && (
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--admin-red)] rounded-full border-2 border-[var(--admin-bg)]" />
-                )}
-
-                {isActive && (
-                    <motion.div
-                        layoutId="active-indicator"
-                        className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-6 bg-[var(--admin-accent)] rounded-r-full shadow-[0_0_8px_var(--admin-accent)]"
-                    />
-                )}
-            </Link>
-
-            <AnimatePresence>
-                {isHovered && (
-                    <motion.div
-                        initial={{ opacity: 0, x: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, x: 20, scale: 1 }}
-                        exit={{ opacity: 0, x: 10, scale: 0.95 }}
-                        className="absolute left-10 z-50 px-3 py-1.5 bg-[var(--admin-surface3)] text-[var(--admin-text)] text-xs font-medium rounded-lg whitespace-nowrap border border-[var(--admin-border2)] shadow-xl pointer-events-none"
-                    >
-                        {item.label}
-                        <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-[var(--admin-surface3)] border-l border-b border-[var(--admin-border2)] rotate-45" />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-}
-
-export function AdminSidebar() {
+export function AdminSidebar({
+    collapsed,
+    mobileOpen,
+    onCloseMobile,
+    onToggleCollapse
+}: AdminSidebarProps) {
     const pathname = usePathname();
 
-    return (
-        <aside className="fixed left-0 top-0 w-16 h-screen bg-[var(--admin-surface)] border-r border-[var(--admin-border)] flex flex-col items-center py-4 z-50">
-            {/* Logo */}
-            <div className="mb-8 flex items-center justify-center">
-                <div className="w-10 h-10 bg-[var(--admin-accent)] rounded-xl flex items-center justify-center text-[var(--admin-bg)] shadow-[0_0_15px_rgba(99,102,241,0.4)]">
-                    <Command className="h-6 w-6" />
+    const SidebarContent = (
+        <div className="flex flex-col h-full bg-[var(--admin-surface)] border-r border-[var(--admin-border)] transition-all duration-300">
+            {/* Logo area */}
+            <div className="h-[52px] px-4 flex items-center justify-between border-b border-[var(--admin-border)]">
+                <div className={`flex items-center gap-3 overflow-hidden ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} transition-all`}>
+                    <Tornado className="h-6 w-6 text-[var(--admin-accent)] shrink-0" />
+                    <span className="font-black text-lg tracking-tighter whitespace-nowrap">TUTOR <span className="text-[var(--admin-accent)]">PRO</span></span>
                 </div>
+                {collapsed && (
+                    <Tornado className="h-6 w-6 text-[var(--admin-accent)] mx-auto" />
+                )}
+
+                <button
+                    onClick={onToggleCollapse}
+                    className="hidden lg:flex h-6 w-6 rounded-md bg-[var(--admin-surface2)] border border-[var(--admin-border)] items-center justify-center hover:text-[var(--admin-accent)] transition-colors"
+                >
+                    {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                </button>
             </div>
 
-            {/* Main Groups */}
-            <div className="flex-1 w-full flex flex-col items-center gap-6 px-2">
-                {groups.map((group, idx) => (
-                    <div key={group.id} className="w-full flex flex-col items-center gap-2">
-                        {group.items.map((item) => (
-                            <SidebarItem
-                                key={item.id}
-                                item={item}
-                                isActive={pathname === item.href}
-                            />
-                        ))}
-                        {idx < groups.length - 1 && (
-                            <div className="w-8 h-[1px] bg-[var(--admin-border)] my-2" />
-                        )}
-                    </div>
-                ))}
+            {/* Navigation links */}
+            <div className="flex-1 overflow-y-auto py-4 px-2 custom-scrollbar">
+                <TooltipProvider delayDuration={0}>
+                    {navSections.map((section, sIdx) => (
+                        <div key={sIdx} className="mb-6 last:mb-0">
+                            {!collapsed && (
+                                <h3 className="px-3 text-[10px] font-bold text-[var(--admin-text3)] uppercase tracking-[0.2em] mb-3">
+                                    {section.title}
+                                </h3>
+                            )}
+                            {collapsed && (
+                                <div className="h-px bg-[var(--admin-border)] mx-2 mb-3" />
+                            )}
+                            <div className="space-y-1">
+                                {section.items.map((item) => {
+                                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                                    const Icon = item.icon;
+
+                                    return (
+                                        <Tooltip key={item.href}>
+                                            <TooltipTrigger asChild>
+                                                <Link
+                                                    href={item.href}
+                                                    className={`
+                                                        flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative
+                                                        ${isActive
+                                                            ? 'bg-[var(--admin-accent)] text-white shadow-lg shadow-[var(--admin-accent)]/20'
+                                                            : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)] hover:text-[var(--admin-text)]'
+                                                        }
+                                                    `}
+                                                >
+                                                    <Icon className={`h-5 w-5 shrink-0 ${collapsed ? 'mx-auto' : ''}`} />
+                                                    {!collapsed && (
+                                                        <span className="text-sm font-medium tracking-tight whitespace-nowrap overflow-hidden">
+                                                            {item.label}
+                                                        </span>
+                                                    )}
+                                                    {isActive && collapsed && (
+                                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                                                    )}
+                                                </Link>
+                                            </TooltipTrigger>
+                                            {collapsed && (
+                                                <TooltipContent side="right" className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-[var(--admin-text)] font-semibold">
+                                                    {item.label}
+                                                </TooltipContent>
+                                            )}
+                                        </Tooltip>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </TooltipProvider>
             </div>
 
-            {/* Bottom */}
-            <div className="mt-auto w-full flex flex-col items-center gap-4 px-2 pb-2">
-                <div className="w-8 h-[1px] bg-[var(--admin-border)] mb-2" />
-                {bottomItems.map((item) => (
-                    <SidebarItem
-                        key={item.id}
-                        item={item}
-                        isActive={pathname === item.href}
-                    />
-                ))}
-            </div>
-        </aside>
+            {/* Bottom Footer */}
+            {!collapsed && (
+                <div className="p-4 border-t border-[var(--admin-border)] flex flex-col gap-1">
+                    <p className="text-[10px] font-bold text-[var(--admin-text3)]">VERSION 1.0.0</p>
+                    <p className="text-[10px] text-[var(--admin-text3)] whitespace-nowrap">&copy; 2026 Tutor Management</p>
+                </div>
+            )}
+        </div>
+    );
+
+    return (
+        <>
+            {/* Desktop Sidebar */}
+            <aside className={`fixed top-0 left-0 bottom-0 z-50 hidden lg:block transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+                {SidebarContent}
+            </aside>
+
+            {/* Mobile Sidebar */}
+            <aside className={`fixed top-0 left-0 bottom-0 z-50 w-64 transform lg:hidden transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                {SidebarContent}
+            </aside>
+        </>
     );
 }
-

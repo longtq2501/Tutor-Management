@@ -79,17 +79,38 @@ export function AdminTable<T extends { id: string | number }>({
                             <ChevronLeft className="h-4 w-4" />
                         </button>
                         <div className="flex items-center gap-1">
-                            {[1, 2, 3, '...', Math.ceil(pagination.total / pagination.pageSize)].map((page, idx) => (
-                                <button
-                                    key={idx}
-                                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === pagination.current ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)] shadow-md' : 'text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)]'
-                                        }`}
-                                    disabled={typeof page !== 'number'}
-                                    onClick={() => typeof page === 'number' && pagination.onPageChange?.(page)}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                            {(() => {
+                                const totalPages = Math.ceil(pagination.total / pagination.pageSize);
+                                const pages: (number | string)[] = [];
+
+                                if (totalPages <= 5) {
+                                    // Show all pages if 5 or less
+                                    for (let i = 1; i <= totalPages; i++) {
+                                        pages.push(i);
+                                    }
+                                } else {
+                                    // Show first 2, last 2, and current page with dots
+                                    pages.push(1, 2);
+                                    if (pagination.current > 3) pages.push('...');
+                                    if (pagination.current > 2 && pagination.current < totalPages - 1) {
+                                        pages.push(pagination.current);
+                                    }
+                                    if (pagination.current < totalPages - 2) pages.push('...');
+                                    pages.push(totalPages - 1, totalPages);
+                                }
+
+                                return pages.map((page, idx) => (
+                                    <button
+                                        key={idx}
+                                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === pagination.current ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)] shadow-md' : 'text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)]'
+                                            }`}
+                                        disabled={typeof page !== 'number'}
+                                        onClick={() => typeof page === 'number' && pagination.onPageChange?.(page)}
+                                    >
+                                        {page}
+                                    </button>
+                                ));
+                            })()}
                         </div>
                         <button className="p-1.5 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] disabled:opacity-50 transition-colors" disabled={pagination.current * pagination.pageSize >= pagination.total} onClick={() => pagination.onPageChange?.(pagination.current + 1)}>
                             <ChevronRight className="h-4 w-4" />

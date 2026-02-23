@@ -32,7 +32,7 @@ export function StatCard({ label, value, icon: Icon, badge, glowColor = '#6366f1
         >
             {/* Glow Effect */}
             <div
-                className="absolute -top-12 -right-12 w-32 h-32 blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
+                className="absolute -top-12 -right-12 w-32 h-32 blur-[60px] opacity-[0.03] dark:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
                 style={{ backgroundColor: glowColor }}
             />
 
