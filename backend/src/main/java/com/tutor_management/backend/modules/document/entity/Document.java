@@ -69,6 +69,13 @@ public class Document {
     private DocumentCategory category;
 
     /**
+     * Folder organization.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id")
+    private Folder folder;
+
+    /**
      * Short summary or descriptive text about the document's content.
      */
     @Column(length = 1000)

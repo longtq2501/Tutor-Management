@@ -34,4 +34,9 @@ public class DocumentRequest {
      * Optional student ID if the document is being uploaded specifically for a student.
      */
     private Long studentId;
+
+    /**
+     * Optional folder ID where the document should be stored.
+     */
+    private Long folderId;
 }

@@ -25,12 +25,6 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
     boolean existsByEmailAndIdNot(String email, Long id);
 
     /**
-     * Searches for parents by name, email, or phone number (case-insensitive).
-     * 
-     * @param keyword The search term.
-     * @return List of matching parents.
-     */
-    /**
      * Retrieves all parents along with their associated students.
      * Uses LEFT JOIN FETCH to avoid N+1 and LazyInitializationException.
      */

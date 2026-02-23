@@ -270,5 +270,25 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
     Long sumNonCancelledTotalAmount();
 
     @Query("SELECT COALESCE(SUM(sr.sessions), 0) FROM SessionRecord sr WHERE sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)")
-    Long countNonCancelledSessions();
+    long countNonCancelledSessions();
+
+    @Query("SELECT sr FROM SessionRecord sr " +
+            "LEFT JOIN FETCH sr.student s " +
+            "WHERE (:search IS NULL OR :search = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(sr.subject) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (:month IS NULL OR :month = '' OR sr.month = :month) " +
+            "AND (:paid IS NULL OR sr.paid = :paid) " +
+            "AND (:tutorId IS NULL OR sr.tutorId = :tutorId) " +
+            "ORDER BY sr.sessionDate DESC, sr.createdAt DESC")
+    Page<SessionRecord> findWithFilters(
+            @Param("search") String search,
+            @Param("month") String month,
+            @Param("paid") Boolean paid,
+            @Param("tutorId") Long tutorId,
+            org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT sr.tutorId, SUM(sr.totalAmount) as totalRevenue, COUNT(sr) as sessionCount " +
+            "FROM SessionRecord sr " +
+            "GROUP BY sr.tutorId " +
+            "ORDER BY totalRevenue DESC")
+    List<Object[]> findTopTutorsByRevenue(org.springframework.data.domain.Pageable pageable);
 }

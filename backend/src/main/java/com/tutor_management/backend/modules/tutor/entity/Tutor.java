@@ -2,10 +2,8 @@ package com.tutor_management.backend.modules.tutor.entity;
 
 import com.tutor_management.backend.modules.auth.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 /**
@@ -18,7 +16,8 @@ import java.time.LocalDateTime;
     @Index(name = "idx_tutor_email", columnList = "email"),
     @Index(name = "idx_tutor_subscription_status", columnList = "subscriptionStatus")
 })
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

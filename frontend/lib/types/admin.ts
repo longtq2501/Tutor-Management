@@ -41,10 +41,32 @@ export interface AdminStudent extends Student {
 export interface AdminDocument extends DocumentType {
     tutorId: number;
     tutorName: string;
+    folderId?: number;
+    folderName?: string;
+}
+
+export interface AdminFolder {
+    id: number;
+    name: string;
+    parentId?: number;
+    documentCount: number;
+    createdAt: string;
 }
 
 export interface AdminDocumentStats {
     totalDocuments: number;
     totalDownloads: number;
     totalStorageMB: number;
+}
+
+export interface StudentGrowth {
+    month: string;
+    count: number;
+}
+
+export interface TopTutor {
+    tutorId: number;
+    tutorName: string;
+    totalRevenue: number;
+    sessionCount: number;
 }

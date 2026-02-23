@@ -3,6 +3,8 @@ package com.tutor_management.backend.modules.admin.service;
 import com.tutor_management.backend.modules.admin.dto.response.ActivityLogResponse;
 import com.tutor_management.backend.modules.admin.dto.response.MonthlyRevenueResponse;
 import com.tutor_management.backend.modules.admin.dto.response.OverviewStatsResponse;
+import com.tutor_management.backend.modules.admin.dto.response.StudentGrowthResponse;
+import com.tutor_management.backend.modules.admin.dto.response.TopTutorResponse;
 import com.tutor_management.backend.modules.admin.entity.ActivityLog;
 import com.tutor_management.backend.modules.admin.repository.ActivityLogRepository;
 import com.tutor_management.backend.modules.finance.dto.response.MonthlyStats;
@@ -11,6 +13,7 @@ import com.tutor_management.backend.modules.student.repository.StudentRepository
 import com.tutor_management.backend.modules.tutor.repository.TutorRepository;
 import com.tutor_management.backend.util.FormatterUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class AdminStatsService {
 
     private final TutorRepository tutorRepository;
@@ -75,6 +79,34 @@ public class AdminStatsService {
                         .month(s.getMonth())
                         .totalRevenue(s.getTotalPaid())
                         .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<StudentGrowthResponse> getStudentGrowth() {
+        List<Object[]> results = studentRepository.countByMonth();
+        return results.stream()
+                .map(r -> StudentGrowthResponse.builder()
+                        .month((String) r[0])
+                        .count((Long) r[1])
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<TopTutorResponse> getTopTutors(int limit) {
+        List<Object[]> results = sessionRecordRepository.findTopTutorsByRevenue(org.springframework.data.domain.PageRequest.of(0, limit));
+        return results.stream()
+                .map(r -> {
+                    Long tutorId = (Long) r[0];
+                    String name = tutorRepository.findById(tutorId)
+                            .map(t -> t.getFullName())
+                            .orElse("Unknown");
+                    return TopTutorResponse.builder()
+                            .tutorId(tutorId)
+                            .tutorName(name)
+                            .totalRevenue((Long) r[1])
+                            .sessionCount((Long) r[2])
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

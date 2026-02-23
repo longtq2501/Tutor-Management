@@ -1,10 +1,7 @@
 package com.tutor_management.backend.modules.auth;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +16,8 @@ import java.util.List;
            @Index(name = "idx_users_email", columnList = "email"),  // ✅ Explicit index
            @Index(name = "idx_users_student_id", columnList = "student_id")
        })
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,10 +41,10 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(nullable = false)
-    private Boolean enabled = true;
+    private boolean enabled = true;
 
     @Column(nullable = false)
-    private Boolean accountNonLocked = true;
+    private boolean accountNonLocked = true;
 
     // ✅ THÊM DUY NHẤT: Link to Student (for STUDENT role)
     @Column(name = "avatar_url")
@@ -72,7 +70,15 @@ public class User implements UserDetails {
         updatedAt = LocalDateTime.now();
     }
 
-    // UserDetails implementation
+    // Manual Getters to bypass Lombok issues
+    public Long getId() { return id; }
+    public String getEmail() { return email; }
+    public String getFullName() { return fullName; }
+    public Role getRole() { return role; }
+    public Long getStudentId() { return studentId; }
+    public boolean isEnabled() { return enabled; }
+    public boolean isAccountNonLocked() { return accountNonLocked; }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -84,22 +90,17 @@ public class User implements UserDetails {
     }
 
     @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    @Override
     public boolean isCredentialsNonExpired() {
         return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 }

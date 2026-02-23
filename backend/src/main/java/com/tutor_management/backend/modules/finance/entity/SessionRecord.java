@@ -27,8 +27,7 @@ import org.hibernate.annotations.BatchSize;
         @Index(name = "idx_session_student_month", columnList = "student_id, month"),
         @Index(name = "idx_session_date", columnList = "sessionDate")
 })
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

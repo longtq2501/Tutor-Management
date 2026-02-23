@@ -1,0 +1,12 @@
+﻿features/students/student-modal/components/StudentFormFields.tsx(39,21): error TS2322: Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+features/students/unified-view/components/EnhancedAddStudentModal.tsx(205,41): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | number | readonly string[] | undefined'.
+  Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.
+features/students/unified-view/components/EnhancedAddStudentModal.tsx(216,41): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | number | readonly string[] | undefined'.
+  Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.
+features/students/unified-view/components/EnhancedAddStudentModal.tsx(300,37): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | number | readonly string[] | undefined'.
+  Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.
+features/students/unified-view/components/EnhancedAddStudentModal.tsx(374,45): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | number | readonly string[] | undefined'.
+  Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.
+features/students/unified-view/components/EnhancedAddStudentModal.tsx(405,49): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | number | readonly string[] | undefined'.
+  Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.

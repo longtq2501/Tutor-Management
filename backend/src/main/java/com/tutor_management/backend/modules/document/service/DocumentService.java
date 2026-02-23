@@ -12,6 +12,7 @@ import com.tutor_management.backend.modules.document.dto.response.DocumentStats;
 import com.tutor_management.backend.modules.document.dto.response.DocumentUploadResponse;
 import com.tutor_management.backend.modules.document.entity.Document;
 import com.tutor_management.backend.modules.document.entity.DocumentCategory;
+import com.tutor_management.backend.modules.document.repository.FolderRepository;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
 import com.tutor_management.backend.modules.shared.service.CloudinaryService;
 import com.tutor_management.backend.modules.student.entity.Student;
@@ -47,6 +48,7 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final DocumentCategoryRepository documentCategoryRepository;
+    private final FolderRepository folderRepository;
     private final StudentRepository studentRepository;
     private final TutorRepository tutorRepository;
     private final SessionRecordRepository sessionRecordRepository;
@@ -103,8 +105,9 @@ public class DocumentService {
      * Lists all documents with paged results for the admin library.
      */
     @Transactional(readOnly = true)
-    public Page<DocumentResponse> getAllDocuments(Pageable pageable) {
-        return documentRepository.findAllWithStudent(getCurrentTutorId(), getCurrentStudentId(), pageable).map(this::convertToResponse);
+    public Page<DocumentResponse> getAllDocuments(Long folderId, boolean isRoot, Pageable pageable) {
+        return documentRepository.findAllWithStudent(getCurrentTutorId(), getCurrentStudentId(), folderId, isRoot, pageable)
+                .map(this::convertToResponse);
     }
 
     /**
@@ -160,6 +163,7 @@ public class DocumentService {
                     .description(request.getDescription())
                     .student(student)
                     .tutor(tutor)
+                    .folder(request.getFolderId() != null ? folderRepository.findById(request.getFolderId()).orElse(null) : null)
                     .downloadCount(0L)
                     .build();
 
@@ -332,6 +336,8 @@ public class DocumentService {
                 .studentName(document.getStudent() != null ? document.getStudent().getName() : null)
                 .tutorId(document.getTutor() != null ? document.getTutor().getId() : null)
                 .tutorName(document.getTutor() != null ? document.getTutor().getFullName() : null)
+                .folderId(document.getFolder() != null ? document.getFolder().getId() : null)
+                .folderName(document.getFolder() != null ? document.getFolder().getName() : null)
                 .downloadCount(document.getDownloadCount())
                 .createdAt(document.getCreatedAt().format(formatter))
                 .updatedAt(document.getUpdatedAt().format(formatter))

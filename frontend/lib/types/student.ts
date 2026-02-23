@@ -43,16 +43,16 @@ export interface Student {
 
 export interface StudentRequest {
   name: string; // TÊN HỌC SINH (BẮT BUỘC)
-  phone?: string; // SỐ ĐIỆN THOẠI (TÙY CHỌN)
+  phone?: string | null; // SỐ ĐIỆN THOẠI (TÙY CHỌN)
   schedule: string; // THIẾT LẬP LỊCH HỌC
   pricePerHour: number; // MỨC HỌC PHÍ THỎA THUẬN
-  notes?: string; // GHI CHÚ BAN ĐẦU
+  notes?: string | null; // GHI CHÚ BAN ĐẦU
   active?: boolean; // THIẾT LẬP TRẠNG THÁI HOẠT ĐỘNG
-  startMonth?: string; // THÁNG BẮT ĐẦU (ĐỊNH DẠNG YYYY-MM)
-  parentId?: number; // LIÊN KẾT VỚI ID PHỤ HUYNH CÓ SẴN
+  startMonth?: string | null; // THÁNG BẮT ĐẦU (ĐỊNH DẠNG YYYY-MM)
+  parentId?: number | null; // LIÊN KẾT VỚI ID PHỤ HUYNH CÓ SẴN
 
   // ✅ THÊM FIELD ACCOUNT
   createAccount?: boolean;
-  email?: string;
-  password?: string;
+  email?: string | null;
+  password?: string | null;
 }

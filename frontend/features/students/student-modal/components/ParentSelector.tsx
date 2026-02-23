@@ -5,7 +5,7 @@ import { Users, UserCircle, Phone, Mail } from 'lucide-react';
 import type { Parent } from '@/lib/types';
 
 interface ParentSelectorProps {
-  parentId?: number;
+  parentId?: number | null;
   parents: Parent[];
   loading: boolean;
   onChange: (parentId?: number) => void;
@@ -33,7 +33,7 @@ export function ParentSelector({ parentId, parents, loading, onChange }: ParentS
           </option>
         ))}
       </select>
-      
+
       {/* Selected Parent Info Card */}
       {selectedParent && (
         <div className="mt-3 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-start gap-3">

@@ -299,7 +299,7 @@ public class TutorService {
         if (!tutorRepository.existsById(tutorId)) {
             throw new TutorNotFoundException(tutorId);
         }
-        return documentRepository.findAllWithStudent(tutorId, null, pageable)
+        return documentRepository.findAllWithStudent(tutorId, null, null, false, pageable)
                 .map(this::mapToDocumentResponse);
     }
 

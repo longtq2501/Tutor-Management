@@ -34,7 +34,7 @@ public class AdminDocumentService {
         } else if (category != null && !category.isBlank()) {
             documents = documentRepository.findByCategoryCode(category, tutorId, null, pageable);
         } else {
-            documents = documentRepository.findAllWithStudent(tutorId, null, pageable);
+            documents = documentRepository.findAllWithStudent(tutorId, null, null, false, pageable);
         }
 
         // Batch fetch tutor names for optimization

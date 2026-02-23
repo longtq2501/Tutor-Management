@@ -94,11 +94,11 @@ class DocumentServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Document> page = new PageImpl<>(List.of());
         
-        when(documentRepository.findAllWithStudent(null, null, pageable)).thenReturn(page);
+        when(documentRepository.findAllWithStudent(null, null, null, false, pageable)).thenReturn(page);
 
-        documentService.getAllDocuments(pageable);
+        documentService.getAllDocuments(null, false, pageable);
 
-        verify(documentRepository).findAllWithStudent(null, null, pageable);
+        verify(documentRepository).findAllWithStudent(null, null, null, false, pageable);
     }
 
     @Test
@@ -110,11 +110,11 @@ class DocumentServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Document> page = new PageImpl<>(List.of());
         
-        when(documentRepository.findAllWithStudent(20L, null, pageable)).thenReturn(page);
+        when(documentRepository.findAllWithStudent(20L, null, null, false, pageable)).thenReturn(page);
 
-        documentService.getAllDocuments(pageable);
+        documentService.getAllDocuments(null, false, pageable);
 
-        verify(documentRepository).findAllWithStudent(20L, null, pageable);
+        verify(documentRepository).findAllWithStudent(20L, null, null, false, pageable);
     }
 
     @Test
@@ -126,11 +126,11 @@ class DocumentServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Document> page = new PageImpl<>(List.of());
         
-        when(documentRepository.findAllWithStudent(20L, 10L, pageable)).thenReturn(page);
+        when(documentRepository.findAllWithStudent(20L, 10L, null, false, pageable)).thenReturn(page);
 
-        documentService.getAllDocuments(pageable);
+        documentService.getAllDocuments(null, false, pageable);
 
-        verify(documentRepository).findAllWithStudent(20L, 10L, pageable);
+        verify(documentRepository).findAllWithStudent(20L, 10L, null, false, pageable);
     }
 
     @Test

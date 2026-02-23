@@ -41,9 +41,13 @@ public class SessionRecordController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getAllRecords(Pageable pageable) {
-        log.info("Fetching paged session records");
-        return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getAllRecords(pageable)));
+    public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getAllRecords(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String month,
+            @RequestParam(required = false) Boolean paid,
+            Pageable pageable) {
+        log.info("Fetching paged session records with filters - Search: {}, Month: {}, Paid: {}", search, month, paid);
+        return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getAllRecordsFiltered(search, month, paid, pageable)));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR', 'STUDENT')")

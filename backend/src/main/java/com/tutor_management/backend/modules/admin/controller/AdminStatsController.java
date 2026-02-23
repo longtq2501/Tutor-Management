@@ -3,6 +3,8 @@ package com.tutor_management.backend.modules.admin.controller;
 import com.tutor_management.backend.modules.admin.dto.response.ActivityLogResponse;
 import com.tutor_management.backend.modules.admin.dto.response.MonthlyRevenueResponse;
 import com.tutor_management.backend.modules.admin.dto.response.OverviewStatsResponse;
+import com.tutor_management.backend.modules.admin.dto.response.StudentGrowthResponse;
+import com.tutor_management.backend.modules.admin.dto.response.TopTutorResponse;
 import com.tutor_management.backend.modules.admin.service.AdminStatsService;
 import com.tutor_management.backend.modules.shared.dto.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +42,16 @@ public class AdminStatsController {
     public ApiResponse<Page<ActivityLogResponse>> getActivityLogs(
             @PageableDefault(size = 20) Pageable pageable) {
         return ApiResponse.success(adminStatsService.getActivityLogs(pageable));
+    }
+
+    @GetMapping("/stats/student-growth")
+    public ApiResponse<List<StudentGrowthResponse>> getStudentGrowth() {
+        return ApiResponse.success(adminStatsService.getStudentGrowth());
+    }
+
+    @GetMapping("/stats/top-tutors")
+    public ApiResponse<List<TopTutorResponse>> getTopTutors(
+            @RequestParam(defaultValue = "5") int limit) {
+        return ApiResponse.success(adminStatsService.getTopTutors(limit));
     }
 }

@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Eye, Search, UserPlus } from 'lucide-react';
+import { Eye, Search, UserPlus, Trash2, Edit } from 'lucide-react';
 import { StatsBar } from '@/components/admin/StatsBar';
 import { AdminTable } from '@/components/admin/AdminTable';
 import { adminStudentsApi } from '@/lib/services/admin-students';
 import { adminStatsApi } from '@/lib/services/admin-stats';
 import type { AdminStudent, OverviewStats } from '@/lib/types/admin';
 import { toast } from 'sonner';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useConfirm } from '@/hooks/useConfirm';
+import { StudentFormModal } from './components/StudentFormModal';
+import { StudentDetailsDrawer } from './components/StudentDetailsDrawer';
 
 export function StudentsList() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -16,11 +20,19 @@ export function StudentsList() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+    // CRUD States
+    const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
+
+    const { confirm, ConfirmationDialog } = useConfirm();
 
     const fetchStudents = async () => {
         setLoading(true);
         try {
-            const data = await adminStudentsApi.getAll(page, 10, searchTerm);
+            const data = await adminStudentsApi.getAll(page, 10, debouncedSearchTerm);
             setStudents(data.content);
             setTotalElements(data.totalElements);
         } catch (error) {
@@ -42,11 +54,40 @@ export function StudentsList() {
 
     useEffect(() => {
         fetchStudents();
-    }, [page, searchTerm]);
+    }, [page, debouncedSearchTerm]);
 
     useEffect(() => {
         fetchStats();
     }, []);
+
+    const handleDelete = async (id: number) => {
+        const isConfirmed = await confirm({
+            title: 'XÓA HỌC SINH',
+            description: 'Bạn có chắc chắn muốn xóa học sinh này? Hành động này không thể hoàn tác.',
+            variant: 'destructive'
+        });
+
+        if (isConfirmed) {
+            try {
+                await adminStudentsApi.delete(id);
+                toast.success('Đã xóa học sinh thành công');
+                fetchStudents();
+                fetchStats();
+            } catch (error) {
+                toast.error('Không thể xóa học sinh');
+            }
+        }
+    };
+
+    const openEdit = (id: number) => {
+        setSelectedStudentId(id);
+        setIsFormModalOpen(true);
+    };
+
+    const openDetails = (id: number) => {
+        setSelectedStudentId(id);
+        setIsDetailsDrawerOpen(true);
+    };
 
     const columns = [
         {
@@ -97,7 +138,25 @@ export function StudentsList() {
             className: 'text-right',
             accessor: (s: AdminStudent) => (
                 <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] rounded-lg transition-all" title="Xem chi tiết">
+                    <button
+                        className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-accent)] hover:bg-[var(--admin-accent)]/10 rounded-lg transition-all"
+                        title="Chỉnh sửa"
+                        onClick={() => openEdit(s.id)}
+                    >
+                        <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                        className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-red)] hover:bg-[var(--admin-red)]/10 rounded-lg transition-all"
+                        title="Xóa"
+                        onClick={() => handleDelete(s.id)}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                    <button
+                        className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] rounded-lg transition-all"
+                        title="Xem chi tiết"
+                        onClick={() => openDetails(s.id)}
+                    >
                         <Eye className="h-4 w-4" />
                     </button>
                 </div>
@@ -127,7 +186,13 @@ export function StudentsList() {
                     </div>
                 </div>
 
-                <button className="flex items-center gap-2 px-6 py-2 bg-[var(--admin-accent)] text-[var(--admin-bg)] rounded-xl text-xs font-black shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:scale-105 transition-all">
+                <button
+                    onClick={() => {
+                        setSelectedStudentId(null);
+                        setIsFormModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 px-6 py-2 bg-[var(--admin-accent)] text-[var(--admin-bg)] rounded-xl text-xs font-black shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:scale-105 transition-all"
+                >
                     <UserPlus className="h-4 w-4" />
                     <span>THÊM HỌC SINH</span>
                 </button>
@@ -137,6 +202,7 @@ export function StudentsList() {
                 columns={columns}
                 data={students}
                 loading={loading}
+                onRowClick={(s) => openDetails(s.id)}
                 pagination={{
                     current: page + 1,
                     total: totalElements,
@@ -144,6 +210,30 @@ export function StudentsList() {
                     onPageChange: (p) => setPage(p - 1)
                 }}
             />
+
+            <StudentFormModal
+                isOpen={isFormModalOpen}
+                onClose={() => {
+                    setIsFormModalOpen(false);
+                    setSelectedStudentId(null);
+                }}
+                onSuccess={() => {
+                    fetchStudents();
+                    fetchStats();
+                }}
+                studentId={selectedStudentId}
+            />
+
+            <StudentDetailsDrawer
+                isOpen={isDetailsDrawerOpen}
+                onClose={() => {
+                    setIsDetailsDrawerOpen(false);
+                    setSelectedStudentId(null);
+                }}
+                studentId={selectedStudentId}
+            />
+
+            <ConfirmationDialog />
         </div>
     );
 }

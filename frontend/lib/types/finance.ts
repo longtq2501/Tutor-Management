@@ -24,6 +24,8 @@ export interface SessionRecord {
   status?: LessonStatus; // TRẠNG THÁI CHI TIẾT (SCHEDULED, CONFIRMED, COMPLETED, PAID, etc.)
   version?: number; // VERSION FOR OPTIMISTIC LOCKING
   isOnline?: boolean; // TRẠNG THÁI BUỔI HỌC ONLINE
+  tutorId?: number;
+  tutorName?: string;
 
   // ========== ATTACHMENTS (LIBRARY) ==========
   documents?: DocumentDTO[];

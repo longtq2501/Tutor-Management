@@ -160,7 +160,7 @@ export function EnhancedAddStudentModal({
                                 <Label className="text-sm font-medium">Phụ huynh liên kết</Label>
                                 <div className="flex gap-2">
                                     <Select
-                                        value={formData.parentId?.toString()}
+                                        value={formData.parentId?.toString() || ''}
                                         onValueChange={(val) => updateField('parentId', Number(val))}
                                     >
                                         <SelectTrigger className="flex-1 h-11 rounded-xl border-muted-foreground/20 focus:border-primary/50 transition-colors">
@@ -202,7 +202,7 @@ export function EnhancedAddStudentModal({
                                         id="phone"
                                         placeholder="0901234567"
                                         className="h-11 rounded-xl border-muted-foreground/20 focus:border-primary/50 transition-colors"
-                                        value={formData.phone}
+                                        value={formData.phone || ''}
                                         onChange={e => updateField('phone', e.target.value)}
                                     />
                                 </div>
@@ -213,7 +213,7 @@ export function EnhancedAddStudentModal({
                                         id="startMonth"
                                         type="month"
                                         className="h-11 rounded-xl border-muted-foreground/20 focus:border-primary/50 transition-colors"
-                                        value={formData.startMonth}
+                                        value={formData.startMonth || ''}
                                         onChange={e => updateField('startMonth', e.target.value)}
                                     />
                                 </div>
@@ -297,7 +297,7 @@ export function EnhancedAddStudentModal({
                                     rows={4}
                                     placeholder="Ghi chú về trình độ, mục tiêu hoặc cần lưu ý..."
                                     className="resize-none rounded-xl border-muted-foreground/20 focus:border-primary/50 transition-colors"
-                                    value={formData.notes}
+                                    value={formData.notes || ''}
                                     onChange={e => updateField('notes', e.target.value)}
                                 />
                             </div>
@@ -371,7 +371,7 @@ export function EnhancedAddStudentModal({
                                             type="email"
                                             placeholder="hocsinh@students.tutormanagement.com"
                                             className="h-11 rounded-xl border-muted-foreground/20 focus:border-primary/50"
-                                            value={formData.email}
+                                            value={formData.email || ''}
                                             onChange={e => updateField('email', e.target.value)}
                                         />
                                     </div>
@@ -402,7 +402,7 @@ export function EnhancedAddStudentModal({
                                                 type={showPassword ? "text" : "password"}
                                                 placeholder="Sử dụng mật khẩu mạnh"
                                                 className="h-11 pl-4 pr-12 rounded-xl border-muted-foreground/20 focus:border-primary/50"
-                                                value={formData.password}
+                                                value={formData.password || ''}
                                                 onChange={e => updateField('password', e.target.value)}
                                             />
                                             <button

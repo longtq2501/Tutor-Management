@@ -8,13 +8,17 @@ import { RevenueChart } from '@/features/admin/overview/RevenueChart';
 import { QuickStats } from '@/features/admin/overview/QuickStats';
 import { RecentTutors } from '@/features/admin/overview/RecentTutors';
 import { ActivityFeed } from '@/features/admin/overview/ActivityFeed';
+import { StudentGrowthChart } from '@/features/admin/overview/StudentGrowthChart';
+import { TopTutorsList } from '@/features/admin/overview/TopTutorsList';
 import { adminStatsApi } from '@/lib/services/admin-stats';
 import { dashboardApi } from '@/lib/services/dashboard';
-import type { OverviewStats, MonthlyRevenue } from '@/lib/types/admin';
+import type { OverviewStats, MonthlyRevenue, StudentGrowth, TopTutor } from '@/lib/types/admin';
 
 export default function OverviewPage() {
     const [stats, setStats] = useState<OverviewStats | null>(null);
     const [revenue, setRevenue] = useState<MonthlyRevenue[]>([]);
+    const [studentGrowth, setStudentGrowth] = useState<StudentGrowth[]>([]);
+    const [topTutors, setTopTutors] = useState<TopTutor[]>([]);
     const [loading, setLoading] = useState(true);
     const [revenueView, setRevenueView] = useState<6 | 12>(6);
     const [revenueLoading, setRevenueLoading] = useState(false);
@@ -102,12 +106,16 @@ export default function OverviewPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [overviewData, revenueData] = await Promise.all([
+                const [overviewData, revenueData, growthData, tutorsData] = await Promise.all([
                     adminStatsApi.getOverview(),
-                    adminStatsApi.getMonthlyRevenue(6)
+                    adminStatsApi.getMonthlyRevenue(6),
+                    adminStatsApi.getStudentGrowth(),
+                    adminStatsApi.getTopTutors(5)
                 ]);
                 setStats(overviewData);
                 setRevenue(revenueData);
+                setStudentGrowth(growthData);
+                setTopTutors(tutorsData);
             } catch (error) {
                 console.error('Failed to fetch overview data:', error);
             } finally {
@@ -174,11 +182,10 @@ export default function OverviewPage() {
                         <div className="relative">
                             <button
                                 onClick={() => setFilterOpen(!filterOpen)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                                    filterType !== 'all'
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterType !== 'all'
                                         ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
                                         : 'bg-[var(--admin-surface2)] border border-[var(--admin-border)] text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface3)]'
-                                }`}
+                                    }`}
                             >
                                 <Filter className="h-4 w-4" />
                                 <span>Bộ lọc</span>
@@ -189,41 +196,37 @@ export default function OverviewPage() {
                                 <div className="absolute top-full right-0 mt-2 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-xl shadow-lg z-50 p-2 w-48">
                                     <button
                                         onClick={() => handleFilterChange('all')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                            filterType === 'all'
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'all'
                                                 ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
                                                 : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                        }`}
+                                            }`}
                                     >
                                         Tất cả thời gian
                                     </button>
                                     <button
                                         onClick={() => handleFilterChange('month')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                            filterType === 'month'
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'month'
                                                 ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
                                                 : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                        }`}
+                                            }`}
                                     >
                                         Tháng này
                                     </button>
                                     <button
                                         onClick={() => handleFilterChange('quarter')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                            filterType === 'quarter'
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'quarter'
                                                 ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
                                                 : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                        }`}
+                                            }`}
                                     >
                                         Quý này
                                     </button>
                                     <button
                                         onClick={() => handleFilterChange('year')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                            filterType === 'year'
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'year'
                                                 ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
                                                 : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                        }`}
+                                            }`}
                                     >
                                         Năm nay
                                     </button>
@@ -263,16 +266,23 @@ export default function OverviewPage() {
             </div>
 
             {/* Charts Row */}
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="flex-1">
-                    <RevenueChart
-                        data={revenue.map(r => ({ month: r.month, value: r.totalRevenue }))}
-                        view={revenueView === 6 ? '6m' : '1y'}
-                        onViewChange={(v) => setRevenueView(v === '6m' ? 6 : 12)}
-                        loading={revenueLoading}
-                    />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <RevenueChart
+                    data={revenue.map(r => ({ month: r.month, value: r.totalRevenue }))}
+                    view={revenueView === 6 ? '6m' : '1y'}
+                    onViewChange={(v) => setRevenueView(v === '6m' ? 6 : 12)}
+                    loading={revenueLoading}
+                />
+                <StudentGrowthChart data={studentGrowth} loading={loading} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1">
+                    <QuickStats stats={stats} />
                 </div>
-                <QuickStats stats={stats} />
+                <div className="lg:col-span-2">
+                    <TopTutorsList data={topTutors} loading={loading} />
+                </div>
             </div>
 
             {/* Tables Row */}

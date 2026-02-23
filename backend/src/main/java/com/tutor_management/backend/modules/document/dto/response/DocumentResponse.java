@@ -58,6 +58,9 @@ public class DocumentResponse {
     
     /** Name of the tutor who owns/uploaded this document */
     private String tutorName;
+
+    private Long folderId;
+    private String folderName;
     
     /** Usage statistics */
     private Long downloadCount;

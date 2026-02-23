@@ -37,8 +37,11 @@ public class DocumentController {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR', 'STUDENT')")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<DocumentResponse>>> getAllDocuments(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(documentService.getAllDocuments(pageable)));
+    public ResponseEntity<ApiResponse<Page<DocumentResponse>>> getAllDocuments(
+            @RequestParam(required = false) Long folderId,
+            @RequestParam(defaultValue = "false") boolean isRoot,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(documentService.getAllDocuments(folderId, isRoot, pageable)));
     }
 
     /**

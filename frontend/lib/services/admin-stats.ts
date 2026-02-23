@@ -1,5 +1,5 @@
 import api from './axios-instance';
-import type { OverviewStats, MonthlyRevenue, ActivityLog } from '../types/admin';
+import type { OverviewStats, MonthlyRevenue, ActivityLog, StudentGrowth, TopTutor } from '../types/admin';
 import type { PageResponse } from '../types/common';
 
 export const adminStatsApi = {
@@ -18,6 +18,16 @@ export const adminStatsApi = {
 
     getActivityLog: async (page = 0, size = 20): Promise<PageResponse<ActivityLog>> => {
         const response = await api.get(`/admin/activity-log?page=${page}&size=${size}`);
+        return response.data.data;
+    },
+
+    getStudentGrowth: async (): Promise<StudentGrowth[]> => {
+        const response = await api.get('/admin/stats/student-growth');
+        return response.data.data;
+    },
+
+    getTopTutors: async (limit = 5): Promise<TopTutor[]> => {
+        const response = await api.get(`/admin/stats/top-tutors?limit=${limit}`);
         return response.data.data;
     },
 };

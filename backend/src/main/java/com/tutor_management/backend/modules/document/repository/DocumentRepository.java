@@ -22,13 +22,19 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
      * Retrieves all documents with paged results, filtered by tutor if provided.
      */
     @Query(value = "SELECT d FROM Document d " +
-           "LEFT JOIN FETCH d.student " +
-           "LEFT JOIN FETCH d.category " +
-           "LEFT JOIN FETCH d.tutor " +
-           "WHERE (:tutorId IS NULL OR d.tutor.id = :tutorId) " +
-           "AND (:studentId IS NULL OR d.student.id = :studentId OR d.student IS NULL)",
-           countQuery = "SELECT COUNT(d) FROM Document d WHERE (:tutorId IS NULL OR d.tutor.id = :tutorId) AND (:studentId IS NULL OR d.student.id = :studentId OR d.student IS NULL)")
-    Page<Document> findAllWithStudent(@Param("tutorId") Long tutorId, @Param("studentId") Long studentId, Pageable pageable);
+            "LEFT JOIN FETCH d.student " +
+            "LEFT JOIN FETCH d.category " +
+            "LEFT JOIN FETCH d.tutor " +
+            "WHERE (:tutorId IS NULL OR d.tutor.id = :tutorId) " +
+            "AND (:studentId IS NULL OR d.student.id = :studentId OR d.student IS NULL) " +
+            "AND (:folderId IS NULL OR d.folder.id = :folderId) " +
+            "AND (:isRoot = false OR (:isRoot = true AND d.folder IS NULL))",
+            countQuery = "SELECT COUNT(d) FROM Document d " +
+                    "WHERE (:tutorId IS NULL OR d.tutor.id = :tutorId) " +
+                    "AND (:studentId IS NULL OR d.student.id = :studentId OR d.student IS NULL) " +
+                    "AND (:folderId IS NULL OR d.folder.id = :folderId) " +
+                    "AND (:isRoot = false OR (:isRoot = true AND d.folder IS NULL))")
+    Page<Document> findAllWithStudent(@Param("tutorId") Long tutorId, @Param("studentId") Long studentId, @Param("folderId") Long folderId, @Param("isRoot") boolean isRoot, Pageable pageable);
 
     /**
      * Filters documents by category code, tutor, and student.

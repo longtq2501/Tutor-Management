@@ -21,8 +21,7 @@ import java.util.UUID;
     @Index(name = "idx_student_parent_id", columnList = "parent_id"),
     @Index(name = "idx_student_active", columnList = "active")
 })
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

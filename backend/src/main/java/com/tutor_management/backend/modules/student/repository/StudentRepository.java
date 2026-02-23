@@ -112,4 +112,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Long calculateTotalDebt(@Param("studentId") Long studentId);
 
     long countByTutorIdAndActiveTrue(Long tutorId);
+
+    @Query("SELECT SUBSTRING(CAST(s.createdAt AS string), 1, 7) as month, COUNT(s) as count " +
+            "FROM Student s " +
+            "GROUP BY month " +
+            "ORDER BY month DESC")
+    List<Object[]> countByMonth();
 }
