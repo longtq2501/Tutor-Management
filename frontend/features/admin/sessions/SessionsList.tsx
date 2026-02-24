@@ -181,6 +181,7 @@ export function SessionsList() {
                     <button
                         className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-red)] hover:bg-[var(--admin-red)]/10 rounded-lg transition-all"
                         title="Xóa buổi học"
+                        aria-label={`Xóa buổi học SES-${s.id.toString().padStart(3, '0')}`}
                         onClick={() => handleDelete(s.id)}
                     >
                         <Trash2 className="h-4 w-4" />
@@ -188,6 +189,7 @@ export function SessionsList() {
                     <button
                         className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] rounded-lg transition-all"
                         title="Xem chi tiết"
+                        aria-label={`Xem chi tiết buổi học SES-${s.id.toString().padStart(3, '0')}`}
                         onClick={() => {
                             setSelectedSessionId(s.id);
                             setIsDetailsOpen(true);

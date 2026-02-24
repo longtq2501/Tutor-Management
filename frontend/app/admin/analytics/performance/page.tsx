@@ -3,15 +3,31 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { usePerformanceAnalytics } from '@/features/dashboard/admin-dashboard/hooks/useAnalytics';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Star, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Star, TrendingUp, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
 export default function PerformanceAnalyticsPage() {
-    const { data: stats, isLoading } = usePerformanceAnalytics();
+    const { data: stats, isLoading, isError, refetch } = usePerformanceAnalytics();
 
     const tutorRankings = stats?.tutorRankings ?? [];
+
+    if (isError) {
+        return (
+            <div className="p-6 flex flex-col items-center justify-center min-h-[50vh] text-center">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                    <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+                <h3 className="text-base font-bold mb-1">Không thể tải dữ liệu hiệu suất</h3>
+                <p className="text-sm text-muted-foreground mb-5">Kiểm tra kết nối mạng và thử lại.</p>
+                <Button variant="outline" onClick={() => refetch()}>
+                    <RefreshCw className="mr-2 h-4 w-4" /> Thử lại
+                </Button>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (

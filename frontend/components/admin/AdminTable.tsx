@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { AdminTableSkeleton } from './AdminTableSkeleton';
+import { EmptyState } from './EmptyState';
 
 interface Column<T> {
     header: string;
@@ -21,6 +23,10 @@ interface AdminTableProps<T> {
         pageSize: number;
         onPageChange?: (page: number) => void;
     };
+    emptyState?: {
+        title: string;
+        description?: string;
+    };
 }
 
 export function AdminTable<T extends { id: string | number }>({
@@ -28,8 +34,27 @@ export function AdminTable<T extends { id: string | number }>({
     data,
     loading,
     onRowClick,
-    pagination
+    pagination,
+    emptyState,
 }: AdminTableProps<T>) {
+    // Show skeleton while loading
+    if (loading) {
+        return <AdminTableSkeleton rows={8} cols={columns.length} />;
+    }
+
+    // Show empty state when no data
+    if (data.length === 0) {
+        return (
+            <div className="bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-2xl overflow-hidden">
+                <EmptyState
+                    variant="search"
+                    title={emptyState?.title ?? 'Không có dữ liệu'}
+                    description={emptyState?.description ?? 'Không tìm thấy kết quả phù hợp. Hãy thử thay đổi bộ lọc.'}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-2xl overflow-hidden flex flex-col">
             <div className="overflow-x-auto">
@@ -75,7 +100,12 @@ export function AdminTable<T extends { id: string | number }>({
                         Hiện {(pagination.current - 1) * pagination.pageSize + 1}-{Math.min(pagination.current * pagination.pageSize, pagination.total)} trong tổng số {pagination.total.toLocaleString()}
                     </span>
                     <div className="flex items-center gap-2">
-                        <button className="p-1.5 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] disabled:opacity-50 transition-colors" disabled={pagination.current === 1} onClick={() => pagination.onPageChange?.(pagination.current - 1)}>
+                        <button
+                            className="p-1.5 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] disabled:opacity-50 transition-colors"
+                            aria-label="Trang trước"
+                            disabled={pagination.current === 1}
+                            onClick={() => pagination.onPageChange?.(pagination.current - 1)}
+                        >
                             <ChevronLeft className="h-4 w-4" />
                         </button>
                         <div className="flex items-center gap-1">
@@ -84,12 +114,8 @@ export function AdminTable<T extends { id: string | number }>({
                                 const pages: (number | string)[] = [];
 
                                 if (totalPages <= 5) {
-                                    // Show all pages if 5 or less
-                                    for (let i = 1; i <= totalPages; i++) {
-                                        pages.push(i);
-                                    }
+                                    for (let i = 1; i <= totalPages; i++) pages.push(i);
                                 } else {
-                                    // Show first 2, last 2, and current page with dots
                                     pages.push(1, 2);
                                     if (pagination.current > 3) pages.push('...');
                                     if (pagination.current > 2 && pagination.current < totalPages - 1) {
@@ -102,8 +128,11 @@ export function AdminTable<T extends { id: string | number }>({
                                 return pages.map((page, idx) => (
                                     <button
                                         key={idx}
-                                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === pagination.current ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)] shadow-md' : 'text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)]'
+                                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === pagination.current
+                                            ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)] shadow-md'
+                                            : 'text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)]'
                                             }`}
+                                        aria-label={typeof page === 'number' ? `Trang ${page}` : undefined}
                                         disabled={typeof page !== 'number'}
                                         onClick={() => typeof page === 'number' && pagination.onPageChange?.(page)}
                                     >
@@ -112,7 +141,12 @@ export function AdminTable<T extends { id: string | number }>({
                                 ));
                             })()}
                         </div>
-                        <button className="p-1.5 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] disabled:opacity-50 transition-colors" disabled={pagination.current * pagination.pageSize >= pagination.total} onClick={() => pagination.onPageChange?.(pagination.current + 1)}>
+                        <button
+                            className="p-1.5 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text3)] hover:text-[var(--admin-text)] disabled:opacity-50 transition-colors"
+                            aria-label="Trang tiếp"
+                            disabled={pagination.current * pagination.pageSize >= pagination.total}
+                            onClick={() => pagination.onPageChange?.(pagination.current + 1)}
+                        >
                             <ChevronRight className="h-4 w-4" />
                         </button>
                     </div>

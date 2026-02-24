@@ -141,6 +141,7 @@ export function StudentsList() {
                     <button
                         className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-accent)] hover:bg-[var(--admin-accent)]/10 rounded-lg transition-all"
                         title="Chỉnh sửa"
+                        aria-label={`Chỉnh sửa học sinh ${s.name}`}
                         onClick={() => openEdit(s.id)}
                     >
                         <Edit className="h-4 w-4" />
@@ -148,6 +149,7 @@ export function StudentsList() {
                     <button
                         className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-red)] hover:bg-[var(--admin-red)]/10 rounded-lg transition-all"
                         title="Xóa"
+                        aria-label={`Xóa học sinh ${s.name}`}
                         onClick={() => handleDelete(s.id)}
                     >
                         <Trash2 className="h-4 w-4" />
@@ -155,6 +157,7 @@ export function StudentsList() {
                     <button
                         className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] rounded-lg transition-all"
                         title="Xem chi tiết"
+                        aria-label={`Xem chi tiết học sinh ${s.name}`}
                         onClick={() => openDetails(s.id)}
                     >
                         <Eye className="h-4 w-4" />

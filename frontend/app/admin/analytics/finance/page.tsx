@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, TrendingUp, DollarSign, Users, Percent } from 'lucide-react';
+import { Download, TrendingUp, DollarSign, Users, Percent, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useFinancialAnalytics } from '@/features/dashboard/admin-dashboard/hooks/useAnalytics';
 import { analyticsApi } from '@/lib/services';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,7 @@ import {
 
 export default function FinanceAnalyticsPage() {
     const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
-    const { data: stats, isLoading } = useFinancialAnalytics(selectedMonth);
+    const { data: stats, isLoading, isError, refetch } = useFinancialAnalytics(selectedMonth);
 
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -27,6 +27,21 @@ export default function FinanceAnalyticsPage() {
     };
 
     const tooltipFormatter = (value: unknown) => formatCurrency(Number(value));
+
+    if (isError) {
+        return (
+            <div className="p-6 flex flex-col items-center justify-center min-h-[50vh] text-center">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                    <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+                <h3 className="text-base font-bold mb-1">Không thể tải dữ liệu tài chính</h3>
+                <p className="text-sm text-muted-foreground mb-5">Kiểm tra kết nối mạng và thử lại.</p>
+                <Button variant="outline" onClick={() => refetch()}>
+                    <RefreshCw className="mr-2 h-4 w-4" /> Thử lại
+                </Button>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (
