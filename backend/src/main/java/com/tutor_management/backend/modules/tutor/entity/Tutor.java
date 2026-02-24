@@ -46,6 +46,10 @@ public class Tutor {
     @Column(nullable = false)
     private String subscriptionStatus; // e.g., "ACTIVE", "EXPIRED"
 
+    @Column(name = "default_commission_rate", nullable = false)
+    @Builder.Default
+    private Double defaultCommissionRate = 10.0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

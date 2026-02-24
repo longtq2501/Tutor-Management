@@ -18,4 +18,5 @@ export * from './course-admin';
 export * from './course-student';
 export * from './admin-auth';
 export * from './admin-audit';
+export * from './analytics-api';
 export { default as api } from './axios-instance';
