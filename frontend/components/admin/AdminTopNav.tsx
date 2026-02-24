@@ -6,7 +6,8 @@ import {
     ChevronRight,
     User,
     LogOut,
-    Camera
+    Camera,
+    Menu
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +34,7 @@ const routeMap: Record<string, string> = {
     '/settings': 'Cài Đặt',
 };
 
-export function AdminTopNav() {
+export function AdminTopNav({ onMenuClick }: { onMenuClick?: () => void }) {
     const pathname = usePathname();
     const router = useRouter();
     const { user, logout } = useAuth();
@@ -73,12 +74,23 @@ export function AdminTopNav() {
     };
 
     return (
-        <header className="fixed top-0 left-16 right-0 h-[52px] admin-glass z-40 px-6 flex items-center justify-between">
-            {/* Left: Breadcrumb */}
-            <div className="flex items-center gap-2 text-xs font-medium">
-                <span className="text-[var(--admin-text3)] uppercase tracking-wider">Admin</span>
-                <ChevronRight className="h-3 w-3 text-[var(--admin-text3)]" />
-                <span className="text-[var(--admin-text)]">{currentPage}</span>
+        <header className="fixed top-0 left-0 right-0 lg:left-16 h-[52px] admin-glass z-40 px-4 lg:px-6 flex items-center justify-between">
+            {/* Left: Mobile Menu + Breadcrumb */}
+            <div className="flex items-center gap-3">
+                {/* Hamburger — mobile only */}
+                <button
+                    onClick={onMenuClick}
+                    className="lg:hidden p-2 text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] rounded-lg transition-all"
+                    aria-label="Mở menu"
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+
+                <div className="flex items-center gap-2 text-xs font-medium">
+                    <span className="text-[var(--admin-text3)] uppercase tracking-wider hidden sm:inline">Admin</span>
+                    <ChevronRight className="h-3 w-3 text-[var(--admin-text3)] hidden sm:inline" />
+                    <span className="text-[var(--admin-text)]">{currentPage}</span>
+                </div>
             </div>
 
             {/* Right: Actions */}

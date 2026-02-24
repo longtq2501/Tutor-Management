@@ -14,7 +14,8 @@ import {
     History,
     ChevronLeft,
     ChevronRight,
-    Tornado
+    Tornado,
+    UserCog
 } from 'lucide-react';
 import {
     Tooltip,
@@ -38,25 +39,25 @@ const navSections: NavSection[] = [
     {
         title: 'Hệ Thống',
         items: [
-            { label: 'Overview', href: '/overview', icon: LayoutDashboard },
+            { label: 'Overview', href: '/admin/overview', icon: LayoutDashboard },
         ]
     },
     {
         title: 'Quản Lý',
         items: [
-            { label: 'Gia Sư', href: '/tutors', icon: Users },
-            { label: 'Học Sinh', href: '/students', icon: GraduationCap },
-            { label: 'Người Dùng', href: '/users', icon: Users },
-            { label: 'Lịch Dạy', href: '/sessions', icon: Calendar },
-            { label: 'Tài Liệu', href: '/documents', icon: FolderClosed },
+            { label: 'Gia Sư', href: '/admin/tutors', icon: Users },
+            { label: 'Học Sinh', href: '/admin/students', icon: GraduationCap },
+            { label: 'Người Dùng', href: '/admin/users', icon: UserCog },
+            { label: 'Lịch Dạy', href: '/admin/sessions', icon: Calendar },
+            { label: 'Tài Liệu', href: '/admin/documents', icon: FolderClosed },
         ]
     },
     {
         title: 'Bảo Mật & Hệ Thống',
         items: [
-            { label: 'Phân Quyền', href: '/permissions', icon: ShieldCheck },
-            { label: 'Nhật Ký Hoạt Động', href: '/audit-logs', icon: History },
-            { label: 'Cài Đặt', href: '/settings', icon: Settings },
+            { label: 'Phân Quyền', href: '/admin/permissions', icon: ShieldCheck },
+            { label: 'Nhật Ký Hoạt Động', href: '/admin/audit-logs', icon: History },
+            { label: 'Cài Đặt', href: '/admin/settings', icon: Settings },
         ]
     }
 ];

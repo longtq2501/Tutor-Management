@@ -11,8 +11,16 @@ export const adminAuditApi = {
      * @param page Page index (0-based).
      * @param size Number of items per page.
      */
-    getAuditLogs: async (page = 0, size = 20): Promise<PageResponse<AuditLog>> => {
-        const response = await api.get(`/admin/audit-logs?page=${page}&size=${size}`);
+    getAuditLogs: async (
+        page = 0,
+        size = 20,
+        search?: string,
+        actionType?: string
+    ): Promise<PageResponse<AuditLog>> => {
+        const params = new URLSearchParams({ page: String(page), size: String(size) });
+        if (search) params.set('search', search);
+        if (actionType) params.set('actionType', actionType);
+        const response = await api.get(`/admin/audit-logs?${params}`);
         return response.data.data;
     },
 };

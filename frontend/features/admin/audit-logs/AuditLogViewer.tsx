@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     Table,
     TableBody,
@@ -11,12 +11,28 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { adminAuditApi } from '@/lib/services/admin-audit';
 import type { AuditLog } from '@/lib/types/admin';
-import { Shield, Clock, BookOpen, AlertCircle, CheckCircle2, XCircle, Search } from 'lucide-react';
+import { Shield, Clock, AlertCircle, CheckCircle2, XCircle, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const ACTION_TYPES = [
+    { value: 'ALL', label: 'Tất cả hành động' },
+    { value: 'CREATE', label: 'Tạo mới (CREATE)' },
+    { value: 'UPDATE', label: 'Cập nhật (UPDATE)' },
+    { value: 'DELETE', label: 'Xóa (DELETE)' },
+    { value: 'LOGIN', label: 'Đăng nhập (LOGIN)' },
+];
 
 export const AuditLogViewer: React.FC = () => {
     const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -24,22 +40,36 @@ export const AuditLogViewer: React.FC = () => {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
-    const fetchLogs = async (currentPage: number) => {
+    // Filter state
+    const [searchInput, setSearchInput] = useState('');
+    const [actionType, setActionType] = useState('ALL');
+    const debouncedSearch = useDebounce(searchInput, 300);
+
+    const fetchLogs = useCallback(async (currentPage: number) => {
         try {
             setLoading(true);
-            const response = await adminAuditApi.getAuditLogs(currentPage);
+            const response = await adminAuditApi.getAuditLogs(
+                currentPage,
+                20,
+                debouncedSearch || undefined,
+                actionType !== 'ALL' ? actionType : undefined
+            );
             setLogs(response.content);
             setTotalPages(response.totalPages);
-        } catch (error) {
+        } catch {
             toast.error('Không thể tải nhật ký hoạt động');
         } finally {
             setLoading(false);
         }
-    };
+    }, [debouncedSearch, actionType]);
+
+    useEffect(() => {
+        setPage(0);
+    }, [debouncedSearch, actionType]);
 
     useEffect(() => {
         fetchLogs(page);
-    }, [page]);
+    }, [page, fetchLogs]);
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -64,6 +94,7 @@ export const AuditLogViewer: React.FC = () => {
         if (action.includes('DELETE')) return 'text-red-600';
         if (action.includes('UPDATE') || action.includes('PUT')) return 'text-blue-600';
         if (action.includes('CREATE') || action.includes('POST')) return 'text-green-600';
+        if (action.includes('LOGIN')) return 'text-purple-600';
         return 'text-foreground';
     };
 
@@ -80,11 +111,27 @@ export const AuditLogViewer: React.FC = () => {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center gap-4">
+            {/* Search + Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input placeholder="Tìm kiếm nhật ký..." className="pl-9" />
+                    <Input
+                        placeholder="Tìm theo email, tài nguyên..."
+                        className="pl-9"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                    />
                 </div>
+                <Select value={actionType} onValueChange={setActionType}>
+                    <SelectTrigger className="w-full sm:w-52">
+                        <SelectValue placeholder="Loại hành động" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {ACTION_TYPES.map((at) => (
+                            <SelectItem key={at.value} value={at.value}>{at.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className="rounded-md border bg-white overflow-hidden">
@@ -99,10 +146,21 @@ export const AuditLogViewer: React.FC = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {logs.length === 0 ? (
+                        {loading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    {Array.from({ length: 5 }).map((__, j) => (
+                                        <TableCell key={j}><Skeleton className="h-5 w-full" /></TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : logs.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-                                    Chưa có nhật ký hoạt động nào
+                                    {debouncedSearch || actionType !== 'ALL'
+                                        ? 'Không tìm thấy nhật ký phù hợp'
+                                        : 'Chưa có nhật ký hoạt động nào'
+                                    }
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -152,7 +210,7 @@ export const AuditLogViewer: React.FC = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        disabled={page === 0}
+                        disabled={page === 0 || loading}
                         onClick={() => setPage(p => p - 1)}
                     >
                         Trước
@@ -163,7 +221,7 @@ export const AuditLogViewer: React.FC = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        disabled={page === totalPages - 1}
+                        disabled={page === totalPages - 1 || loading}
                         onClick={() => setPage(p => p + 1)}
                     >
                         Sau

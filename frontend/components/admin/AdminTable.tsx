@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
 import { AdminTableSkeleton } from './AdminTableSkeleton';
 import { EmptyState } from './EmptyState';
 
-interface Column<T> {
+export interface Column<T> {
     header: string;
     accessor: keyof T | ((item: T) => React.ReactNode);
     className?: string;

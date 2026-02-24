@@ -11,11 +11,36 @@ interface AdminShellProps {
     children: React.ReactNode;
 }
 
+/** Syncs `data-admin-theme` on <html> with the current dark/light class
+ *  so `admin.css` CSS variable overrides activate correctly. */
+function useAdminThemeSync() {
+    useEffect(() => {
+        const apply = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.setAttribute('data-admin-theme', isDark ? 'dark' : 'light');
+        };
+
+        // Apply on mount
+        apply();
+
+        // Watch for class changes from ModeToggle
+        const observer = new MutationObserver(apply);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
+
+        return () => observer.disconnect();
+    }, []);
+}
+
 export function AdminShell({ children }: AdminShellProps) {
     const pathname = usePathname();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+
+    useAdminThemeSync();
 
     useEffect(() => {
         setMounted(true);
@@ -66,7 +91,7 @@ export function AdminShell({ children }: AdminShellProps) {
                 className={`flex flex-col flex-1 transition-[padding] duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'
                     }`}
             >
-                <AdminTopNav />
+                <AdminTopNav onMenuClick={toggleSidebar} />
 
                 <main className="mt-[52px] h-[calc(100vh-52px)] overflow-y-auto p-5 lg:p-8">
                     <div className="max-w-[1440px] mx-auto">
