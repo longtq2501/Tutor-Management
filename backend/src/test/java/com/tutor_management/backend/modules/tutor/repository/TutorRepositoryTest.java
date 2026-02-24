@@ -2,7 +2,7 @@ package com.tutor_management.backend.modules.tutor.repository;
 
 import com.tutor_management.backend.exception.EmailNotFoundException;
 import com.tutor_management.backend.exception.TutorNotFoundException;
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.tutor.dto.TutorStatsDTO;
@@ -62,12 +62,13 @@ class TutorServiceTest {
     @BeforeEach
     void setUp() {
         // Setup test user
+        RoleEntity role = RoleEntity.builder().name("TUTOR").build();
         testUser = User.builder()
                 .id(1L)
                 .email("tutor@test.com")
                 .password("password")
                 .fullName("Test Tutor")
-                .role(Role.TUTOR)
+                .role(role)
                 .enabled(true)
                 .accountNonLocked(true)
                 .build();

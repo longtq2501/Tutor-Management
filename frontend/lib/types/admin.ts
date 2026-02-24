@@ -32,6 +32,17 @@ export interface ActivityLog {
     createdAt: string;
 }
 
+export interface AuditLog {
+    id: number;
+    action: string;
+    actorEmail: string;
+    actorRole: string;
+    resourceType: string;
+    resourceId?: string;
+    timestamp: string;
+    status: string;
+}
+
 export interface AdminStudent extends Student {
     tutorId: number;
     tutorName: string;
@@ -69,4 +80,19 @@ export interface TopTutor {
     tutorName: string;
     totalRevenue: number;
     sessionCount: number;
+}
+
+export interface Role {
+    id: number;
+    name: string;
+    permissions: string[];
+}
+
+export interface ManagedUser {
+    id: number;
+    email: string;
+    fullName: string;
+    role: string;
+    enabled: boolean;
+    createdAt: string;
 }

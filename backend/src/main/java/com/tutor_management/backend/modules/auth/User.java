@@ -36,13 +36,15 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String fullName;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private RoleEntity role;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean accountNonLocked = true;
 
@@ -74,14 +76,17 @@ public class User implements UserDetails {
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getFullName() { return fullName; }
-    public Role getRole() { return role; }
+    public RoleEntity getRole() { return role; }
     public Long getStudentId() { return studentId; }
     public boolean isEnabled() { return enabled; }
     public boolean isAccountNonLocked() { return accountNonLocked; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        if (role == null) {
+            return List.of();
+        }
+        return role.getAuthorities();
     }
 
     @Override

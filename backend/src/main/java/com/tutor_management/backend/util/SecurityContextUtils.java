@@ -1,6 +1,5 @@
 package com.tutor_management.backend.util;
 
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.tutor.entity.Tutor;
@@ -52,12 +51,12 @@ public class SecurityContextUtils {
                     });
         }
 
-        if (Role.ADMIN.equals(user.getRole())) {
+        if ("ADMIN".equals(user.getRole().getName())) {
             log.debug("User {} resolved as ADMIN (null tutorId)", user.getEmail());
             return null;
         }
 
-        if (Role.TUTOR.equals(user.getRole())) {
+        if ("TUTOR".equals(user.getRole().getName())) {
             return tutorRepository.findByUserId(user.getId())
                     .map(Tutor::getId)
                     .orElseThrow(() -> {

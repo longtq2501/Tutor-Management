@@ -46,15 +46,16 @@ const navSections: NavSection[] = [
         items: [
             { label: 'Gia Sư', href: '/tutors', icon: Users },
             { label: 'Học Sinh', href: '/students', icon: GraduationCap },
+            { label: 'Người Dùng', href: '/users', icon: Users },
             { label: 'Lịch Dạy', href: '/sessions', icon: Calendar },
             { label: 'Tài Liệu', href: '/documents', icon: FolderClosed },
         ]
     },
     {
-        title: 'Phân Quyền',
+        title: 'Bảo Mật & Hệ Thống',
         items: [
-            { label: 'Permissions', href: '/permissions', icon: ShieldCheck },
-            { label: 'Audit Logs', href: '/audit', icon: History },
+            { label: 'Phân Quyền', href: '/permissions', icon: ShieldCheck },
+            { label: 'Nhật Ký Hoạt Động', href: '/audit-logs', icon: History },
             { label: 'Cài Đặt', href: '/settings', icon: Settings },
         ]
     }

@@ -1,5 +1,5 @@
 // 📁 parents-view/index.tsx
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 'use client';
 
 import { useState, useMemo } from 'react';

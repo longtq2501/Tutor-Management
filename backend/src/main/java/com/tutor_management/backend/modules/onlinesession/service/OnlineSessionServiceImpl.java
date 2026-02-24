@@ -22,7 +22,6 @@ import com.tutor_management.backend.modules.onlinesession.dto.response.UserJoine
 import com.tutor_management.backend.modules.onlinesession.dto.response.UserLeftMessage;
 import com.tutor_management.backend.modules.onlinesession.repository.OnlineSessionRepository;
 import com.tutor_management.backend.modules.onlinesession.security.RoomTokenService;
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import com.tutor_management.backend.modules.tutor.entity.Tutor;
@@ -154,7 +153,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         // ✅ Record join time
         LocalDateTime now = LocalDateTime.now(clock);
         
-        if (user.getRole() == Role.TUTOR) {
+        if ("TUTOR".equals(user.getRole().getName())) {
             // New Join
             if (session.getTutorJoinedAt() == null) {
                 session.setTutorJoinedAt(now);
@@ -186,7 +185,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
                     log.info("Tutor {} rejoined room {}", userId, roomId);
                 }
             }
-        } else if (user.getRole() == Role.STUDENT) {
+        } else if ("STUDENT".equals(user.getRole().getName())) {
             // Verify student ID match
             if (user.getStudentId() != null && user.getStudentId().equals(session.getStudent().getId())) {
                 if (session.getStudentJoinedAt() == null) {
@@ -222,7 +221,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         
         onlineSessionRepository.save(session);
 
-        String token = roomTokenService.generateToken(roomId, userId, user.getRole());
+        String token = roomTokenService.generateToken(roomId, userId, user.getRole().getName());
 
         return JoinRoomResponse.builder()
                 .token(token)
@@ -441,12 +440,12 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Optional<OnlineSession> session = Optional.empty();
-        if (user.getRole() == Role.TUTOR) {
+        if ("TUTOR".equals(user.getRole().getName())) {
             Tutor tutor = tutorRepository.findByUserId(userId)
                     .orElseThrow(() -> new TutorProfileNotFoundException(userId));
             session = onlineSessionRepository.findFirstByTutorIdAndRoomStatusNotOrderByScheduledStartAsc(
                     tutor.getId(), RoomStatus.ENDED);
-        } else if (user.getRole() == Role.STUDENT) {
+        } else if ("STUDENT".equals(user.getRole().getName())) {
             if (user.getStudentId() != null) {
                 session = onlineSessionRepository.findFirstByStudentIdAndRoomStatusNotOrderByScheduledStartAsc(
                         user.getStudentId(), RoomStatus.ENDED);
@@ -467,12 +466,12 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         Limit limit = Limit.of(size);
         Window<OnlineSession> window = Window.from(Collections.emptyList(), pos -> scrollPosition);
 
-        if (user.getRole() == Role.TUTOR) {
+        if ("TUTOR".equals(user.getRole().getName())) {
             Tutor tutor = tutorRepository.findByUserId(userId)
                     .orElseThrow(() -> new TutorProfileNotFoundException(userId));
             window = onlineSessionRepository.findAllByTutorIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(
                     tutor.getId(), RoomStatus.ENDED, scrollPosition, limit);
-        } else if (user.getRole() == Role.STUDENT) {
+        } else if ("STUDENT".equals(user.getRole().getName())) {
             if (user.getStudentId() != null) {
                 window = onlineSessionRepository.findAllByStudentIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(
                         user.getStudentId(), RoomStatus.ENDED, scrollPosition, limit);
@@ -760,7 +759,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userId));
 
         String name = user.getFullName();
-        String role = user.getRole().name();
+        String role = user.getRole().getName();
         // Assuming avatar logic exists or placeholder
         String avatarUrl = null; // Placeholder: User entity supports no avatar yet
 

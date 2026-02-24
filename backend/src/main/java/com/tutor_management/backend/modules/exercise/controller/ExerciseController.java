@@ -158,7 +158,7 @@ public class ExerciseController {
         
         // Match multi-tenancy rule: Tutors only see what they assigned (linked via Exercise.tutorId)
         Long tutorId = null;
-        if (user.getRole() == com.tutor_management.backend.modules.auth.Role.TUTOR) {
+        if ("TUTOR".equals(user.getRole().getName())) {
             tutorId = tutorRepository.findByUserId(user.getId())
                     .map(com.tutor_management.backend.modules.tutor.entity.Tutor::getId)
                     .orElse(null);

@@ -11,6 +11,9 @@ import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessa
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
+import com.tutor_management.backend.modules.onlinesession.security.RoomTokenService;
+
 @SpringBootTest(classes = {
     WebSocketConfig.class,
     DelegatingWebSocketMessageBrokerConfiguration.class
@@ -19,6 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     "app.online-session.websocket.allowed-origins=http://localhost:3000"
 })
 class WebSocketConfigTest {
+
+    @MockBean
+    private RoomTokenService roomTokenService;
 
     @Autowired(required = false)
     private WebSocketConfig webSocketConfig;

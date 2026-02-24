@@ -1,7 +1,6 @@
 package com.tutor_management.backend.modules.schedule.service;
 
 import com.tutor_management.backend.exception.ResourceNotFoundException;
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.finance.entity.SessionRecord;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
@@ -268,7 +267,7 @@ public class RecurringScheduleService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        if (user.getRole() == Role.ADMIN) {
+        if ("ADMIN".equals(user.getRole().getName())) {
             return null;
         }
         

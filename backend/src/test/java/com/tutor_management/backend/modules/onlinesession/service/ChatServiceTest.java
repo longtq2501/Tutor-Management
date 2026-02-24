@@ -1,6 +1,6 @@
 package com.tutor_management.backend.modules.onlinesession.service;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.onlinesession.dto.request.ChatMessageRequest;
@@ -51,10 +51,11 @@ class ChatServiceTest {
 
     @BeforeEach
     void setUp() {
+        RoleEntity role = RoleEntity.builder().name("TUTOR").build();
         testUser = User.builder()
                 .id(userId)
                 .fullName("Test User")
-                .role(Role.TUTOR)
+                .role(role)
                 .build();
 
         chatRequest = new ChatMessageRequest("Hello world");
@@ -122,7 +123,7 @@ class ChatServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        assertEquals("Test Content", result.getContent().get(0).getContent());
+        assertEquals("Test Content", result.getContent().getFirst().getContent());
         verify(chatMessageRepository).findByRoomIdOrderByTimestampDesc(roomId, pageable);
     }
 

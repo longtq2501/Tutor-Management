@@ -1,6 +1,5 @@
 package com.tutor_management.backend.modules.auth.dto.request;
 
-import com.tutor_management.backend.modules.auth.Role;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -19,6 +18,6 @@ public class RegisterRequest {
     @NotBlank(message = "Full name is required")
     private String fullName;
 
-    @NotNull(message = "Role is required")
-    private Role role;  // ← THÊM FIELD NÀY
+    @NotBlank(message = "Role is required")
+    private String role;
 }

@@ -1,6 +1,6 @@
 package com.tutor_management.backend.modules.document.service;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.document.DocumentCategoryType;
 import com.tutor_management.backend.modules.document.dto.request.DocumentRequest;
@@ -72,9 +72,13 @@ class DocumentServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminUser = User.builder().id(1L).email("admin@test.com").role(Role.ADMIN).build();
-        tutorUser = User.builder().id(2L).email("tutor@test.com").role(Role.TUTOR).build();
-        studentUser = User.builder().id(3L).email("student@test.com").role(Role.STUDENT).studentId(10L).build();
+        RoleEntity adminRole = RoleEntity.builder().name("ADMIN").build();
+        RoleEntity tutorRole = RoleEntity.builder().name("TUTOR").build();
+        RoleEntity studentRole = RoleEntity.builder().name("STUDENT").build();
+
+        adminUser = User.builder().id(1L).email("admin@test.com").role(adminRole).build();
+        tutorUser = User.builder().id(2L).email("tutor@test.com").role(tutorRole).build();
+        studentUser = User.builder().id(3L).email("student@test.com").role(studentRole).studentId(10L).build();
 
         tutor = Tutor.builder().id(20L).fullName("Tutor Name").build();
         student = Student.builder().id(10L).name("Student Name").tutorId(20L).build();

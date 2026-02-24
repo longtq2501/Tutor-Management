@@ -18,7 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
+import com.tutor_management.backend.modules.auth.RoleRepository;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.finance.entity.SessionRecord;
@@ -49,6 +50,7 @@ public class StudentService {
     private final SessionRecordRepository sessionRecordRepository;
     private final ParentRepository parentRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final com.tutor_management.backend.util.SecurityContextUtils securityContextUtils;
 
@@ -331,11 +333,14 @@ public class StudentService {
     }
 
     private User createUserRecord(Student student, String email, String rawPassword) {
+        RoleEntity studentRole = roleRepository.findByName("STUDENT")
+                .orElseThrow(() -> new IllegalStateException("STUDENT role not found"));
+
         return User.builder()
                 .fullName(student.getName())
                 .email(email)
                 .password(passwordEncoder.encode(rawPassword))
-                .role(Role.STUDENT)
+                .role(studentRole)
                 .enabled(true)
                 .accountNonLocked(true)
                 .studentId(student.getId())

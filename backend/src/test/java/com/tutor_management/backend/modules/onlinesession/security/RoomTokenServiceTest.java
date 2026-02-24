@@ -1,6 +1,6 @@
 package com.tutor_management.backend.modules.onlinesession.security;
 
-import com.tutor_management.backend.modules.auth.Role;
+
 import com.tutor_management.backend.modules.onlinesession.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -38,7 +38,7 @@ class RoomTokenServiceTest {
         // Given
         String roomId = "room-123";
         Long userId = 1L;
-        Role role = Role.TUTOR;
+        String role = "TUTOR";
 
         // When
         String token = roomTokenService.generateToken(roomId, userId, role);
@@ -55,7 +55,7 @@ class RoomTokenServiceTest {
         assertEquals(userId.toString(), claims.getSubject());
         assertEquals(roomId, claims.get("roomId"));
         assertEquals(userId.intValue(), ((Number) claims.get("userId")).intValue());
-        assertEquals(role.name(), claims.get("role"));
+        assertEquals(role, claims.get("role"));
         
         Date exp = claims.getExpiration();
         assertTrue(exp.after(new Date()));
@@ -75,7 +75,7 @@ class RoomTokenServiceTest {
         // Given
         String roomId = "room-123";
         Long userId = 1L;
-        Role role = Role.TUTOR;
+        String role = "TUTOR";
         String token = roomTokenService.generateToken(roomId, userId, role);
 
         // When
@@ -102,7 +102,7 @@ class RoomTokenServiceTest {
     void validateToken_ExpiredToken() throws InterruptedException {
         // Given
         ReflectionTestUtils.setField(roomTokenService, "jwtExpiration", 1L); // ✅ Keep 1L
-        String token = roomTokenService.generateToken("room-123", 1L, Role.TUTOR);
+        String token = roomTokenService.generateToken("room-123", 1L, "TUTOR");
         Thread.sleep(10); // Wait for token to expire
 
         // When/Then
@@ -117,7 +117,7 @@ class RoomTokenServiceTest {
     void extractRoomId_Success() {
         // Given
         String roomId = "room-abc-123";
-        String token = roomTokenService.generateToken(roomId, 1L, Role.TUTOR);
+        String token = roomTokenService.generateToken(roomId, 1L, "TUTOR");
 
         // When
         String extractedRoomId = roomTokenService.extractRoomId(token);
@@ -131,7 +131,7 @@ class RoomTokenServiceTest {
     void extractUserId_Success() {
         // Given
         Long userId = 42L;
-        String token = roomTokenService.generateToken("room-123", userId, Role.STUDENT);
+        String token = roomTokenService.generateToken("room-123", userId, "STUDENT");
 
         // When
         Long extractedUserId = roomTokenService.extractUserId(token);
@@ -144,11 +144,11 @@ class RoomTokenServiceTest {
     @DisplayName("Should extract role correctly")
     void extractRole_Success() {
         // Given
-        Role role = Role.ADMIN;
+        String role = "ADMIN";
         String token = roomTokenService.generateToken("room-123", 1L, role);
 
         // When
-        Role extractedRole = roomTokenService.extractRole(token);
+        String extractedRole = roomTokenService.extractRole(token);
 
         // Then
         assertEquals(role, extractedRole);
@@ -159,7 +159,7 @@ class RoomTokenServiceTest {
     void isTokenExpired_ExpiredToken() throws InterruptedException {
         // Given
         ReflectionTestUtils.setField(roomTokenService, "jwtExpiration", 1L);
-        String token = roomTokenService.generateToken("room-123", 1L, Role.TUTOR);
+        String token = roomTokenService.generateToken("room-123", 1L, "TUTOR");
         Thread.sleep(10);
 
         // When
@@ -176,7 +176,7 @@ class RoomTokenServiceTest {
     @DisplayName("Should detect valid token as not expired")
     void isTokenExpired_ValidToken() {
         // Given
-        String token = roomTokenService.generateToken("room-123", 1L, Role.TUTOR);
+        String token = roomTokenService.generateToken("room-123", 1L, "TUTOR");
 
         // When
         boolean isExpired = roomTokenService.isTokenExpired(token);

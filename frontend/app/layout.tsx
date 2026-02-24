@@ -56,6 +56,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SessionManager } from '@/components/shared/SessionManager';
 import QueryProvider from '@/providers/QueryProvider';
 import { Toaster } from 'sonner';
 
@@ -75,7 +76,9 @@ export default function RootLayout({
                             enableSystem
                             disableTransitionOnChange
                         >
-                            {children}
+                            <SessionManager>
+                                {children}
+                            </SessionManager>
                             <Toaster richColors position="bottom-right" />
                         </ThemeProvider>
                     </AuthProvider>

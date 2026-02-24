@@ -1,6 +1,6 @@
 package com.tutor_management.backend.modules.onlinesession.security;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.onlinesession.entity.OnlineSession;
@@ -59,9 +59,13 @@ class RoomAccessValidatorTest {
                 .student(Student.builder().id(studentId).build())
                 .build();
 
-        adminUser = User.builder().id(userId).role(Role.ADMIN).build();
-        tutorUser = User.builder().id(userId).role(Role.TUTOR).build();
-        studentUser = User.builder().id(userId).role(Role.STUDENT).studentId(studentId).build();
+        RoleEntity adminRole = RoleEntity.builder().name("ADMIN").build();
+        RoleEntity tutorRole = RoleEntity.builder().name("TUTOR").build();
+        RoleEntity studentRole = RoleEntity.builder().name("STUDENT").build();
+
+        adminUser = User.builder().id(userId).role(adminRole).build();
+        tutorUser = User.builder().id(userId).role(tutorRole).build();
+        studentUser = User.builder().id(userId).role(studentRole).studentId(studentId).build();
 
         tutorProfile = Tutor.builder().id(tutorId).user(tutorUser).build();
     }
@@ -108,7 +112,8 @@ class RoomAccessValidatorTest {
     @Test
     @DisplayName("Should throw RoomAccessDeniedException for non-participating Student")
     void validateAccess_StudentDenied() {
-        User otherStudentUser = User.builder().id(userId).role(Role.STUDENT).studentId(99L).build();
+        RoleEntity studentRole = RoleEntity.builder().name("STUDENT").build();
+        User otherStudentUser = User.builder().id(userId).role(studentRole).studentId(99L).build();
         when(onlineSessionRepository.findByRoomId(roomId)).thenReturn(Optional.of(session));
         when(userRepository.findById(userId)).thenReturn(Optional.of(otherStudentUser));
 

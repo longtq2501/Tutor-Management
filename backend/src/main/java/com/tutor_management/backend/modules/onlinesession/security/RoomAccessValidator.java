@@ -1,6 +1,5 @@
 package com.tutor_management.backend.modules.onlinesession.security;
 
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.onlinesession.entity.OnlineSession;
@@ -85,12 +84,12 @@ public class RoomAccessValidator {
             .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
 
         // ADMIN has global access
-        if (user.getRole() == Role.ADMIN) {
+        if ("ADMIN".equals(user.getRole().getName())) {
             return;
         }
 
         // TUTOR must be the assigned tutor for this session
-        if (user.getRole() == Role.TUTOR) {
+        if ("TUTOR".equals(user.getRole().getName())) {
             Tutor tutor = tutorRepository.findByUserId(userId)
                 .orElseThrow(() -> new RoomAccessDeniedException("Tutor profile not found for user: " + userId));
 
@@ -105,7 +104,7 @@ public class RoomAccessValidator {
         }
 
         // STUDENT must be the assigned student for this session
-        if (user.getRole() == Role.STUDENT) {
+        if ("STUDENT".equals(user.getRole().getName())) {
             if (session.getStudent() == null) {
                 log.error("RoomAccessValidator: Session {} has no student assigned", roomId);
                 throw new RoomAccessDeniedException("Session has no assigned student (data corruption).");

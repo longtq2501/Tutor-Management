@@ -1,11 +1,7 @@
 package com.tutor_management.backend.modules.onlinesession.security;
 
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.onlinesession.exception.InvalidTokenException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -17,6 +13,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service for managing room access tokens (JWT).
+ */
 @Service
 public class RoomTokenService {
 
@@ -24,16 +23,16 @@ public class RoomTokenService {
     private String secretKey;
 
     @Value("${app.online-session.jwt.expiration}")
-    private Long jwtExpiration;
+    private long jwtExpiration;
 
     /**
      * Generates a JWT for room access.
      */
-    public String generateToken(String roomId, Long userId, Role role) {
+    public String generateToken(String roomId, Long userId, String roleName) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("roomId", roomId);
         extraClaims.put("userId", userId);
-        extraClaims.put("role", role.name());
+        extraClaims.put("role", roleName);
 
         return Jwts.builder()
                 .claims(extraClaims)
@@ -43,7 +42,7 @@ public class RoomTokenService {
                 .signWith(getSignInKey())
                 .compact();
     }
-    
+
     /**
      * Validates a room token and extracts claims.
      * 
@@ -88,10 +87,9 @@ public class RoomTokenService {
     /**
      * Extracts the role from a validated token.
      */
-    public Role extractRole(String token) {
+    public String extractRole(String token) {
         Claims claims = validateToken(token);
-        String roleName = claims.get("role", String.class);
-        return Role.valueOf(roleName);
+        return claims.get("role", String.class);
     }
 
     /**

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.document.repository.DocumentRepository;
 import com.tutor_management.backend.modules.document.entity.Document;
@@ -21,6 +20,8 @@ import com.tutor_management.backend.modules.finance.StatusTransitionValidator;
 import com.tutor_management.backend.modules.lesson.repository.LessonRepository;
 import com.tutor_management.backend.modules.lesson.entity.Lesson;
 import com.tutor_management.backend.modules.onlinesession.repository.OnlineSessionRepository;
+import com.tutor_management.backend.modules.tutor.entity.Tutor;
+import com.tutor_management.backend.modules.tutor.repository.TutorRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,6 +62,7 @@ public class SessionRecordService {
     
     // Dependencies for isolation
     private final com.tutor_management.backend.modules.auth.UserRepository userRepository;
+    private final TutorRepository tutorRepository;
     private final OnlineSessionRepository onlineSessionRepository;
     private final com.tutor_management.backend.modules.admin.service.AdminStatsService adminStatsService;
 
@@ -68,9 +70,17 @@ public class SessionRecordService {
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     private Long getCurrentTutorId() {
-        // Break circular dependency - need to find another way to fetch tutorId
-        // For now return null (Admin view)
-        return null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return null;
+
+        return userRepository.findByEmail(auth.getName())
+                .flatMap(user -> {
+                    if ("TUTOR".equals(user.getRole().getName())) {
+                        return tutorRepository.findByUserId(user.getId()).map(Tutor::getId);
+                    }
+                    return Optional.empty();
+                })
+                .orElse(null);
     }
 
     /**

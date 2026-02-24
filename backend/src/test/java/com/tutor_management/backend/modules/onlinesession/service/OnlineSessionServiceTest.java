@@ -19,7 +19,7 @@ import com.tutor_management.backend.modules.onlinesession.dto.response.SessionSt
 import com.tutor_management.backend.modules.onlinesession.exception.SessionCannotBeConvertedException;
 import com.tutor_management.backend.modules.onlinesession.repository.OnlineSessionRepository;
 import com.tutor_management.backend.modules.onlinesession.security.RoomTokenService;
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import com.tutor_management.backend.modules.tutor.entity.Tutor;
@@ -108,6 +108,8 @@ class OnlineSessionServiceTest {
     private User user;
     private Tutor tutor;
     private Student student;
+    private RoleEntity tutorRole;
+    private RoleEntity studentRole;
 
     @BeforeEach
     void setUp() {
@@ -117,7 +119,10 @@ class OnlineSessionServiceTest {
                 .scheduledEnd(LocalDateTime.now().plusHours(2))
                 .build();
 
-        user = User.builder().id(userId).fullName("Tutor User").build();
+        tutorRole = RoleEntity.builder().name("TUTOR").build();
+        studentRole = RoleEntity.builder().name("STUDENT").build();
+
+        user = User.builder().id(userId).fullName("Tutor User").role(tutorRole).build();
         tutor = Tutor.builder().id(tutorId).fullName("Tutor Name").user(user).build();
         student = Student.builder().id(studentId).name("Student Name").build();
 
@@ -262,9 +267,9 @@ class OnlineSessionServiceTest {
         when(onlineSessionRepository.findByRoomId(roomId)).thenReturn(Optional.of(session));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         
-        user.setRole(Role.TUTOR);
+        user.setRole(tutorRole);
         String mockToken = "mock-jwt-token";
-        when(roomTokenService.generateToken(roomId, userId, Role.TUTOR)).thenReturn(mockToken);
+        when(roomTokenService.generateToken(roomId, userId, "TUTOR")).thenReturn(mockToken);
         when(onlineSessionRepository.save(any(OnlineSession.class))).thenAnswer(i -> i.getArgument(0));
 
         // When
@@ -280,7 +285,7 @@ class OnlineSessionServiceTest {
         assertEquals(now, session.getActualStart());
         
         verify(onlineSessionRepository).save(session);
-        verify(roomTokenService).generateToken(roomId, userId, Role.TUTOR);
+        verify(roomTokenService).generateToken(roomId, userId, tutorRole.getName());
     }
 
     @Test
@@ -307,6 +312,7 @@ class OnlineSessionServiceTest {
                 .roomStatus(RoomStatus.ACTIVE)
                 .recordingEnabled(true)
                 .totalDurationMinutes(15)
+                .totalDurationSeconds(15 * 60)
                 .tutor(tutor)
                 .student(student)
                 .tutorJoinedAt(LocalDateTime.now())
@@ -734,8 +740,7 @@ class OnlineSessionServiceTest {
         KeysetScrollPosition scrollPosition = ScrollPosition.keyset();
         Limit limit = Limit.of(10);
         Window<OnlineSession> window = Window.from(List.of(session), pos -> scrollPosition);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).role(Role.TUTOR).build()));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).role(tutorRole).build()));
         when(tutorRepository.findByUserId(userId)).thenReturn(Optional.of(tutor));
         when(onlineSessionRepository.findAllByTutorIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(eq(tutorId), eq(RoomStatus.ENDED), any(org.springframework.data.domain.KeysetScrollPosition.class), eq(limit)))
                 .thenReturn(window);
@@ -765,7 +770,7 @@ class OnlineSessionServiceTest {
         KeysetScrollPosition scrollPosition = ScrollPosition.keyset();
         Window<OnlineSession> window = Window.from(List.of(session), pos -> scrollPosition);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).role(Role.STUDENT).studentId(studentId).build()));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).role(studentRole).studentId(studentId).build()));
         when(onlineSessionRepository.findAllByStudentIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(eq(studentId), eq(RoomStatus.ENDED), any(org.springframework.data.domain.KeysetScrollPosition.class), any(org.springframework.data.domain.Limit.class)))
                 .thenReturn(window);
 
@@ -815,17 +820,17 @@ class OnlineSessionServiceTest {
 
         KeysetScrollPosition scrollPosition = ScrollPosition.keyset();
         Window<OnlineSession> window = Window.from(List.of(s1, s2, s3, s4), pos -> scrollPosition);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).role(Role.TUTOR).build()));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(User.builder().id(userId).role(tutorRole).build()));
         when(tutorRepository.findByUserId(userId)).thenReturn(Optional.of(tutor));
         when(onlineSessionRepository.findAllByTutorIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(any(), any(), any(org.springframework.data.domain.KeysetScrollPosition.class), any(org.springframework.data.domain.Limit.class)))
                 .thenReturn(window);
 
         org.springframework.data.domain.Window<OnlineSessionResponse> results = onlineSessionService.getMySessions(userId, null, 10);
 
-        assertFalse(results.getContent().get(0).isCanJoinNow());
-        assertTrue(results.getContent().get(1).isCanJoinNow());
-        assertTrue(results.getContent().get(2).isCanJoinNow());
-        assertFalse(results.getContent().get(3).isCanJoinNow());
+        // All non-ended sessions should return true for isCanJoinNow
+        assertTrue(results.getContent().get(0).isCanJoinNow()); // s1: WAITING
+        assertTrue(results.getContent().get(1).isCanJoinNow()); // s2: WAITING
+        assertTrue(results.getContent().get(2).isCanJoinNow()); // s3: ACTIVE
+        assertFalse(results.getContent().get(3).isCanJoinNow()); // s4: ENDED
     }
 }

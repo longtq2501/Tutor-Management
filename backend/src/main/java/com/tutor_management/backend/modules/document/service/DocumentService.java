@@ -1,7 +1,6 @@
 package com.tutor_management.backend.modules.document.service;
 
 import com.tutor_management.backend.exception.ResourceNotFoundException;
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.document.repository.DocumentCategoryRepository;
 import com.tutor_management.backend.modules.document.DocumentCategoryType;
@@ -66,7 +65,11 @@ public class DocumentService {
             return null;
         }
 
-        return user.getRole() == Role.STUDENT ? user.getStudentId() : null;
+        if (user.getRole() == null) {
+            return null;
+        }
+
+        return "STUDENT".equals(user.getRole().getName()) ? user.getStudentId() : null;
     }
 
     /**
@@ -82,17 +85,21 @@ public class DocumentService {
             return null;
         }
 
-        if (user.getRole() == Role.ADMIN) {
+        if (user.getRole() == null) {
             return null;
         }
 
-        if (user.getRole() == Role.TUTOR) {
+        if ("ADMIN".equals(user.getRole().getName())) {
+            return null;
+        }
+
+        if ("TUTOR".equals(user.getRole().getName())) {
             return tutorRepository.findByUserId(user.getId())
                     .map(Tutor::getId)
                     .orElse(null);
         }
 
-        if (user.getRole() == Role.STUDENT && user.getStudentId() != null) {
+        if ("STUDENT".equals(user.getRole().getName()) && user.getStudentId() != null) {
             return studentRepository.findById(user.getStudentId())
                     .map(Student::getTutorId)
                     .orElse(null);

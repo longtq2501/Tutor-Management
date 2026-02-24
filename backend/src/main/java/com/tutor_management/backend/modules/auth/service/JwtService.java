@@ -36,7 +36,7 @@ public class JwtService {
     // ✅ OVERLOAD METHOD - Accept User type to include custom claims
     public String generateToken(User user) {
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", user.getRole().name());
+        extraClaims.put("role", user.getRole().getName());
         extraClaims.put("fullName", user.getFullName());
 
         // ✅ ADD studentId if present

@@ -1,7 +1,6 @@
 package com.tutor_management.backend.modules.exercise.service;
 
 import com.tutor_management.backend.exception.ResourceNotFoundException;
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.util.SecurityContextUtils;
@@ -256,7 +255,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         Page<com.tutor_management.backend.modules.student.entity.Student> studentsPage;
         if (activeTutorId != null) {
             studentsPage = studentRepository.findByTutorIdAndActiveTrueWithParent(activeTutorId, pageable);
-        } else if (securityContextUtils.getCurrentUser().map(u -> Role.ADMIN.equals(u.getRole())).orElse(false)) {
+        } else if (securityContextUtils.getCurrentUser().map(u -> "ADMIN".equals(u.getRole().getName())).orElse(false)) {
             // Only Admins see everything if tutorId/activeTutorId is null
             studentsPage = studentRepository.findByActiveTrueWithParent(pageable);
         } else {

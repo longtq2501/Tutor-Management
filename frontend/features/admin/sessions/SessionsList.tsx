@@ -162,8 +162,8 @@ export function SessionsList() {
                         handleTogglePayment(s.id);
                     }}
                     className={`flex items-center gap-2 px-2.5 py-1 rounded-full border transition-all ${s.paid
-                            ? 'bg-[var(--admin-green)]/10 border-[var(--admin-green)]/20 text-[var(--admin-green)]'
-                            : 'bg-[var(--admin-red)]/10 border-[var(--admin-red)]/20 text-[var(--admin-red)] animate-pulse'
+                        ? 'bg-[var(--admin-green)]/10 border-[var(--admin-green)]/20 text-[var(--admin-green)]'
+                        : 'bg-[var(--admin-red)]/10 border-[var(--admin-red)]/20 text-[var(--admin-red)] animate-pulse'
                         }`}
                 >
                     <div className={`w-1 h-1 rounded-full ${s.paid ? 'bg-[var(--admin-green)]' : 'bg-[var(--admin-red)]'}`} />
@@ -229,7 +229,7 @@ export function SessionsList() {
                                 <Filter className="h-3 w-3 mr-2 opacity-50" />
                                 <SelectValue placeholder="Chọn tháng" />
                             </SelectTrigger>
-                            <SelectContent className="admin-glass border-[var(--admin-border)]">
+                            <SelectContent className="admin-glass border-[var(--admin-border)] z-[100]">
                                 <SelectItem value="all" className="text-xs font-bold">Tất cả tháng</SelectItem>
                                 {months.map(m => (
                                     <SelectItem key={m} value={m} className="text-xs font-bold">Tháng {m}</SelectItem>
@@ -241,7 +241,7 @@ export function SessionsList() {
                             <SelectTrigger className="w-[140px] h-10 bg-[var(--admin-surface)] border-[var(--admin-border)] text-xs font-bold rounded-xl">
                                 <SelectValue placeholder="Trạng thái" />
                             </SelectTrigger>
-                            <SelectContent className="admin-glass border-[var(--admin-border)]">
+                            <SelectContent className="admin-glass border-[var(--admin-border)] z-[100]">
                                 <SelectItem value="all" className="text-xs font-bold">Mọi trạng thái</SelectItem>
                                 <SelectItem value="paid" className="text-xs font-bold text-[var(--admin-green)]">Đã thanh toán</SelectItem>
                                 <SelectItem value="unpaid" className="text-xs font-bold text-[var(--admin-red)]">Chưa thanh toán</SelectItem>

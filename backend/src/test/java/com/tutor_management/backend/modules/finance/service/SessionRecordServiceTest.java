@@ -1,6 +1,6 @@
 package com.tutor_management.backend.modules.finance.service;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
@@ -47,7 +47,8 @@ class SessionRecordServiceTest {
         // Arrange
         String month = "2024-01";
         String adminEmail = "admin@test.com";
-        User admin = User.builder().id(1L).email(adminEmail).role(Role.ADMIN).build();
+        RoleEntity adminRole = RoleEntity.builder().name("ADMIN").build();
+        User admin = User.builder().id(1L).email(adminEmail).role(adminRole).build();
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -68,7 +69,8 @@ class SessionRecordServiceTest {
         String month = "2024-01";
         String tutorEmail = "tutor@test.com";
         Long tutorId = 100L;
-        User tutorUser = User.builder().id(2L).email(tutorEmail).role(Role.TUTOR).build();
+        RoleEntity tutorRole = RoleEntity.builder().name("TUTOR").build();
+        User tutorUser = User.builder().id(2L).email(tutorEmail).role(tutorRole).build();
         Tutor tutorProfile = Tutor.builder().id(tutorId).user(tutorUser).build();
 
         when(securityContext.getAuthentication()).thenReturn(authentication);

@@ -4,7 +4,6 @@ import java.util.List;
 import java.time.YearMonth;
 import java.time.LocalDateTime;
 
-import com.tutor_management.backend.modules.auth.Role;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.dashboard.dto.response.StudentDashboardStats;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;

@@ -112,8 +112,8 @@ export function StudentsList() {
         {
             header: 'Dư Nợ',
             accessor: (s: AdminStudent) => (
-                <span className={`text-sm font-bold ${s.totalDebt > 0 ? 'text-[var(--admin-red)]' : 'text-[var(--admin-green)]'}`}>
-                    {s.totalDebt.toLocaleString()}₫
+                <span className={`text-sm font-bold ${(s.totalDebt || 0) > 0 ? 'text-[var(--admin-red)]' : 'text-[var(--admin-green)]'}`}>
+                    {(s.totalDebt || 0).toLocaleString()}₫
                 </span>
             )
         },

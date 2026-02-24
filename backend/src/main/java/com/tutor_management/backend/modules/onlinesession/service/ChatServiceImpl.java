@@ -46,7 +46,7 @@ public class ChatServiceImpl implements ChatService {
                 .roomId(roomId)
                 .senderId(userId)
                 .senderName(user.getFullName())
-                .senderRole(user.getRole().name())
+                .senderRole(user.getRole().getName())
                 .content(request.getContent())
                 .build();
 

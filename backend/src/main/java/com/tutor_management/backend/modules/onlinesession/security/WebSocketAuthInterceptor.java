@@ -1,6 +1,5 @@
 package com.tutor_management.backend.modules.onlinesession.security;
 
-import com.tutor_management.backend.modules.auth.Role;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,7 @@ import java.util.Map;
  * Interceptor for WebSocket messages to handle authentication.
  * Extracts JWT from CONNECT headers and sets the SecurityContext Principal.
  */
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
@@ -43,13 +43,13 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                     // 2. Extract roomId, userId and role from the token
                     Long userId = roomTokenService.extractUserId(token);
                     String roomId = roomTokenService.extractRoomId(token);
-                    Role role = roomTokenService.extractRole(token);
+                    String roleName = roomTokenService.extractRole(token);
 
                     // 3. Set Principal with userId as name for easy access in controllers
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                             userId.toString(),
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()))
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName))
                     );
 
                     accessor.setUser(auth);
@@ -58,10 +58,10 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                     Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
                     if (sessionAttributes != null) {
                         sessionAttributes.put("roomId", roomId);
-                        sessionAttributes.put("role", role.name());
+                        sessionAttributes.put("role", roleName);
                     }
 
-                    log.info("WebSocket user authenticated: userId={}, roomId={}, role={}", userId, roomId, role);
+                    log.info("WebSocket user authenticated: userId={}, roomId={}, role={}", userId, roomId, roleName);
                 } catch (Exception e) {
                     log.error("WebSocket authentication failed: {}", e.getMessage());
                 }

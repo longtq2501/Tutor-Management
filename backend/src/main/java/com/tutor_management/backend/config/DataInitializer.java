@@ -1,8 +1,10 @@
 package com.tutor_management.backend.config;
 
 import com.tutor_management.backend.modules.auth.User;
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
+import com.tutor_management.backend.modules.auth.Permission;
 import com.tutor_management.backend.modules.auth.UserRepository;
+import com.tutor_management.backend.modules.auth.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * DataInitializer - Tự động tạo tài khoản demo khi start application
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
@@ -48,37 +53,75 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeUsers() {
-        // Check if users already exist
+        // 1. Initialize Roles & Permissions
+        if (roleRepository.count() == 0) {
+            log.info("Initializing Roles & Permissions...");
+            
+            // ADMIN ROLE
+            RoleEntity adminRole = RoleEntity.builder()
+                    .name("ADMIN")
+                    .permissions(java.util.Set.of(Permission.values()))
+                    .build();
+            roleRepository.save(adminRole);
+
+            // TUTOR ROLE
+            RoleEntity tutorRole = RoleEntity.builder()
+                    .name("TUTOR")
+                    .permissions(java.util.Set.of(
+                            Permission.TUTOR_READ,
+                            Permission.TUTOR_UPDATE,
+                            Permission.STUDENT_READ,
+                            Permission.STUDENT_UPDATE
+                    ))
+                    .build();
+            roleRepository.save(tutorRole);
+
+            // STUDENT ROLE
+            RoleEntity studentRole = RoleEntity.builder()
+                    .name("STUDENT")
+                    .permissions(java.util.Set.of(
+                            Permission.STUDENT_READ
+                    ))
+                    .build();
+            roleRepository.save(studentRole);
+        }
+
+        // 2. Initialize Users
         long userCount = userRepository.count();
         if (userCount > 0) {
-            log.info("Database already contains {} users, skipping initialization", userCount);
+            log.info("Database already contains {} users, checking for missing roles...", userCount);
+            repairUsersWithMissingRoles();
             return;
         }
 
         log.info("=================================================");
-        log.info("🚀 Starting Data Initialization...");
+        log.info("🚀 Starting User Data Initialization...");
         log.info("=================================================");
 
         try {
+            RoleEntity adminRole = roleRepository.findByName("ADMIN").orElseThrow();
+            RoleEntity tutorRole = roleRepository.findByName("TUTOR").orElseThrow();
+            RoleEntity studentRole = roleRepository.findByName("STUDENT").orElseThrow();
+
             // Create ADMIN account
             User admin = createUser(
                     "admin@tutormanagement.com",
                     "Quản Trị Viên",
-                    Role.ADMIN
+                    adminRole
             );
 
             // Create TUTOR account
             User tutor = createUser(
                     "tutor@tutormanagement.com",
                     "Giáo Viên Dạy Kèm",
-                    Role.TUTOR
+                    tutorRole
             );
 
             // Create STUDENT account
             User student = createUser(
                     "student@tutormanagement.com",
                     "Học Sinh",
-                    Role.STUDENT
+                    studentRole
             );
 
             // Save all users
@@ -90,11 +133,39 @@ public class DataInitializer implements CommandLineRunner {
             printAccountInfo();
 
         } catch (Exception e) {
-            log.error("❌ Error initializing data: {}", e.getMessage(), e);
+            log.error("❌ Error initializing users: {}", e.getMessage(), e);
         }
     }
 
-    private User createUser(String email, String fullName, Role role) {
+    private void repairUsersWithMissingRoles() {
+        List<User> usersWithNoRole = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == null)
+                .toList();
+
+        if (usersWithNoRole.isEmpty()) {
+            return;
+        }
+
+        log.info("🔧 Found {} users with missing roles. Attempting repair...", usersWithNoRole.size());
+        
+        RoleEntity adminRole = roleRepository.findByName("ADMIN").orElse(null);
+        RoleEntity tutorRole = roleRepository.findByName("TUTOR").orElse(null);
+        RoleEntity studentRole = roleRepository.findByName("STUDENT").orElse(null);
+
+        for (User user : usersWithNoRole) {
+            if (user.getEmail().contains("admin") && adminRole != null) {
+                user.setRole(adminRole);
+            } else if (user.getEmail().contains("tutor") && tutorRole != null) {
+                user.setRole(tutorRole);
+            } else if (studentRole != null) {
+                user.setRole(studentRole);
+            }
+            userRepository.save(user);
+            log.info("✅ Repaired user: {} with role: {}", user.getEmail(), user.getRole().getName());
+        }
+    }
+
+    private User createUser(String email, String fullName, RoleEntity role) {
         return User.builder()
                 .email(email)
                 .password(passwordEncoder.encode(defaultPassword))

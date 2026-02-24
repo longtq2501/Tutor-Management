@@ -1,6 +1,7 @@
 package com.tutor_management.backend.modules.auth.service;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
+import com.tutor_management.backend.modules.auth.RoleRepository;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.tutor.entity.Tutor;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final com.tutor_management.backend.modules.tutor.service.TutorService tutorService;
     private final PasswordEncoder passwordEncoder;
 
@@ -52,27 +54,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userOptional.get();
             
             // ✅ CRITICAL: Prevent students from logging in via Google
-            if (Role.STUDENT.equals(user.getRole())) {
+            if ("STUDENT".equals(user.getRole().getName())) {
                 log.warn("Blocked Google login attempt for student account: {}", email);
                 throw new OAuth2AuthenticationException("Học sinh vui lòng đăng nhập bằng tài khoản được cấp từ Gia sư.");
             }
             
             updateExistingUser(user, name, picture);
         } else {
-            Role role = Role.TUTOR;
+            String roleName = "TUTOR";
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpSession session = attr.getRequest().getSession(false);
             if (session != null) {
                 String roleHint = (String) session.getAttribute("OAUTH2_ROLE_HINT");
                 if (roleHint != null) {
-                    try {
-                        role = Role.valueOf(roleHint.toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        log.warn("Invalid role hint provided: {}", roleHint);
-                    }
+                    roleName = roleHint.toUpperCase();
                     session.removeAttribute("OAUTH2_ROLE_HINT");
                 }
             }
+
+            final String finalRoleName = roleName;
+            RoleEntity role = roleRepository.findByName(finalRoleName)
+                    .orElseThrow(() -> new OAuth2AuthenticationException("Role not found: " + finalRoleName));
             
             user = registerNewUser(email, name, picture, role);
         }
@@ -83,7 +85,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
-    private User registerNewUser(String email, String name, String picture, Role role) {
+    private User registerNewUser(String email, String name, String picture, RoleEntity role) {
         User user = User.builder()
                 .email(email)
                 .fullName(name != null ? name : email.split("@")[0])

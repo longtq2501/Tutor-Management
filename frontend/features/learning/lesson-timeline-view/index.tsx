@@ -1,5 +1,5 @@
 // 📁 lesson-timeline-view/index.tsx
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 'use client';
 
 import { useRouter } from 'next/navigation';

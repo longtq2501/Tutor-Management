@@ -37,7 +37,7 @@ public class UserService {
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .role(user.getRole())
+                .role(user.getRole().getName())
                 .avatarUrl(user.getAvatarUrl())
                 .studentId(user.getStudentId())
                 .build();

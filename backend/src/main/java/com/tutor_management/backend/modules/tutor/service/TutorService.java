@@ -3,6 +3,8 @@ package com.tutor_management.backend.modules.tutor.service;
 import com.tutor_management.backend.exception.AlreadyExistsException;
 import com.tutor_management.backend.exception.EmailNotFoundException;
 import com.tutor_management.backend.exception.TutorNotFoundException;
+import com.tutor_management.backend.modules.auth.RoleEntity;
+import com.tutor_management.backend.modules.auth.RoleRepository;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.tutor.dto.TutorStatsDTO;
@@ -46,6 +48,7 @@ public class TutorService {
     private final com.tutor_management.backend.modules.finance.repository.SessionRecordRepository sessionRecordRepository;
     private final DocumentRepository documentRepository;
     private final com.tutor_management.backend.modules.admin.service.AdminStatsService adminStatsService;
+    private final RoleRepository roleRepository;
     
     // Inject services for mapping/logic reuse
     private final StudentService studentService;
@@ -109,11 +112,13 @@ public class TutorService {
                  throw new AlreadyExistsException("User account with this email already exists: " + request.getEmail());
             }
 
+            RoleEntity tutorRole = roleRepository.findByName("TUTOR")
+                    .orElseThrow(() -> new IllegalStateException("TUTOR role not found"));
             user = User.builder()
                     .fullName(request.getFullName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(com.tutor_management.backend.modules.auth.Role.TUTOR)
+                    .role(tutorRole)
                     .enabled(true)
                     .accountNonLocked(true)
                     .build();
@@ -139,7 +144,7 @@ public class TutorService {
      */
     @Transactional
     public void ensureTutorProfile(User user) {
-        if (user == null || !com.tutor_management.backend.modules.auth.Role.TUTOR.equals(user.getRole())) {
+        if (user == null || !"TUTOR".equals(user.getRole().getName())) {
             return;
         }
 

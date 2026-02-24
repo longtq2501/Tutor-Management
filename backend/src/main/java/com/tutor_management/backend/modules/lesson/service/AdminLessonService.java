@@ -68,7 +68,7 @@ public class AdminLessonService {
         if (auth == null || !(auth.getPrincipal() instanceof User user)) {
             return null;
         }
-        if ("ADMIN".equals(user.getRole())) {
+        if ("ADMIN".equals(user.getRole().getName())) {
             return null; // Admin sees all lessons
         }
         return tutorRepository.findByUserId(user.getId())

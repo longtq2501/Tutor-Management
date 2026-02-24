@@ -1,6 +1,6 @@
 package com.tutor_management.backend.modules.auth.service;
 
-import com.tutor_management.backend.modules.auth.Role;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.auth.dto.request.UpdateUserRequest;
@@ -32,11 +32,12 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+        RoleEntity role = RoleEntity.builder().name("STUDENT").build();
         user = User.builder()
                 .id(1L)
                 .email("test@example.com")
                 .fullName("Test User")
-                .role(Role.STUDENT)
+                .role(role)
                 .avatarUrl("http://avatar.url")
                 .build();
     }
@@ -53,7 +54,7 @@ class UserServiceTest {
         assertEquals(user.getId(), result.getId());
         assertEquals(user.getEmail(), result.getEmail());
         assertEquals(user.getFullName(), result.getFullName());
-        assertEquals(user.getRole(), result.getRole());
+        assertEquals(user.getRole().getName(), result.getRole());
         assertEquals(user.getAvatarUrl(), result.getAvatarUrl());
     }
 

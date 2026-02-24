@@ -1,6 +1,5 @@
 package com.tutor_management.backend.modules.auth.dto.response;
 
-import com.tutor_management.backend.modules.auth.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +13,7 @@ public class AuthResponse {
 
     private String accessToken;
     private String refreshToken;
+    @Builder.Default
     private String tokenType = "Bearer";
     private Long expiresIn;
     private UserInfo user;
@@ -26,7 +26,7 @@ public class AuthResponse {
         private Long id;
         private String email;
         private String fullName;
-        private Role role;
+        private String role;
         private String avatarUrl;
 
         private Long studentId;

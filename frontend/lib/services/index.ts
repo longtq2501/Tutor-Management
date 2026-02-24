@@ -16,4 +16,6 @@ export * from './lesson-admin';
 export * from './lesson-category';
 export * from './course-admin';
 export * from './course-student';
+export * from './admin-auth';
+export * from './admin-audit';
 export { default as api } from './axios-instance';
