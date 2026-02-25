@@ -113,9 +113,14 @@ export const AdminUserList: React.FC = () => {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant={user.role === 'ADMIN' ? 'destructive' : 'secondary'}>
-                                        {user.role}
-                                    </Badge>
+                                    {(() => {
+                                        const roleName = typeof user.role === 'string' ? user.role : user.role.name;
+                                        return (
+                                            <Badge variant={roleName === 'ADMIN' ? 'destructive' : 'secondary'}>
+                                                {roleName}
+                                            </Badge>
+                                        );
+                                    })()}
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
