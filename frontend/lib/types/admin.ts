@@ -92,7 +92,7 @@ export interface ManagedUser {
     id: number;
     email: string;
     fullName: string;
-    role: string;
+    role: Role | string;
     enabled: boolean;
     createdAt: string;
 }

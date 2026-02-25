@@ -54,7 +54,10 @@ export function SessionDetailsDrawer({
     if (!session && loading) {
         return (
             <Sheet open={isOpen} onOpenChange={onClose}>
-                <SheetContent className="sm:max-w-[500px] admin-glass border-[var(--admin-border)]">
+                <SheetContent className="sm:max-w-[500px] admin-theme admin-glass border-[var(--admin-border)]">
+                    <SheetHeader className="sr-only">
+                        <SheetTitle>Chi tiết buổi học</SheetTitle>
+                    </SheetHeader>
                     <div className="h-full flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--admin-accent)]" />
                     </div>

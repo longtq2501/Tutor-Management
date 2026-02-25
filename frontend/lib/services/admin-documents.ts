@@ -18,17 +18,17 @@ export const adminDocumentsApi = {
         if (folderId) params.append('folderId', folderId.toString());
         if (isRoot) params.append('isRoot', 'true');
 
-        const response = await api.get(`/api/documents?${params.toString()}`);
+        const response = await api.get(`/api/admin/documents?${params.toString()}`);
         return response.data.data;
     },
 
     getStats: async (): Promise<AdminDocumentStats> => {
-        const response = await api.get('/api/documents/stats');
+        const response = await api.get('/api/admin/documents/stats');
         return response.data.data;
     },
 
     delete: async (id: number): Promise<void> => {
-        await api.delete(`/api/documents/${id}`);
+        await api.delete(`/api/admin/documents/${id}`);
     },
 
     // Folder Operations
@@ -52,7 +52,7 @@ export const adminDocumentsApi = {
     },
 
     upload: async (formData: FormData, onUploadProgress?: (progress: number) => void): Promise<AdminDocument> => {
-        const response = await api.post('/api/documents', formData, {
+        const response = await api.post('/api/admin/documents', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

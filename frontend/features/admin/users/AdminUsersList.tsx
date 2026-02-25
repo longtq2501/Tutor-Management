@@ -106,7 +106,10 @@ export function AdminUsersList() {
         {
             header: 'Vai trò',
             accessor: (u) => {
-                const meta = ROLE_LABELS[u.role] ?? { label: u.role, className: 'text-gray-600' };
+                const roleName = typeof u.role === 'object' && u.role !== null
+                    ? (u.role as { name: string }).name
+                    : (u.role as string);
+                const meta = ROLE_LABELS[roleName] ?? { label: roleName, className: 'text-gray-600' };
                 return (
                     <Badge variant="outline" className={`text-xs ${meta.className}`}>
                         {meta.label}
