@@ -13,6 +13,7 @@ import { TopTutorsList } from '@/features/admin/overview/TopTutorsList';
 import { adminStatsApi } from '@/lib/services/admin-stats';
 import { dashboardApi } from '@/lib/services/dashboard';
 import type { OverviewStats, MonthlyRevenue, StudentGrowth, TopTutor } from '@/lib/types/admin';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OverviewPage() {
     const [stats, setStats] = useState<OverviewStats | null>(null);
@@ -170,7 +171,11 @@ export default function OverviewPage() {
     ];
 
     return (
-        <div className="flex flex-col gap-8 pb-12">
+        <div className="flex flex-col gap-10 pb-20 relative">
+            {/* Background Glows */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
             {/* Page Header */}
             <AdminPageHeader
                 title="Overview"
@@ -178,83 +183,71 @@ export default function OverviewPage() {
                 category="Hệ Thống Phân Tích"
                 icon={TrendingUp}
                 actions={
-                    <>
+                    <div className="flex items-center gap-3">
                         <div className="relative">
                             <button
                                 onClick={() => setFilterOpen(!filterOpen)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterType !== 'all'
-                                        ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
-                                        : 'bg-[var(--admin-surface2)] border border-[var(--admin-border)] text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface3)]'
+                                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${filterType !== 'all'
+                                    ? 'bg-primary text-white shadow-glow-sm shadow-primary/40'
+                                    : 'bg-white/50 dark:bg-white/5 border border-border/50 text-muted-foreground hover:text-foreground hover:bg-white/80 dark:hover:bg-white/10'
                                     }`}
                             >
-                                <Filter className="h-4 w-4" />
+                                <Filter className="h-3.5 w-3.5" />
                                 <span>Bộ lọc</span>
-                                {filterType !== 'all' && <span className="text-[10px]">({filterType})</span>}
+                                {filterType !== 'all' && <span className="text-[9px] opacity-70">({filterType})</span>}
                             </button>
 
-                            {filterOpen && (
-                                <div className="absolute top-full right-0 mt-2 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-xl shadow-lg z-50 p-2 w-48">
-                                    <button
-                                        onClick={() => handleFilterChange('all')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'all'
-                                                ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
-                                                : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                            }`}
+                            <AnimatePresence>
+                                {filterOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute top-full right-0 mt-3 glass border-premium rounded-2xl shadow-premium z-50 p-2 w-52 backdrop-blur-2xl"
                                     >
-                                        Tất cả thời gian
-                                    </button>
-                                    <button
-                                        onClick={() => handleFilterChange('month')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'month'
-                                                ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
-                                                : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                            }`}
-                                    >
-                                        Tháng này
-                                    </button>
-                                    <button
-                                        onClick={() => handleFilterChange('quarter')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'quarter'
-                                                ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
-                                                : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                            }`}
-                                    >
-                                        Quý này
-                                    </button>
-                                    <button
-                                        onClick={() => handleFilterChange('year')}
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${filterType === 'year'
-                                                ? 'bg-[var(--admin-accent)] text-[var(--admin-bg)]'
-                                                : 'text-[var(--admin-text2)] hover:bg-[var(--admin-surface2)]'
-                                            }`}
-                                    >
-                                        Năm nay
-                                    </button>
-                                </div>
-                            )}
+                                        {[
+                                            { id: 'all', label: 'Tất cả thời gian' },
+                                            { id: 'month', label: 'Tháng này' },
+                                            { id: 'quarter', label: 'Quý này' },
+                                            { id: 'year', label: 'Năm nay' }
+                                        ].map((filter) => (
+                                            <button
+                                                key={filter.id}
+                                                onClick={() => handleFilterChange(filter.id as any)}
+                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${filterType === filter.id
+                                                    ? 'bg-primary text-white'
+                                                    : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                                                    }`}
+                                            >
+                                                {filter.label}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
+
                         <button
                             onClick={handleExportReport}
                             disabled={exportLoading}
-                            className="flex items-center gap-2 px-4 py-2 bg-[var(--admin-surface2)] border border-[var(--admin-border)] rounded-xl text-xs font-bold text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface3)] transition-all disabled:opacity-50"
+                            className="flex items-center gap-2.5 px-5 py-2.5 bg-white/50 dark:bg-white/5 border border-border/50 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 disabled:opacity-50"
                         >
                             {exportLoading ? (
-                                <>
-                                    <div className="h-4 w-4 border-2 border-[var(--admin-text3)] border-t-[var(--admin-text)] rounded-full animate-spin" />
-                                </>
+                                <div className="h-3.5 w-3.5 border-2 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
                             ) : (
-                                <Download className="h-4 w-4" />
+                                <Download className="h-3.5 w-3.5" />
                             )}
                             <span>{exportLoading ? 'Đang xuất...' : 'Xuất file'}</span>
                         </button>
+
                         <button
                             onClick={() => alert('Tính năng sẽ có trong phiên bản tiếp theo')}
-                            className="flex items-center gap-2 px-4 py-2 bg-[var(--admin-accent)] text-[var(--admin-bg)] rounded-xl text-xs font-black shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:scale-105 transition-all"
+                            className="flex items-center gap-2.5 px-5 py-2.5 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-glow-md shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-300"
                         >
                             <Plus className="h-4 w-4" />
                             <span>Thêm Metric</span>
                         </button>
-                    </>
+                    </div>
                 }
             />
 

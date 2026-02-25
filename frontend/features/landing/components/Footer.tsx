@@ -4,7 +4,7 @@ import { GraduationCap } from 'lucide-react';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="py-20 px-6 border-t border-white/5 bg-[#050714]">
+        <footer className="py-12 md:py-20 px-6 border-t border-white/5 bg-[#050714]">
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
                     <div className="col-span-1 md:col-span-1">
@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
                             <div className="w-8 h-8 bg-primary/10 flex items-center justify-center rounded-lg text-primary border border-primary/20">
                                 <GraduationCap size={18} />
                             </div>
-                            <span className="text-xl font-bold">Tutor Pro</span>
+                            <span className="text-xl font-bold tracking-tight">Tutor Pro</span>
                         </div>
                         <p className="text-white/50 text-sm leading-relaxed">
                             Kiến tạo tương lai giáo dục 1-1 tại Việt Nam bằng công nghệ và trí tuệ nhân tạo.

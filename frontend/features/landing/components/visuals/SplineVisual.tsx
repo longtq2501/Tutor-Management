@@ -61,6 +61,7 @@ const SplineVisual: React.FC = () => {
                             fill
                             className="object-cover lg:scale-[1.3] translate-y-[5%]"
                             priority
+                            sizes="(max-width: 1024px) 100vw, 80vw"
                         />
                         {/* Shimmer Effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>

@@ -16,7 +16,7 @@ const CATEGORIES = [
  */
 const DocsVisual: React.FC = () => {
     return (
-        <div className="w-full h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col p-6 font-sans select-none">
+        <div className="w-full h-[350px] md:h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col p-4 md:p-6 font-sans select-none">
             {/* Isometric Grid Background */}
             <div
                 className="absolute inset-0 opacity-[0.02] pointer-events-none"
@@ -41,7 +41,7 @@ const DocsVisual: React.FC = () => {
             </motion.div>
 
             {/* Stats and Search */}
-            <div className="flex gap-3 mb-4 z-10">
+            <div className="flex flex-col md:flex-row gap-3 mb-4 z-10">
                 {/* Search Bar */}
                 <motion.div
                     initial={{ opacity: 0, x: -10 }}
@@ -57,27 +57,29 @@ const DocsVisual: React.FC = () => {
                     />
                 </motion.div>
 
-                {/* Stat Cards */}
-                {[
-                    { label: 'Tổng tài liệu', value: '43', icon: '📄', style: 'text-blue-400', labelStyle: 'text-blue-400/70', bg: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5' },
-                    { label: 'Lượt tải xuống', value: '32', icon: '⬇️', style: 'text-green-400', labelStyle: 'text-green-400/70', bg: 'bg-gradient-to-br from-green-500/10 to-green-600/5' },
-                    { label: 'Dung lượng', value: '5.63 MB', icon: '💾', style: 'text-purple-400', labelStyle: 'text-purple-400/70', bg: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5' }
-                ].map((stat, i) => (
-                    <motion.div
-                        key={stat.label}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 * (i + 1) }}
-                        whileHover={{ y: -2, scale: 1.05 }}
-                        className={`glass px-4 py-2 rounded-xl border-white/10 ${stat.bg} flex flex-col items-center min-w-[90px]`}
-                    >
-                        <div className="flex items-center gap-1 mb-0.5">
-                            <span className="text-sm">{stat.icon}</span>
-                            <span className={`text-[8px] uppercase tracking-wider font-bold ${stat.labelStyle}`}>{stat.label}</span>
-                        </div>
-                        <div className={`text-base font-black ${stat.style}`}>{stat.value}</div>
-                    </motion.div>
-                ))}
+                {/* Stat Cards - Hidden on mobile */}
+                <div className="hidden md:flex gap-3">
+                    {[
+                        { label: 'Tổng tài liệu', value: '43', icon: '📄', style: 'text-blue-400', labelStyle: 'text-blue-400/70', bg: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5' },
+                        { label: 'Lượt tải xuống', value: '32', icon: '⬇️', style: 'text-green-400', labelStyle: 'text-green-400/70', bg: 'bg-gradient-to-br from-green-500/10 to-green-600/5' },
+                        { label: 'Dung lượng', value: '5.63 MB', icon: '💾', style: 'text-purple-400', labelStyle: 'text-purple-400/70', bg: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5' }
+                    ].map((stat, i) => (
+                        <motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 * (i + 1) }}
+                            whileHover={{ y: -2, scale: 1.05 }}
+                            className={`glass px-4 py-2 rounded-xl border-white/10 ${stat.bg} flex flex-col items-center min-w-[90px]`}
+                        >
+                            <div className="flex items-center gap-1 mb-0.5">
+                                <span className="text-sm">{stat.icon}</span>
+                                <span className={`text-[8px] uppercase tracking-wider font-bold ${stat.labelStyle}`}>{stat.label}</span>
+                            </div>
+                            <div className={`text-base font-black ${stat.style}`}>{stat.value}</div>
+                        </motion.div>
+                    ))}
+                </div>
             </div>
 
             {/* Category Grid */}

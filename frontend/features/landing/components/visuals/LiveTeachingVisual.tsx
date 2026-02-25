@@ -10,16 +10,16 @@ import { motion } from 'framer-motion';
  */
 const LiveTeachingVisual: React.FC = () => {
     return (
-        <div className="w-full h-[400px] bg-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col">
+        <div className="w-full h-[300px] md:h-[400px] bg-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col">
             {/* Header / Toolbar */}
             <div className="h-10 border-b border-white/10 bg-white/5 flex items-center px-4 justify-between z-10">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                        <span className="text-[10px] font-bold text-red-400 uppercase tracking-tighter">REC 00:45:12</span>
+                <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+                    <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <span className="text-[9px] md:text-[10px] font-bold text-red-400 uppercase tracking-tighter">REC 00:45:12</span>
                     </div>
-                    <div className="h-4 w-px bg-white/10"></div>
-                    <span className="text-[10px] text-white/60 font-medium">Toán học 12: Hàm số bậc 3</span>
+                    <div className="h-4 w-px bg-white/10 flex-shrink-0"></div>
+                    <span className="text-[9px] md:text-[10px] text-white/60 font-medium truncate">Toán học 12</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="px-2 py-0.5 rounded bg-primary/20 border border-primary/30 text-primary text-[10px] font-bold">
@@ -30,9 +30,9 @@ const LiveTeachingVisual: React.FC = () => {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Main: Whiteboard Mockup */}
-                <div className="flex-1 bg-slate-900/50 relative p-6">
-                    <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10 pointer-events-none">
-                        {Array.from({ length: 144 }).map((_, i) => (
+                <div className="flex-1 bg-slate-900/50 relative p-4 md:p-6">
+                    <div className="absolute inset-0 grid grid-cols-8 md:grid-cols-12 grid-rows-8 md:grid-rows-12 opacity-10 pointer-events-none">
+                        {Array.from({ length: 64 }).map((_, i) => (
                             <div key={i} className="border-[0.5px] border-white/20"></div>
                         ))}
                     </div>
@@ -54,22 +54,21 @@ const LiveTeachingVisual: React.FC = () => {
                         <text x="210" y="145" fill="white" fontSize="12" className="font-bold">Điểm uốn</text>
                     </svg>
 
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 glass p-1.5 rounded-xl border-white/10">
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 glass p-1 md:p-1.5 rounded-xl border-white/10">
                         {[
                             { icon: '✏️', label: 'P' },
                             { icon: '📐', label: 'R' },
-                            { icon: '🧹', label: 'C' },
-                            { icon: '🗑️', label: 'D' }
+                            { icon: '🧹', label: 'C' }
                         ].map((tool, i) => (
-                            <div key={i} className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm ${i === 0 ? 'bg-primary text-white' : 'hover:bg-white/5 font-bold text-[10px]'}`}>
+                            <div key={i} className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-lg text-[8px] md:text-sm ${i === 0 ? 'bg-primary text-white' : 'hover:bg-white/5 font-bold'}`}>
                                 {tool.label}
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Sidebar: Chat Mockup */}
-                <div className="w-1/3 border-l border-white/10 bg-black/40 flex flex-col">
+                {/* Sidebar: Chat Mockup - Hidden on mobile */}
+                <div className="hidden md:flex w-1/3 border-l border-white/10 bg-black/40 flex-col">
                     <div className="p-3 border-b border-white/10 text-[10px] font-bold text-white/40 uppercase tracking-widest">
                         Trò chuyện (2)
                     </div>
@@ -96,14 +95,14 @@ const LiveTeachingVisual: React.FC = () => {
             </div>
 
             {/* Bottom: Real-time Billing Tracker */}
-            <div className="bg-primary/90 text-white px-4 py-2 flex justify-between items-center z-20">
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest">BILLABLE TIME</span>
-                    <span className="font-mono font-bold text-sm">00:45:12</span>
+            <div className="bg-primary/90 text-white px-3 md:px-4 py-1.5 md:py-2 flex justify-between items-center z-20">
+                <div className="flex items-center gap-1 md:gap-2">
+                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest hidden sm:inline">BILLABLE TIME</span>
+                    <span className="font-mono font-bold text-xs md:text-sm">00:45:12</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest">ACCUMULATED</span>
-                    <span className="font-mono font-bold text-sm">113.000đ</span>
+                <div className="flex items-center gap-1 md:gap-2">
+                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest hidden sm:inline">ACCUMULATED</span>
+                    <span className="font-mono font-bold text-xs md:text-sm">113.000đ</span>
                 </div>
             </div>
         </div>

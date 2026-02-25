@@ -16,10 +16,10 @@ interface StatCardProps {
 }
 
 const variantStyles = {
-    green: 'bg-[var(--admin-green)]/10 text-[var(--admin-green)] border-[var(--admin-green)]/20',
-    red: 'bg-[var(--admin-red)]/10 text-[var(--admin-red)] border-[var(--admin-red)]/20',
-    amber: 'bg-[var(--admin-amber)]/10 text-[var(--admin-amber)] border-[var(--admin-amber)]/20',
-    accent: 'bg-[var(--admin-accent)]/10 text-[var(--admin-accent)] border-[var(--admin-accent)]/20',
+    green: 'bg-green-500/10 text-green-500 border-green-500/20 shadow-glow-sm shadow-green-500/10',
+    red: 'bg-red-500/10 text-red-500 border-red-500/20 shadow-glow-sm shadow-red-500/10',
+    amber: 'bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-glow-sm shadow-amber-500/10',
+    accent: 'bg-primary/10 text-primary border-primary/20 shadow-glow-sm shadow-primary/10',
 };
 
 export function StatCard({ label, value, icon: Icon, badge, glowColor = '#6366f1', index = 0 }: StatCardProps) {
@@ -27,37 +27,48 @@ export function StatCard({ label, value, icon: Icon, badge, glowColor = '#6366f1
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="relative group bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-2xl p-6 overflow-hidden hover:border-[var(--admin-border2)] transition-all duration-300"
+            transition={{ duration: 0.6, delay: index * 0.1, ease: [0.33, 1, 0.68, 1] }}
+            className="relative group glass border-premium rounded-3xl p-8 overflow-hidden shadow-premium backdrop-blur-xl transition-all duration-500 hover:scale-[1.02]"
         >
-            {/* Glow Effect */}
+            {/* Advanced Glow Effect */}
             <div
-                className="absolute -top-12 -right-12 w-32 h-32 blur-[60px] opacity-[0.03] dark:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
+                className="absolute -top-16 -right-16 w-48 h-48 blur-[80px] opacity-[0.05] group-hover:opacity-[0.15] transition-opacity duration-700 pointer-events-none rounded-full"
                 style={{ backgroundColor: glowColor }}
             />
+            <div
+                className="absolute -bottom-16 -left-16 w-32 h-32 blur-[60px] opacity-[0.02] group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none rounded-full bg-primary"
+            />
 
-            <div className="relative z-10 flex flex-col gap-4">
+            <div className="relative z-10 flex flex-col gap-6">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         {Icon && (
-                            <div className="p-2 bg-[var(--admin-surface2)] rounded-lg text-[var(--admin-text2)] group-hover:text-[var(--admin-text)] transition-colors">
-                                <Icon className="h-5 w-5" />
+                            <div
+                                className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-border/50 rounded-xl text-muted-foreground group-hover:text-primary group-hover:border-primary/20 transition-all duration-500 shadow-glow-sm group-hover:shadow-primary/10"
+                            >
+                                <Icon className="h-5 w-5 group-hover:scale-110 transition-transform duration-500" />
                             </div>
                         )}
-                        <span className="text-sm font-medium text-[var(--admin-text2)]">{label}</span>
+                        <span className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.25em]">{label}</span>
                     </div>
 
                     {badge && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${variantStyles[badge.variant]}`}>
+                        <motion.span
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.3 + (index * 0.1) }}
+                            className={`text-[9px] font-black px-3 py-1 rounded-full border uppercase tracking-widest ${variantStyles[badge.variant]}`}
+                        >
                             {badge.text}
-                        </span>
+                        </motion.span>
                     )}
                 </div>
 
-                <div className="flex flex-col">
-                    <h3 className="text-3xl font-bold text-[var(--admin-text)] tracking-tight">
+                <div className="flex flex-col gap-1">
+                    <h3 className="text-4xl font-black text-foreground tracking-tighter tabular-nums drop-shadow-sm">
                         {value}
                     </h3>
+                    <div className="w-12 h-1 bg-gradient-to-r from-primary to-transparent rounded-full opacity-40 group-hover:w-24 transition-all duration-700" />
                 </div>
             </div>
         </motion.div>

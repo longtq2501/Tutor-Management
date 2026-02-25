@@ -15,12 +15,12 @@ const ExamVisual: React.FC = () => {
     });
 
     return (
-        <div className="w-full h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex p-6 gap-6 font-sans select-none">
+        <div className="w-full h-[500px] md:h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col md:flex-row p-4 md:p-6 gap-4 md:gap-6 font-sans select-none">
             {/* Ambient Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-600/10 blur-[120px] rounded-full pointer-events-none"></div>
 
             {/* Left Panel - Progress */}
-            <div className="w-48 flex flex-col gap-4 z-10">
+            <div className="w-full md:w-48 flex flex-row md:flex-col gap-3 md:gap-4 z-10 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -58,12 +58,12 @@ const ExamVisual: React.FC = () => {
                     </div>
                 </motion.div>
 
-                {/* Progress Grid */}
+                {/* Progress Grid - Hidden on mobile, shown on desktop */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="glass p-3 rounded-xl border-white/10 bg-white/5"
+                    className="hidden md:block glass p-3 rounded-xl border-white/10 bg-white/5"
                 >
                     <div className="text-xs text-white/50 mb-2 flex justify-between">
                         <span>Progress</span>
@@ -88,26 +88,12 @@ const ExamVisual: React.FC = () => {
                             </motion.div>
                         ))}
                     </div>
-                    <div className="mt-3 flex gap-2 text-[9px]">
-                        <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                            <span className="text-white/40">Unanswered</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                            <span className="text-white/40">Answered</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-white/20"></div>
-                            <span className="text-white/40">Current</span>
-                        </div>
-                    </div>
                 </motion.div>
             </div>
 
             {/* Right Panel - Question */}
             <motion.div
-                className="flex-1 glass rounded-2xl border-white/10 p-6 flex flex-col z-10 shadow-2xl"
+                className="flex-1 glass rounded-2xl border-white/10 p-4 md:p-6 flex flex-col z-10 shadow-2xl overflow-hidden"
                 initial={{ opacity: 0, x: 20, rotateY: -5 }}
                 animate={{ opacity: 1, x: 0, rotateY: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
@@ -117,7 +103,7 @@ const ExamVisual: React.FC = () => {
                 {/* Question Header */}
                 <div className="flex justify-between items-center mb-4">
                     <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
-                        "I ___ my keys. I can't open the door now." Chọn từ đúng:
+                        &quot;I ___ my keys. I can&apos;t open the door now.&quot; Chọn từ đúng:
                     </span>
                     <div className="px-2 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold">
                         4 points

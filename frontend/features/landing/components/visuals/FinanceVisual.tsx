@@ -17,7 +17,7 @@ const STUDENTS = [
  */
 const FinanceVisual: React.FC = () => {
     return (
-        <div className="w-full h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col p-6 font-sans select-none">
+        <div className="w-full h-[450px] md:h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col p-4 md:p-6 font-sans select-none">
             {/* Ambient Background Glows */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/5 blur-[100px] rounded-full pointer-events-none"></div>
@@ -33,7 +33,7 @@ const FinanceVisual: React.FC = () => {
             </motion.div>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-4 gap-3 mb-4 z-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 z-10">
                 {[
                     { label: 'Tổng Doanh Thu / Nợ', value: '6.080.000 đ', icon: '💰', style: 'text-emerald-400', labelStyle: 'text-emerald-400/70', bg: 'from-emerald-500/20 to-emerald-600/10' },
                     { label: 'Tổng số Buổi', value: '32', subtext: 'tất cả học sinh', icon: '📊', style: 'text-blue-400', labelStyle: 'text-blue-400/70', bg: 'from-blue-500/20 to-blue-600/10' },
@@ -46,14 +46,14 @@ const FinanceVisual: React.FC = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ delay: 0.1 * i, duration: 0.3 }}
                         whileHover={{ y: -4, scale: 1.05, boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}
-                        className={`glass p-3 rounded-xl border-white/10 bg-gradient-to-br ${stat.bg} backdrop-blur-sm`}
+                        className={`glass p-2 md:p-3 rounded-xl border-white/10 bg-gradient-to-br ${stat.bg} backdrop-blur-sm`}
                     >
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg">{stat.icon}</span>
-                            <span className={`text-[9px] uppercase tracking-wider font-bold ${stat.labelStyle}`}>{stat.label}</span>
+                        <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+                            <span className="text-base md:text-lg">{stat.icon}</span>
+                            <span className={`text-[8px] md:text-[9px] uppercase tracking-wider font-bold ${stat.labelStyle}`}>{stat.label}</span>
                         </div>
-                        <div className={`text-base font-black ${stat.style}`}>{stat.value}</div>
-                        {stat.subtext && <div className="text-[8px] text-white/30 mt-0.5">{stat.subtext}</div>}
+                        <div className={`text-sm md:text-base font-black ${stat.style}`}>{stat.value}</div>
+                        {stat.subtext && <div className="text-[7px] md:text-[8px] text-white/30 md:mt-0.5">{stat.subtext}</div>}
                     </motion.div>
                 ))}
             </div>

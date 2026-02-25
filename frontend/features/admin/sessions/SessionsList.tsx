@@ -155,39 +155,34 @@ export function SessionsList() {
         },
         {
             header: 'Trạng Thái',
-            accessor: (s: SessionRecord) => (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleTogglePayment(s.id);
-                    }}
-                    className={`flex items-center gap-2 px-2.5 py-1 rounded-full border transition-all ${s.paid
-                        ? 'bg-[var(--admin-green)]/10 border-[var(--admin-green)]/20 text-[var(--admin-green)]'
-                        : 'bg-[var(--admin-red)]/10 border-[var(--admin-red)]/20 text-[var(--admin-red)] animate-pulse'
-                        }`}
-                >
-                    <div className={`w-1 h-1 rounded-full ${s.paid ? 'bg-[var(--admin-green)]' : 'bg-[var(--admin-red)]'}`} />
-                    <span className="text-[10px] font-black uppercase tracking-wider">
-                        {s.paid ? 'Đã thu' : 'Chưa thu'}
-                    </span>
-                </button>
-            )
+            accessor: (s: SessionRecord) => {
+                const isPaid = s.paid;
+                return (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleTogglePayment(s.id);
+                        }}
+                        className={`flex items-center gap-2.5 px-4 py-1.5 rounded-full border transition-all duration-300 group ${isPaid
+                                ? 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500 hover:text-white'
+                                : 'bg-red-500/10 border-red-500/20 text-red-500 animate-pulse hover:animate-none hover:bg-red-500 hover:text-white'
+                            }`}
+                    >
+                        <div className={`w-1.5 h-1.5 rounded-full shadow-glow-sm ${isPaid ? 'bg-green-500 group-hover:bg-white' : 'bg-red-500 group-hover:bg-white shadow-red-500'}`} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.15em]">
+                            {isPaid ? 'Đã thu' : 'Chưa thu'}
+                        </span>
+                    </button>
+                );
+            }
         },
         {
             header: 'Actions',
             className: 'text-right',
             accessor: (s: SessionRecord) => (
-                <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                     <button
-                        className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-red)] hover:bg-[var(--admin-red)]/10 rounded-lg transition-all"
-                        title="Xóa buổi học"
-                        aria-label={`Xóa buổi học SES-${s.id.toString().padStart(3, '0')}`}
-                        onClick={() => handleDelete(s.id)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </button>
-                    <button
-                        className="p-2 text-[var(--admin-text3)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] rounded-lg transition-all"
+                        className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-primary bg-slate-100 dark:bg-white/5 hover:bg-primary/10 border border-transparent hover:border-primary/20 rounded-xl transition-all duration-300 group/btn"
                         title="Xem chi tiết"
                         aria-label={`Xem chi tiết buổi học SES-${s.id.toString().padStart(3, '0')}`}
                         onClick={() => {
@@ -195,7 +190,15 @@ export function SessionsList() {
                             setIsDetailsOpen(true);
                         }}
                     >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-4.5 w-4.5 group-hover/btn:scale-110 transition-transform" />
+                    </button>
+                    <button
+                        className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-red-500 bg-slate-100 dark:bg-white/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-xl transition-all duration-300 group/btn"
+                        title="Xóa buổi học"
+                        aria-label={`Xóa buổi học SES-${s.id.toString().padStart(3, '0')}`}
+                        onClick={() => handleDelete(s.id)}
+                    >
+                        <Trash2 className="h-4.5 w-4.5 group-hover/btn:scale-110 transition-transform" />
                     </button>
                 </div>
             )
@@ -210,43 +213,48 @@ export function SessionsList() {
                 { label: 'Chờ Thanh Toán', value: stats ? `${(stats.totalRevenue * 0.12).toLocaleString()}₫` : '...', variant: 'red' },
             ]} />
 
-            <div className="flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--admin-text3)]" />
+            <div className="flex flex-col gap-6 backdrop-blur-xl p-6 bg-white/40 dark:bg-black/40 border-premium rounded-[2.5rem] shadow-premium">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 flex-1 max-w-2xl">
+                        <div className="relative flex-1 group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                                <Search className="h-4.5 w-4.5" />
+                            </div>
                             <input
                                 type="text"
                                 placeholder="Tìm theo mã, môn học hoặc học sinh..."
-                                className="w-full h-10 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-xl pl-10 pr-4 text-xs text-[var(--admin-text)] focus:outline-none focus:border-[var(--admin-accent)] transition-all"
+                                className="w-full h-12 bg-white/50 dark:bg-white/5 border border-border/50 rounded-2xl pl-12 pr-6 text-sm font-bold text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                            <SelectTrigger className="w-[140px] h-10 bg-[var(--admin-surface)] border-[var(--admin-border)] text-xs font-bold rounded-xl">
-                                <Filter className="h-3 w-3 mr-2 opacity-50" />
+                            <SelectTrigger className="w-[160px] h-12 bg-white/50 dark:bg-white/5 border border-border/50 rounded-2xl text-[11px] font-black uppercase tracking-widest text-foreground focus:ring-4 focus:ring-primary/5 transition-all outline-none">
+                                <Filter className="h-3.5 w-3.5 mr-2 opacity-50" />
                                 <SelectValue placeholder="Chọn tháng" />
                             </SelectTrigger>
-                            <SelectContent className="admin-glass border-[var(--admin-border)] z-[100]">
-                                <SelectItem value="all" className="text-xs font-bold">Tất cả tháng</SelectItem>
+                            <SelectContent className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-border/50 rounded-2xl shadow-premium z-[100]">
+                                <SelectItem value="all" className="text-[11px] font-black uppercase tracking-widest py-3 hover:bg-primary/5">Tất cả tháng</SelectItem>
                                 {months.map(m => (
-                                    <SelectItem key={m} value={m} className="text-xs font-bold">Tháng {m}</SelectItem>
+                                    <SelectItem key={m} value={m} className="text-[11px] font-black uppercase tracking-widest py-3 hover:bg-primary/5">Tháng {m}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
 
                         <Select value={paidStatus} onValueChange={setPaidStatus}>
-                            <SelectTrigger className="w-[140px] h-10 bg-[var(--admin-surface)] border-[var(--admin-border)] text-xs font-bold rounded-xl">
-                                <SelectValue placeholder="Trạng thái" />
+                            <SelectTrigger className="w-[160px] h-12 bg-white/50 dark:bg-white/5 border border-border/50 rounded-2xl text-[11px] font-black uppercase tracking-widest text-foreground focus:ring-4 focus:ring-primary/5 transition-all outline-none">
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${paidStatus === 'paid' ? 'bg-green-500' : paidStatus === 'unpaid' ? 'bg-red-500' : 'bg-muted-foreground'}`} />
+                                    <SelectValue placeholder="Trạng thái" />
+                                </div>
                             </SelectTrigger>
-                            <SelectContent className="admin-glass border-[var(--admin-border)] z-[100]">
-                                <SelectItem value="all" className="text-xs font-bold">Mọi trạng thái</SelectItem>
-                                <SelectItem value="paid" className="text-xs font-bold text-[var(--admin-green)]">Đã thanh toán</SelectItem>
-                                <SelectItem value="unpaid" className="text-xs font-bold text-[var(--admin-red)]">Chưa thanh toán</SelectItem>
+                            <SelectContent className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-border/50 rounded-2xl shadow-premium z-[100]">
+                                <SelectItem value="all" className="text-[11px] font-black uppercase tracking-widest py-3">Mọi trạng thái</SelectItem>
+                                <SelectItem value="paid" className="text-[11px] font-black uppercase tracking-widest py-3 text-green-500">Đã thanh toán</SelectItem>
+                                <SelectItem value="unpaid" className="text-[11px] font-black uppercase tracking-widest py-3 text-red-500">Chưa thanh toán</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -257,10 +265,10 @@ export function SessionsList() {
                                     setSelectedMonth('all');
                                     setPaidStatus('all');
                                 }}
-                                className="p-2.5 bg-[var(--admin-surface2)] text-[var(--admin-text3)] hover:text-[var(--admin-red)] rounded-xl transition-all"
+                                className="w-12 h-12 flex items-center justify-center bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 active:scale-90 transition-all duration-300"
                                 title="Xóa bộ lọc"
                             >
-                                <X className="h-4 w-4" />
+                                <X className="h-5 w-5" />
                             </button>
                         )}
                     </div>

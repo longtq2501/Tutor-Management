@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import CalendarVisual from './visuals/CalendarVisual';
 import ExamVisual from './visuals/ExamVisual';
 import FinanceVisual from './visuals/FinanceVisual';
@@ -33,7 +34,7 @@ const FeatureShowcase: React.FC = () => {
             id: 'calendar',
             title: 'Lịch dạy Thông minh',
             icon: '📅',
-            color: '#3b82f6',
+            color: '#6366f1',
             painPoint: 'Bạn đau đầu vì lịch dạy chồng chéo, quên lịch hoặc phải nhắn tin nhắc từng học sinh?',
             solution: 'Hệ thống tự động phát hiện trùng lịch, gợi ý giờ rảnh tối ưu và tự động gửi nhắc nhở qua Zalo/Email trước buổi học.',
             visual: <CalendarVisual />
@@ -67,6 +68,29 @@ const FeatureShowcase: React.FC = () => {
         }
     ];
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+                delayChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.8,
+                ease: [0.23, 1, 0.32, 1] as [number, number, number, number]
+            }
+        }
+    };
+
     return (
         <section id="features" className="py-32 px-6 bg-[#050714] relative overflow-hidden">
 
@@ -75,23 +99,39 @@ const FeatureShowcase: React.FC = () => {
             <div className="absolute bottom-[20%] right-0 w-[500px] h-[500px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-24">
+                <motion.div
+                    className="text-center mb-24"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
                     <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold tracking-widest uppercase text-white/50 mb-4">
                         Feature Tour
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-black mb-6">
+                    <h2 className="text-3xl md:text-6xl font-black mb-6 leading-[1.2] md:leading-[1.15]">
                         Mọi công cụ bạn cần <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4a9eff] to-[#06ffa5]">Trong một nền tảng duy nhất</span>
                     </h2>
-                </div>
+                </motion.div>
 
-                <div className="relative">
+                <motion.div
+                    className="relative"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                >
                     {/* Central Connecting Line */}
                     <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent hidden md:block"></div>
 
                     <div className="flex flex-col gap-32">
                         {features.map((feature, index) => (
-                            <div key={feature.id} className="relative flex flex-col md:flex-row items-center gap-10 md:gap-20 group">
+                            <motion.div
+                                key={feature.id}
+                                className="relative flex flex-col md:flex-row items-center gap-10 md:gap-20 group"
+                                variants={itemVariants}
+                            >
 
                                 {/* Connector Dot (Desktop) */}
                                 <div
@@ -122,44 +162,35 @@ const FeatureShowcase: React.FC = () => {
                                 <div className={`w-full md:w-1/2 ${index % 2 === 0 ? 'md:order-2 md:pl-10' : 'md:order-1 md:pr-10 md:text-right'}`}>
                                     <div className={`flex items-center gap-3 mb-4 ${index % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
                                         <div
-                                            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg border border-white/10 glass"
+                                            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-premium border border-white/10 glass transition-transform group-hover:scale-110"
                                         >
                                             {feature.icon}
                                         </div>
-                                        <h3 className="text-3xl font-black">{feature.title}</h3>
+                                        <h3 className="text-3xl font-black leading-tight">{feature.title}</h3>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        {/* Pain Point */}
-                                        <div className={`p-4 rounded-xl bg-red-500/5 border border-red-500/10 ${index % 2 !== 0 ? 'md:ml-auto' : ''}`}>
-                                            <div className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                                                <span className="text-sm">😣</span> Vấn đề cũ
+                                    <div className="space-y-4 md:space-y-6">
+                                        <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl border border-red-500/10 bg-red-500/5 relative group/pain">
+                                            <div className="text-[10px] font-bold uppercase tracking-widest text-red-500/50 mb-1 flex items-center gap-2">
+                                                <span className="text-sm">😫</span> Vấn đề cũ
                                             </div>
-                                            <p className="text-white/70 text-sm leading-relaxed">{feature.painPoint}</p>
+                                            <p className="text-white/60 text-sm md:text-base leading-relaxed">{feature.painPoint}</p>
                                         </div>
 
-                                        {/* Connecting Arrow */}
-                                        <div className={`text-2xl text-white/20 ${index % 2 !== 0 ? 'pr-8' : 'pl-8'}`}>
-                                            ↓
-                                        </div>
-
-                                        {/* Solution */}
-                                        <div
-                                            className={`p-5 rounded-xl border bg-gradient-to-br from-white/5 to-transparent ${index % 2 !== 0 ? 'md:ml-auto' : ''}`}
-                                            style={{ borderColor: `${feature.color}30` }}
-                                        >
+                                        <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl border border-[#4a9eff]/20 bg-[#4a9eff]/5 relative overflow-hidden group/sol">
+                                            <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: feature.color }}></div>
                                             <div className="text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2" style={{ color: feature.color }}>
                                                 <span className="text-sm">✨</span> Giải pháp Tutor Pro
                                             </div>
-                                            <p className="text-white text-lg font-medium leading-relaxed">{feature.solution}</p>
+                                            <p className="text-white text-base md:text-lg font-medium leading-[1.5] md:leading-[1.4]">{feature.solution}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );

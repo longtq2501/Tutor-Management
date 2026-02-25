@@ -1,6 +1,5 @@
-'use client';
-
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import SplineVisual from './visuals/SplineVisual';
 
 /**
@@ -10,12 +9,20 @@ import SplineVisual from './visuals/SplineVisual';
  * @returns {JSX.Element} The Hero section
  */
 const Hero: React.FC = () => {
+    const router = useRouter();
     return (
         <div className="relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center bg-[#050714]">
-            {/* Background Ambience */}
+            {/* Background Ambience & Spotlight */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[150px] rounded-full"></div>
+                {/* Central Top Spotlight */}
+                <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-full h-[80%] bg-gradient-to-b from-primary/20 via-transparent to-transparent blur-[120px] rounded-full"></div>
+
+                {/* Floating Side Blurs */}
+                <div className="absolute top-1/4 left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[150px] rounded-full animate-float"></div>
+                <div className="absolute bottom-1/4 right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[150px] rounded-full animate-float [animation-delay:2s]"></div>
+
+                {/* Noise Overlay */}
+                <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay"></div>
             </div>
 
             {/* 
@@ -36,15 +43,15 @@ const Hero: React.FC = () => {
             <div className="relative z-10 w-full max-w-5xl mx-auto px-6 flex flex-col items-center text-center pointer-events-none mt-[-5vh]">
 
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass border-white/10 text-sm font-medium text-white/80 mb-10 animate-bounce pointer-events-auto cursor-default backdrop-blur-md">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-premium bg-white/5 text-sm font-medium text-white/80 mb-10 animate-float pointer-events-auto cursor-default backdrop-blur-md shadow-premium">
                     <span className="flex h-2 w-2 rounded-full bg-[#06ffa5] shadow-[0_0_10px_#06ffa5]"></span>
                     Hệ sinh thái quản lý gia sư 4.0 số 1 Việt Nam
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tighter select-none drop-shadow-2xl">
+                <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 md:mb-8 leading-[1] sm:leading-[0.95] tracking-tighter select-none drop-shadow-2xl">
                     <span className="block text-white">TUTOR</span>
-                    <span className="bg-gradient-to-r from-[#4a9eff] via-[#06ffa5] to-[#9d4edd] bg-clip-text text-transparent animate-gradient-x block pb-4">
+                    <span className="bg-gradient-to-r from-primary via-[#06ffa5] to-[#9d4edd] bg-clip-text text-transparent animate-gradient-x block pb-4">
                         PRO
                     </span>
                 </h1>
@@ -57,37 +64,40 @@ const Hero: React.FC = () => {
                 </p>
 
                 {/* Buttons */}
-                <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto mb-16 pointer-events-auto">
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full mb-12 md:mb-16 pointer-events-auto">
                     <button
-                        onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="w-full sm:w-auto px-10 py-5 bg-primary text-primary-foreground font-bold rounded-2xl hover:scale-105 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-3 text-lg"
+                        onClick={() => router.push('/login')}
+                        className="w-full sm:w-auto px-12 py-5 bg-primary text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-glow-lg shadow-primary/40 flex items-center justify-center text-lg md:text-xl tracking-widest"
                     >
-                        <span className="text-2xl">⚡</span>
-                        KHÁM PHÁ NGAY
+                        BẮT ĐẦU NGAY
                     </button>
-
                     <button
                         onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="w-full sm:w-auto px-10 py-5 glass border-white/20 text-white font-bold rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-lg backdrop-blur-md"
+                        className="w-full sm:w-auto px-12 py-5 glass border-white/20 text-white font-bold rounded-2xl hover:bg-white/10 transition-all backdrop-blur-md text-lg md:text-xl"
                     >
-                        <span className="text-2xl">🎮</span>
-                        XEM DEMO 3D
+                        KHÁM PHÁ
                     </button>
                 </div>
 
                 {/* Floating Stats Bar */}
-                <div className="hidden md:grid grid-cols-4 divide-x divide-white/10 glass rounded-3xl p-6 border-white/5 pointer-events-auto backdrop-blur-xl shadow-2xl animate-fade-in-up">
+                <div className="hidden md:grid grid-cols-4 divide-x divide-white/10 border-premium bg-white/5 rounded-3xl p-6 pointer-events-auto backdrop-blur-xl shadow-premium animate-fade-in-up">
                     {[
                         { label: 'Gia sư tin dùng', value: '500+' },
                         { label: 'Học sinh active', value: '12K+' },
                         { label: 'Kho tài liệu', value: '50K+' },
                         { label: 'Đánh giá', value: '4.9/5' }
                     ].map((stat, i) => (
-                        <div key={i} className="px-8 flex flex-col items-center">
-                            <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
+                        <div key={i} className="px-8 flex flex-col items-center group/stat">
+                            <div className="text-3xl font-black text-white mb-1 group-hover/stat:scale-110 transition-transform duration-300">{stat.value}</div>
                             <div className="text-xs uppercase tracking-widest text-white/50 font-bold">{stat.label}</div>
                         </div>
                     ))}
+                </div>
+
+                {/* Scroll Indicator */}
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-pulse pointer-events-auto cursor-pointer" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">Cuộn để khám phá</span>
+                    <div className="w-px h-12 bg-gradient-to-b from-white/40 to-transparent"></div>
                 </div>
             </div>
         </div>

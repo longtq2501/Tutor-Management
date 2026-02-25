@@ -42,7 +42,7 @@ const EVENTS = [
 const CalendarVisual: React.FC = () => {
     return (
         <motion.div
-            className="w-full h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col p-4 font-sans select-none"
+            className="w-full h-[320px] md:h-[400px] bg-[#09090b] rounded-2xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col p-3 md:p-4 font-sans select-none"
             style={{ perspective: '1000px' }}
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
@@ -53,33 +53,33 @@ const CalendarVisual: React.FC = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-4 z-10">
                 <motion.div
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-2 md:gap-3"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h3 className="text-xl font-black text-white tracking-tight flex items-end gap-2 leading-none">
-                        Tháng 12 <span className="text-white/40 text-lg">2026</span>
+                    <h3 className="text-lg md:text-xl font-black text-white tracking-tight flex items-end gap-1.5 md:gap-2 leading-none">
+                        Tháng 12 <span className="text-white/40 text-sm md:text-lg">2026</span>
                     </h3>
                 </motion.div>
 
-                <div className="flex items-center gap-2 scale-90 origin-right">
+                <div className="flex items-center gap-1.5 md:gap-2 scale-75 md:scale-90 origin-right">
                     {[
-                        { label: 'Tổng buổi', value: '22', style: 'text-blue-400', bg: '#1e293b' },
-                        { label: 'Hoàn thành', value: '14', style: 'text-green-400', bg: '#052e16' },
-                        { label: 'Doanh thu', value: '4.880.000đ', style: 'text-orange-400', bg: '#2a1b06' }
+                        { label: 'Tổng', value: '22', style: 'text-blue-400', bg: '#1e293b' },
+                        { label: 'Xong', value: '14', style: 'text-green-400', bg: '#052e16' },
+                        { label: 'Thu', value: '4.8M', style: 'text-orange-400', bg: '#2a1b06' }
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.label}
-                            className={`px-3 py-1.5 rounded-lg border border-white/5 flex flex-col items-center min-w-[70px] backdrop-blur-sm shadow-lg`}
+                            className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-white/5 flex flex-col items-center min-w-[50px] md:min-w-[70px] backdrop-blur-sm shadow-lg`}
                             style={{ backgroundColor: stat.bg }}
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 * i, duration: 0.4 }}
                             whileHover={{ y: -2, scale: 1.05, boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}
                         >
-                            <span className={`text-[8px] font-bold uppercase ${stat.style}`}>{stat.label}</span>
-                            <span className={`text-sm font-black leading-none ${stat.style}`}>{stat.value}</span>
+                            <span className={`text-[7px] md:text-[8px] font-bold uppercase ${stat.style}`}>{stat.label}</span>
+                            <span className={`text-xs md:text-sm font-black leading-none ${stat.style}`}>{stat.value}</span>
                         </motion.div>
                     ))}
                 </div>

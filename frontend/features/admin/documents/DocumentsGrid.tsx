@@ -184,58 +184,65 @@ export function DocumentsGrid() {
             }}
         >
             {/* Header & Breadcrumbs */}
-            <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--admin-text3)]">
-                        <button
-                            onClick={() => handleNavigate(null)}
-                            className={`p-2 rounded-lg hover:bg-[var(--admin-surface2)] transition-all ${!currentFolder ? 'text-[var(--admin-accent)]' : ''}`}
-                        >
-                            <Home className="h-4 w-4" />
-                        </button>
-                        {breadcrumbs.map((b, idx) => (
-                            <div key={b.id} className="flex items-center gap-2">
-                                <ChevronRight className="h-3 w-3 opacity-30" />
-                                <button
-                                    onClick={() => handleNavigate(b)}
-                                    className={`hover:text-[var(--admin-text)] transition-colors ${idx === breadcrumbs.length - 1 ? 'text-[var(--admin-text)]' : ''}`}
-                                >
-                                    {b.name}
-                                </button>
+            <div className="flex flex-col gap-8 backdrop-blur-xl p-8 bg-white/40 dark:bg-black/40 border-premium rounded-[3rem] shadow-premium mb-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-white/5 border border-border/50 rounded-2xl shadow-premium">
+                            <button
+                                onClick={() => handleNavigate(null)}
+                                className={`p-2 rounded-xl transition-all ${!currentFolder ? 'bg-primary text-white shadow-glow-sm shadow-primary/30' : 'hover:bg-primary/10 text-muted-foreground hover:text-primary'}`}
+                            >
+                                <Home className="h-4 w-4" />
+                            </button>
+                            {breadcrumbs.length > 0 && <ChevronRight className="h-4 w-4 opacity-30" />}
+                            <div className="flex items-center gap-1 overflow-x-auto max-w-[300px] no-scrollbar">
+                                {breadcrumbs.map((b, idx) => (
+                                    <div key={b.id} className="flex items-center gap-1 shrink-0">
+                                        <button
+                                            onClick={() => handleNavigate(b)}
+                                            className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${idx === breadcrumbs.length - 1 ? 'text-primary bg-primary/5' : 'text-muted-foreground hover:text-primary hover:bg-primary/5'}`}
+                                        >
+                                            {b.name}
+                                        </button>
+                                        {idx < breadcrumbs.length - 1 && <ChevronRight className="h-3 w-3 opacity-20" />}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={handleCreateFolder}
-                            className="bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:border-[var(--admin-accent)] transition-all"
+                            className="bg-white/50 dark:bg-white/5 border border-border/50 text-foreground px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2.5 hover:border-primary/50 hover:bg-primary/5 transition-all shadow-premium"
                         >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-4.5 w-4.5 text-primary" />
                             <span>Thư mục mới</span>
                         </button>
-                        <div className="relative">
+                        <div className="relative group/upload">
                             <input
                                 type="file"
                                 multiple
-                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                 onChange={(e) => handleUpload(e.target.files)}
                                 disabled={uploading}
                             />
-                            <button className="bg-[var(--admin-accent)] text-[var(--admin-bg)] px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-[var(--admin-accent)]/20 hover:scale-105 active:scale-95 transition-all">
-                                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                            <button className="bg-primary text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 shadow-glow-md shadow-primary/30 group-hover/upload:scale-[1.03] active:scale-95 transition-all duration-300">
+                                {uploading ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <Upload className="h-4.5 w-4.5" />}
                                 <span>{uploading ? `Đang tải ${uploadProgress}%` : 'Tải tài liệu'}</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--admin-text3)]" />
+                <div className="relative max-w-xl group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                        <Search className="h-5 w-5" />
+                    </div>
                     <input
                         type="text"
                         placeholder="Tìm tài liệu hoặc thư mục..."
-                        className="w-full h-11 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-2xl pl-10 pr-4 text-xs text-[var(--admin-text)] focus:outline-none focus:border-[var(--admin-accent)] transition-all shadow-sm"
+                        className="w-full h-14 bg-white/50 dark:bg-white/5 border border-border/50 rounded-[2rem] pl-14 pr-6 text-sm font-bold text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none shadow-premium backdrop-blur-md"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -249,28 +256,30 @@ export function DocumentsGrid() {
                     <span className="text-xs font-bold uppercase tracking-widest">Đang kết nối thư viện...</span>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {/* Folders */}
                     {folders.map((folder) => (
                         <div
                             key={folder.id}
                             onClick={() => handleNavigate(folder)}
-                            className="group relative bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-2xl p-4 flex flex-col gap-3 hover:border-[var(--admin-accent)] hover:shadow-xl hover:shadow-[var(--admin-accent)]/5 cursor-pointer transition-all duration-300"
+                            className="group relative glass border-premium rounded-[2.5rem] p-6 flex flex-col gap-4 shadow-premium backdrop-blur-xl hover:scale-[1.03] hover:border-amber-500/30 cursor-pointer transition-all duration-500 overflow-hidden"
                         >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -z-10 group-hover:bg-amber-500/10 transition-colors" />
+
                             <div className="flex items-start justify-between">
-                                <div className="p-3 bg-amber-500/10 rounded-xl group-hover:scale-110 transition-transform">
-                                    <FolderIcon className="h-6 w-6 text-amber-500 fill-amber-500/20" />
+                                <div className="p-4 bg-amber-500/10 rounded-2xl group-hover:bg-amber-500/20 group-hover:rotate-6 transition-all duration-500 shadow-glow-sm shadow-amber-500/10">
+                                    <FolderIcon className="h-8 w-8 text-amber-500 fill-amber-500/20" />
                                 </div>
                                 <button
                                     onClick={(e) => handleDeleteFolder(e, folder.id)}
-                                    className="p-1.5 opacity-0 group-hover:opacity-100 text-[var(--admin-text3)] hover:text-rose-500 rounded-lg transition-all"
+                                    className="w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 bg-white/50 dark:bg-white/5 hover:bg-red-500/10 rounded-xl transition-all duration-300"
                                 >
-                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <Trash2 className="h-4.5 w-4.5" />
                                 </button>
                             </div>
-                            <div className="flex flex-col gap-0.5">
-                                <span className="text-sm font-bold text-[var(--admin-text)] truncate">{folder.name}</span>
-                                <span className="text-[10px] font-medium text-[var(--admin-text3)] uppercase">{folder.documentCount} tài liệu</span>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-sm font-black text-foreground group-hover:text-amber-600 transition-colors duration-300 truncate">{folder.name}</span>
+                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">{folder.documentCount} tài liệu</span>
                             </div>
                         </div>
                     ))}
@@ -279,36 +288,38 @@ export function DocumentsGrid() {
                     {docs.map((doc) => (
                         <div
                             key={doc.id}
-                            className="group relative bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-2xl p-4 flex flex-col gap-4 hover:border-[var(--admin-accent)] transition-all duration-300"
+                            className="group relative glass border-premium rounded-[2.5rem] p-6 flex flex-col gap-5 shadow-premium backdrop-blur-xl hover:scale-[1.03] transition-all duration-500 overflow-hidden"
                         >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10 group-hover:bg-primary/10 transition-colors" />
+
                             <div className="flex items-start justify-between">
-                                <div className="p-3 bg-[var(--admin-surface2)] rounded-xl group-hover:scale-110 transition-transform">
+                                <div className="p-4 bg-primary/5 dark:bg-white/5 rounded-2xl group-hover:rotate-6 transition-all duration-500 border border-border/50">
                                     {getFileIcon(doc.fileType)}
                                 </div>
-                                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                                     <button
                                         onClick={() => handleDeleteDoc(doc.id)}
-                                        className="p-1.5 text-[var(--admin-text3)] hover:text-rose-500 rounded-lg transition-all"
+                                        className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-red-500 bg-white/50 dark:bg-white/5 hover:bg-red-500/10 rounded-xl transition-all"
                                     >
-                                        <Trash2 className="h-3.5 w-3.5" />
+                                        <Trash2 className="h-4 w-4" />
                                     </button>
                                     <a
                                         href={doc.filePath}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="p-1.5 text-[var(--admin-text3)] hover:text-[var(--admin-accent)] rounded-lg transition-all"
+                                        className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-primary bg-white/50 dark:bg-white/5 hover:bg-primary/10 rounded-xl transition-all"
                                     >
-                                        <Download className="h-3.5 w-3.5" />
+                                        <Download className="h-4 w-4" />
                                     </a>
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <span className="text-xs font-bold text-[var(--admin-text)] line-clamp-2 leading-relaxed" title={doc.title}>
+                            <div className="flex flex-col gap-2">
+                                <span className="text-xs font-black text-foreground line-clamp-2 leading-relaxed group-hover:text-primary transition-colors duration-300" title={doc.title}>
                                     {doc.title}
                                 </span>
-                                <div className="flex items-center gap-2 text-[9px] font-black text-[var(--admin-text3)] uppercase tracking-wider">
-                                    <span>{doc.fileType.split('/')[1] || 'FILE'}</span>
-                                    <span className="w-1 h-1 rounded-full bg-[var(--admin-border)]" />
+                                <div className="flex items-center gap-2.5 text-[9px] font-black text-muted-foreground uppercase tracking-[0.15em] opacity-40">
+                                    <div className="px-2 py-0.5 bg-border/50 rounded-md">{doc.fileType.split('/')[1] || 'FILE'}</div>
+                                    <span className="w-1 h-1 rounded-full bg-border" />
                                     <span>{(doc.fileSize / 1024 / 1024).toFixed(1)}MB</span>
                                 </div>
                             </div>
@@ -317,9 +328,11 @@ export function DocumentsGrid() {
 
                     {/* Empty State */}
                     {!loading && folders.length === 0 && docs.length === 0 && (
-                        <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4 opacity-30">
-                            <Upload className="h-12 w-12" />
-                            <p className="text-sm font-bold uppercase tracking-widest">Thư mục trống. Kéo thả file để tải lên.</p>
+                        <div className="col-span-full py-24 flex flex-col items-center justify-center gap-6 opacity-30">
+                            <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center border-2 border-dashed border-primary/20">
+                                <Upload className="h-10 w-10 text-primary" />
+                            </div>
+                            <p className="text-xs font-black uppercase tracking-[0.2em]">Thư mục trống. Kéo thả file để tải lên.</p>
                         </div>
                     )}
                 </div>
