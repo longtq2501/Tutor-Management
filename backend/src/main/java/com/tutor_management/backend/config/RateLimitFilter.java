@@ -26,6 +26,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
         
+        // Skip rate limiting for OPTIONS requests (CORS preflight)
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Only apply rate limiting to the login endpoint
         if ("/api/auth/login".equals(request.getRequestURI())) {
             String ipAddress = getClientIp(request);
