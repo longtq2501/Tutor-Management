@@ -1,0 +1,229 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/tutor_management?rewriteBatchedStatements=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root_password_vps}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:YOUR_GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET:YOUR_GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 3600000
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false  # ✅ PERF: Release connections immediately after transaction
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 500
+          fetch_size: 100
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 20
+        query:
+          in_clause_parameter_padding: true
+          timeout: 10000  # ✅ PERF: 10s query timeout for safety
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+      location: /tmp
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your_email@gmail.com}
+    password: ${MAIL_PASSWORD:your_app_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+app:
+  frontend:
+    url: ${FRONTEND_URL:https://tutor-pro-app.vercel.app}
+  mail:
+    from: ${APP_MAIL_FROM:tonquynhlong@gmail.com}
+    from-name: ${APP_MAIL_FROM_NAME:Thầy Quỳnh Long}
+  init-data:
+    enabled: ${INIT_DATA_ENABLED:false} # ✅ DEPLOY: Disable by default for faster startup on Render
+    default-password: password123
+  online-session:
+    early-join-minutes: 15
+    jwt:
+      secret: ${ONLINE_SESSION_JWT_SECRET:your_online_session_random_secret_string}
+      expiration: 300000 # 5 minutes
+    websocket:
+      allowed-origins: ${cors.allowed-origins}
+    turn:
+      servers:
+        - urls: "stun:stun.l.google.com:19302"
+        - urls: "stun:stun1.l.google.com:19302"
+        - urls: "stun:stun2.l.google.com:19302"
+
+feedback:
+  validation:
+    min-template-length: 10
+    max-template-length: 1000
+    require-student-placeholder: true
+  ai:
+    groq:
+      api-key: ${GROQ_API_KEY:YOUR_GROQ_API_KEY_HERE}
+      api-url: https://api.groq.com/openai/v1/chat/completions
+      model: llama-3.3-70b-versatile
+      enabled: true
+
+file:
+  upload-dir: uploads
+
+jwt:
+  secret: ${APP_JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970337336763979244226452948404D635166546A576E5A7234753778214125442A}
+  expiration: ${APP_JWT_EXPIRATION:86400000}
+  refresh-expiration: ${APP_JWT_REFRESH_EXPIRATION:604800000}
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+  # ✅ PERFORMANCE: Enable GZIP compression for responses
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+  tomcat:
+    connection-timeout: 120000
+    threads:
+      max: 200
+      min-spare: 20
+    max-connections: 10000
+    accept-count: 200
+
+cors:
+  allowed-origins: "https://tutor-pro-app.vercel.app,http://localhost:3000,http://localhost:5173"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+  allowed-headers: "*"
+  allow-credentials: true
+  max-age: 3600
+
+logging:
+  level:
+    root: INFO
+    com:
+      tutor_management: INFO
+      tutor_management.backend.modules.feedback: INFO
+    org:
+      springframework:
+        web: INFO
+        security: WARN
+        boot:
+          autoconfigure: WARN
+      hibernate:
+        SQL: WARN
+        type.descriptor.sql.BasicBinder: WARN
+    com.cloudinary: INFO
+    com.zaxxer.hikari: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:your_cloud_name}
+  api-key: ${CLOUDINARY_API_KEY:your_api_key}
+  api-secret: ${CLOUDINARY_API_SECRET:your_api_secret}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    mail:
+      enabled: false
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  simple:
+    metrics:
+      export:
+        enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    com.tutor_management: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+
+feedback:
+# feedback:
+#   force-reimport: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    com.tutor_management: INFO
+    org.springframework: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+# feedback:
+#   force-reimport: false
+#   csv:
+#     skip-if-exists: true
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+#spring:
+#  datasource:
+#    hikari:
+#      maximum-pool-size: 10
+#      minimum-idle: 2
+#      connection-timeout: 30000
+#      max-lifetime: 1800000
