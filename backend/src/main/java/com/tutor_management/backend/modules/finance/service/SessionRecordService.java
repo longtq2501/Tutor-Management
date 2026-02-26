@@ -564,6 +564,7 @@ public class SessionRecordService {
             .completed(r.getCompleted()).startTime(formatTime(r.getStartTime()))
             .endTime(formatTime(r.getEndTime())).subject(r.getSubject())
             .status(r.getStatus() != null ? r.getStatus().name() : null).version(r.getVersion())
+            .sessionNumber(r.getTutorId() != null && r.getStatus() != null && r.getStatus() != LessonStatus.CANCELLED_BY_STUDENT && r.getStatus() != LessonStatus.CANCELLED_BY_TUTOR ? sessionRecordRepository.calculateSessionNumberForTutor(r.getTutorId(), r.getSessionDate(), r.getId()) : null)
             .isOnline(onlineSessionRepository.existsBySessionRecordId(r.getId()))
             .tutorId(r.getTutorId())
             .tutorName("N/A");

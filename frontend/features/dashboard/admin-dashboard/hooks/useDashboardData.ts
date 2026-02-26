@@ -42,8 +42,26 @@ export const useDashboardData = () => {
     if (monthlyStats) localStorage.setItem('dashboard-monthly', JSON.stringify(monthlyStats));
   }
 
+  // Calculate true revenue trend (DASH-1)
+  let revenueTrendValue = stats?.revenueTrendValue || 0;
+  let revenueTrendDirection = stats?.revenueTrendDirection || 'neutral';
+
+  if (monthlyStats && monthlyStats.length >= 2) {
+    const sorted = [...monthlyStats].sort((a, b) => a.month.localeCompare(b.month));
+    const currentM = sorted[sorted.length - 1];
+    const prevM = sorted[sorted.length - 2];
+    if (prevM.totalPaid > 0) {
+      const diff = currentM.totalPaid - prevM.totalPaid;
+      revenueTrendValue = parseFloat(((diff / prevM.totalPaid) * 100).toFixed(1));
+      revenueTrendDirection = diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral';
+    } else if (currentM.totalPaid > 0) {
+      revenueTrendValue = 100;
+      revenueTrendDirection = 'up';
+    }
+  }
+
   return {
-    stats: stats || null,
+    stats: stats ? { ...stats, revenueTrendValue, revenueTrendDirection } : null,
     monthlyStats: monthlyStats || [],
     loadingStats,
     loadingMonthly,

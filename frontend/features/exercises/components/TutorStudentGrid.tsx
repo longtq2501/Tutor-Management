@@ -25,7 +25,7 @@ export const TutorStudentGrid: React.FC<TutorStudentGridProps> = ({ onSelectStud
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 gap-4 animate-in fade-in duration-500">
                 {summaries.map((student) => (
                     <TutorStudentCard
                         key={student.studentId}

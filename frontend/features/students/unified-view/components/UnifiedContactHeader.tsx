@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Users, UserX, UserCircle, DollarSign, Search, Plus } from 'lucide-react';
+import { Users, UserX, UserCircle, Wallet, Search, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -61,7 +61,7 @@ function StatsOverview({ stats, isLoading, isError }: { stats: UnifiedContactHea
             <StatsCard icon={<Users className="w-5 h-5" />} label="Đang học" value={renderValue(stats.active)} variant="green" />
             <StatsCard icon={<UserX className="w-5 h-5" />} label="Đã nghỉ" value={renderValue(stats.inactive)} variant="gray" />
             <StatsCard icon={<UserCircle className="w-5 h-5" />} label="Phụ huynh" value={renderValue(stats.parents)} variant="blue" />
-            <StatsCard icon={<DollarSign className="w-5 h-5" />} label="Tổng nợ" value={renderValue(stats.totalDebt)} variant="red" />
+            <StatsCard icon={<Wallet className="w-5 h-5" />} label="Tổng nợ" value={renderValue(stats.totalDebt)} variant="red" />
         </div>
     );
 }

@@ -47,7 +47,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
     const graded = exercises.filter(ex => ex.submissionStatus === 'GRADED');
 
     return (
-        <div className="space-y-8 pb-24 w-full">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut' }} className="space-y-8 pb-24 w-full">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" onClick={onBack} size="sm" className="h-9 hover:bg-muted/80 group rounded-xl px-4">
                     <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
@@ -78,7 +78,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
                     </PerformanceSection>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

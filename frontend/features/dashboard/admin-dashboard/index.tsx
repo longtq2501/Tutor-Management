@@ -100,6 +100,7 @@ export default function AdminDashboard() {
         <StatCard
           title="Tổng Đã Thu"
           value={safeStats.totalPaidAllTime}
+          subtitle={`${paidPercentage}% trên tổng`}
           icon={<CheckCircle />}
           variant="green"
           progressBar={{
@@ -118,6 +119,7 @@ export default function AdminDashboard() {
             </div>
           }
           value={safeStats.totalUnpaidAllTime}
+          subtitle={`${unpaidPercentage}% trên tổng`}
           icon={<XCircle />}
           variant="red"
           progressBar={{

@@ -1,6 +1,6 @@
 import type { SessionRecord } from '@/lib/types/finance';
 import { cn } from '@/lib/utils';
-import { BookOpen, Calendar, Check, Clock, DollarSign, FileText } from 'lucide-react';
+import { BookOpen, Calendar, Check, Clock, Wallet2, FileText } from 'lucide-react';
 import { formatFullCurrency as formatCurrency } from '../utils';
 import { InfoCard } from './InfoCard';
 
@@ -52,8 +52,8 @@ export function ViewModeContent({ session }: ViewModeContentProps) {
                         </>
                     ) : (
                         <>
-                            <DollarSign size={14} className="sm:hidden" />
-                            <DollarSign size={18} className="hidden sm:block" />
+                            <Wallet2 size={14} className="sm:hidden" />
+                            <Wallet2 size={18} className="hidden sm:block" />
                         </>
                     )}
                 </div>

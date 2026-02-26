@@ -10,6 +10,7 @@ interface LessonCardProps {
     onUpdate?: (updated: SessionRecord) => void;
     onDelete?: (id: number) => void;
     onEdit?: (session: SessionRecord) => void;
+    showNotes?: boolean;
 }
 
 /**
@@ -26,7 +27,7 @@ interface LessonCardProps {
  * Format: • BẢO HÂN
  *           14:00-15:30 • Toán 10 • 300k
  */
-export function LessonCard({ session, compact = false, onClick, onContextMenu, onUpdate, onDelete, onEdit }: LessonCardProps) {
+export function LessonCard({ session, compact = false, showNotes = false, onClick, onContextMenu, onUpdate, onDelete, onEdit }: LessonCardProps) {
     // Get colors based on new status or fallback to legacy
     const colors = session.status
         ? getStatusColors(session.status)
@@ -83,8 +84,15 @@ export function LessonCard({ session, compact = false, onClick, onContextMenu, o
 
             {/* Info line: time • subject • fee */}
             {!compact && (
-                <div className="text-[10px] opacity-90 truncate pl-3">
+                <div className="text-[10px] opacity-90 truncate pl-3 mt-0.5">
                     {infoLine}
+                </div>
+            )}
+
+            {/* Notes if enabled */}
+            {showNotes && session.notes && (
+                <div className="text-[9px] opacity-75 truncate pl-3 italic mt-0.5">
+                    {session.notes}
                 </div>
             )}
 

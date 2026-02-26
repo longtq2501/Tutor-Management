@@ -8,13 +8,13 @@ import {
     Calendar,
     CalendarClock,
     ChevronDown,
-    DollarSign,
     Edit2,
     Eye,
     Mail,
     Phone,
     Plus,
-    UserCircle
+    UserCircle,
+    Banknote
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { OptimizedAvatar } from './OptimizedAvatar';
@@ -172,9 +172,9 @@ export const UnifiedStudentCard = memo(function UnifiedStudentCard({
                 <div className="grid grid-cols-1 gap-2 pt-3 border-t border-border/50 dark:border-border/30">
                     {/* Hourly Rate */}
                     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 border border-primary/20 dark:border-primary/30">
-                        <DollarSign className="w-4 h-4 text-primary dark:text-primary" />
+                        <Banknote className="w-4 h-4 text-primary dark:text-primary" />
                         <span className="text-sm font-semibold">
-                            {formatCurrency(student.pricePerHour)}/giờ
+                            {Intl.NumberFormat('vi-VN').format(student.pricePerHour || 0)}/giờ
                         </span>
                     </div>
 
@@ -207,7 +207,7 @@ export const UnifiedStudentCard = memo(function UnifiedStudentCard({
                             </span>
                         </div>
                         <span className="text-lg font-bold text-red-600 dark:text-red-400 tabular-nums">
-                            {formatCurrency(student.totalUnpaidTaught)}
+                            {Intl.NumberFormat('vi-VN').format(student.totalUnpaidTaught || 0)}
                         </span>
                     </motion.div>
                 )}

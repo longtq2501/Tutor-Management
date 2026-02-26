@@ -23,6 +23,7 @@ interface SessionItemProps {
 
 function SessionItemComponent({ session, index, onDelete }: SessionItemProps) {
     const isCancelled = session.status === 'CANCELLED_BY_STUDENT' || session.status === 'CANCELLED_BY_TUTOR';
+    const isStudentCancelled = session.status === 'CANCELLED_BY_STUDENT';
     const isPaid = session.paid || session.status === 'PAID';
 
     // Determine Badge Config
@@ -63,19 +64,19 @@ function SessionItemComponent({ session, index, onDelete }: SessionItemProps) {
                                 'bg-rose-500' // Default unpaid/completed
                 )} />
                 <div className="flex-1 min-w-0">
-                    <div className={cn("font-bold text-sm text-foreground truncate", isCancelled && "line-through text-muted-foreground")}>
+                    <div className={cn("font-black text-sm text-foreground truncate", isCancelled && "line-through text-muted-foreground font-bold")}>
                         {format(new Date(session.sessionDate), 'dd/MM/yyyy')}
                     </div>
-                    <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                        <Clock className="w-3 h-3 text-muted-foreground/70 shrink-0" />
+                    <div className="text-xs text-foreground/90 flex items-center gap-1.5 mt-0.5 font-bold">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground/90 shrink-0" />
                         <span className="shrink-0">{session.hours}h</span>
-                        <span className="w-1 h-1 rounded-full bg-border shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-border shrink-0" />
                         <span className="truncate min-w-0">{session.subject || 'N/A'}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className={cn("flex items-center gap-2 shrink-0", !isStudentCancelled && "ml-auto")}>
                 <Badge variant="outline" className={cn(
                     "text-[10px] h-5 px-1.5 font-bold border whitespace-nowrap shrink-0",
                     badgeConfig.className

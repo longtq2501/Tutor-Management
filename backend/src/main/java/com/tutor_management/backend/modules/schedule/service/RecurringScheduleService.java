@@ -148,6 +148,8 @@ public class RecurringScheduleService {
         publishEvent(new ScheduleCreatedEvent(saved.getId(), student.getId().toString(), student.getName(), tutorName, 
                 saved.getSubject(), formatDaysOfWeek(saved.getDaysOfWeekArray()), saved.getStartTime()));
 
+        updateStudentScheduleString(student.getId());
+
         return convertToResponse(saved);
     }
 
@@ -167,6 +169,8 @@ public class RecurringScheduleService {
         publishEvent(new ScheduleUpdatedEvent(updated.getId(), updated.getStudent().getId().toString(), 
                 updated.getStudent().getName(), "Giáo viên", updated.getSubject(), 
                 formatDaysOfWeek(updated.getDaysOfWeekArray()), updated.getStartTime()));
+
+        updateStudentScheduleString(updated.getStudent().getId());
 
         return convertToResponse(updated);
     }
@@ -190,7 +194,9 @@ public class RecurringScheduleService {
             // For consistency with other methods and cascading if any, fetch first
             schedule = recurringScheduleRepository.findById(id).orElseThrow();
         }
+        Long stuId = schedule.getStudent().getId();
         recurringScheduleRepository.delete(schedule);
+        updateStudentScheduleString(stuId);
     }
 
     /**
@@ -209,7 +215,9 @@ public class RecurringScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch học"));
         }
         schedule.setActive(!schedule.getActive());
-        return convertToResponse(recurringScheduleRepository.save(schedule));
+        RecurringSchedule saved = recurringScheduleRepository.save(schedule);
+        updateStudentScheduleString(saved.getStudent().getId());
+        return convertToResponse(saved);
     }
 
     // --- Session Generation Logic ---
@@ -289,6 +297,8 @@ public class RecurringScheduleService {
         
         active.forEach(s -> s.setActive(false));
         recurringScheduleRepository.saveAll(active);
+        // We do not call updateStudentScheduleString here because this is called within createSchedule
+        // Which will call updateStudentScheduleString at the end.
     }
 
     private void applyRequestToEntity(RecurringSchedule entity, RecurringScheduleRequest request) {
@@ -316,6 +326,35 @@ public class RecurringScheduleService {
         if (studentIds == null) return allActive;
         if (studentIds.isEmpty()) return Collections.emptyList();
         return allActive.stream().filter(s -> studentIds.contains(s.getStudent().getId())).toList();
+    }
+
+    private void updateStudentScheduleString(Long studentId) {
+        Long tutorId = getCurrentTutorId();
+        List<RecurringSchedule> activeSchedules;
+        if (tutorId != null) {
+            activeSchedules = recurringScheduleRepository.findByStudentIdAndTutorIdAndActiveTrue(studentId, tutorId);
+        } else {
+            activeSchedules = recurringScheduleRepository.findByStudentIdAndActiveTrue(studentId);
+        }
+        
+        String formatted = formatSchedulesForStudent(activeSchedules);
+        studentRepository.findById(studentId).ifPresent(student -> {
+            student.setSchedule(formatted.isEmpty() ? "Chưa có lịch cố định" : formatted);
+            studentRepository.save(student);
+        });
+    }
+
+    private String formatSchedulesForStudent(List<RecurringSchedule> schedules) {
+        if (schedules == null || schedules.isEmpty()) return "";
+        return schedules.stream()
+                .map(s -> {
+                    String days = Arrays.stream(s.getDaysOfWeekArray())
+                        .sorted()
+                        .map(d -> d == 8 ? "CN" : "T" + d)
+                        .collect(Collectors.joining(", "));
+                    return days + " (" + s.getStartTime() + " - " + s.getEndTime() + ")";
+                })
+                .collect(Collectors.joining(" | "));
     }
 
     private boolean isApplicable(RecurringSchedule s, String month) {

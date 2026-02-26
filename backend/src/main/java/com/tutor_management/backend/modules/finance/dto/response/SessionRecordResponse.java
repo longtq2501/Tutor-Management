@@ -40,6 +40,7 @@ public class SessionRecordResponse {
     private String endTime;
     private String subject;
     private String status;
+    private Integer sessionNumber;
     private Integer version;
     private Boolean isOnline;
 

@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, FileSpreadsheet, Pencil, X } from "lucide-react";
+import { Copy, FileSpreadsheet, Pencil, X, Check } from "lucide-react";
 
 interface FeedbackHeaderProps {
     isEditing: boolean;
@@ -20,6 +21,14 @@ export function FeedbackHeader({
     onCopy,
     onExport,
 }: FeedbackHeaderProps) {
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopy = () => {
+        onCopy();
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
+
     return (
         <div className="flex items-center justify-between py-2 sm:py-3 px-4 sm:px-6 gap-3 border-b border-border/40 shrink-0 bg-background/95 backdrop-blur z-20">
             <div className="flex items-center gap-2">
@@ -36,9 +45,13 @@ export function FeedbackHeader({
                                     <FileSpreadsheet className="w-3.5 h-3.5 sm:mr-1.5" />
                                     <span className="hidden sm:inline">XLS</span>
                                 </Button>
-                                <Button variant="secondary" size="sm" onClick={onCopy} className="h-8 px-2.5 sm:px-3 text-[10px] uppercase font-bold tracking-wider">
-                                    <Copy className="w-3.5 h-3.5 sm:mr-1.5" />
-                                    <span className="hidden sm:inline">Copy</span>
+                                <Button variant="secondary" size="sm" onClick={handleCopy} className="h-8 px-2.5 sm:px-3 text-[10px] uppercase font-bold tracking-wider transition-all active:scale-95">
+                                    {isCopied ? (
+                                        <Check className="w-3.5 h-3.5 sm:mr-1.5 text-emerald-500" />
+                                    ) : (
+                                        <Copy className="w-3.5 h-3.5 sm:mr-1.5" />
+                                    )}
+                                    <span className="hidden sm:inline">{isCopied ? "Đã Copy" : "Copy"}</span>
                                 </Button>
                             </div>
                         )}

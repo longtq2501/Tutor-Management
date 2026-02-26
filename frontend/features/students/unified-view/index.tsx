@@ -98,6 +98,7 @@ export default function UnifiedContactManagement() {
                     onSuccess={() => {
                         setScheduleModalOpen(false);
                         toast.success('Cập nhật lịch cố định thành công');
+                        refetch();
                     }}
                 />
             )}

@@ -291,4 +291,9 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
             "GROUP BY sr.tutorId " +
             "ORDER BY totalRevenue DESC")
     List<Object[]> findTopTutorsByRevenue(org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT CAST(COUNT(sr) AS integer) FROM SessionRecord sr WHERE sr.tutorId = :tutorId AND " +
+           "(sr.sessionDate < :date OR (sr.sessionDate = :date AND sr.id <= :recordId)) AND " +
+           "(sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR))")
+    Integer calculateSessionNumberForTutor(@Param("tutorId") Long tutorId, @Param("date") java.time.LocalDate date, @Param("recordId") Long recordId);
 }

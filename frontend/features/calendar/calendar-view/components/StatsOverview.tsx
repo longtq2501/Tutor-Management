@@ -2,11 +2,11 @@
 
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarIcon, CheckCircle2, DollarSign } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle2, Banknote } from 'lucide-react';
 import type { CalendarStats } from '../types';
 
 const StatsChip = memo(({ icon, label, value, variant }: {
-    icon: React.ReactNode,
+    icon?: React.ReactNode,
     label: string,
     value: string | number,
     variant: 'blue' | 'emerald' | 'orange' | 'purple'
@@ -19,11 +19,10 @@ const StatsChip = memo(({ icon, label, value, variant }: {
     };
 
     return (
-        <div className={cn("flex px-4 py-2 rounded-2xl border transition-all hover:shadow-md", styles[variant])}>
-            <div className="mr-3 opacity-80">{icon}</div>
+        <div className={cn("flex px-4 py-2 rounded-2xl border transition-all hover:shadow-md justify-center text-center min-w-[120px]", styles[variant])}>
             <div>
                 <div className="text-[10px] font-black uppercase tracking-widest opacity-60 leading-none mb-1">{label}</div>
-                <div className="text-sm font-black tracking-tight">{value}</div>
+                <div className="text-[15px] font-black tracking-tight">{value}</div>
             </div>
         </div>
     );
@@ -35,19 +34,16 @@ export function StatsOverview({ stats }: { stats: CalendarStats }) {
     return (
         <div className="hidden lg:flex items-center gap-3 flex-wrap">
             <StatsChip
-                icon={<CalendarIcon size={16} />}
                 label="Tổng buổi"
                 value={stats.total}
                 variant="blue"
             />
             <StatsChip
-                icon={<CheckCircle2 size={16} />}
                 label="Đã hoàn thành"
                 value={stats.completed}
                 variant="emerald"
             />
             <StatsChip
-                icon={<DollarSign size={16} />}
                 label="Doanh thu"
                 value={new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(stats.revenue)}
                 variant="orange"

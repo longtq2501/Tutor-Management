@@ -22,6 +22,7 @@ export interface SessionRecord {
   endTime?: string; // GIỜ KẾT THÚC (HH:mm format, e.g., "15:30")
   subject?: string; // MÔN HỌC (e.g., "Toán 10", "Lý 11")
   status?: LessonStatus; // TRẠNG THÁI CHI TIẾT (SCHEDULED, CONFIRMED, COMPLETED, PAID, etc.)
+  sessionNumber?: number; // SỐ THỨ TỰ THỰC TẾ
   version?: number; // VERSION FOR OPTIMISTIC LOCKING
   isOnline?: boolean; // TRẠNG THÁI BUỔI HỌC ONLINE
   tutorId?: number;

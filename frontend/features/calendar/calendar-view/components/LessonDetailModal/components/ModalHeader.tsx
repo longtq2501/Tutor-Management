@@ -31,7 +31,7 @@ export function ModalHeader({ session, onClose }: ModalHeaderProps) {
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
                             <h3 className="text-white font-black uppercase tracking-[0.2em] text-[9px] sm:text-[10px] opacity-90 whitespace-nowrap">Chi tiết buổi học</h3>
                             <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 py-0 h-4 text-[8px] sm:text-[9px] font-bold">
-                                #{session.id}
+                                #{session.sessionNumber ? session.sessionNumber : session.id}
                             </Badge>
                             <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 py-0 h-4 text-[8px] sm:text-[9px] font-bold">
                                 {session.sessionDate}

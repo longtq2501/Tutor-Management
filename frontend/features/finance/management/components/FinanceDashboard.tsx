@@ -16,14 +16,14 @@ function DashboardInner() {
     const actions = useFinanceActions({ confirm });
 
     return (
-        <div className="flex flex-col min-w-0 overflow-x-hidden relative min-h-screen">
+        <div className="flex flex-col min-w-0 overflow-hidden relative h-full">
             <DashboardHeader
                 title="Quản Lý Tài Chính"
                 subtitle="Theo dõi doanh thu, công nợ và trạng thái thanh toán"
                 actions={<FinanceHeader />}
             />
 
-            <div className="p-3 md:p-8 space-y-4 md:space-y-8">
+            <div className="p-3 md:p-8 flex-1 overflow-y-auto space-y-4 md:space-y-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

@@ -71,7 +71,7 @@ public class DashboardService {
         stats.setCurrentMonthTotal(FormatterUtils.formatCurrency(stats.getCurrentMonthTotalRaw()));
 
         // 3. Calculate revenue growth trend compared to previous month
-        calculateRevenueTrend(stats, tutorId);
+        calculateRevenueTrend(stats, tutorId, currentMonth);
 
         // 4. Calculate new student signups for the current month
         calculateNewStudentGrowth(stats, currentMonth, tutorId);
@@ -79,7 +79,7 @@ public class DashboardService {
         return stats;
     }
 
-    private void calculateRevenueTrend(DashboardStats stats, Long tutorId) {
+    private void calculateRevenueTrend(DashboardStats stats, Long tutorId, String currentMonth) {
         List<MonthlyStats> monthlyList;
         if (tutorId != null) {
             monthlyList = sessionRecordRepository.findMonthlyStatsAggregatedByTutorId(tutorId);
@@ -87,15 +87,30 @@ public class DashboardService {
             monthlyList = sessionRecordRepository.findAllMonthlyStatsAggregated();
         }
         
-        if (monthlyList.size() >= 2) {
-            long currentRevenue = monthlyList.get(0).getTotalPaid() + monthlyList.get(0).getTotalUnpaid();
-            long previousRevenue = monthlyList.get(1).getTotalPaid() + monthlyList.get(1).getTotalUnpaid();
-            
-            if (previousRevenue > 0) {
-                double growthPercentage = ((double) (currentRevenue - previousRevenue) / previousRevenue) * 100;
-                stats.setRevenueTrendValue(Math.abs(Math.round(growthPercentage * 10.0) / 10.0));
-                stats.setRevenueTrendDirection(growthPercentage >= 0 ? "up" : "down");
+        java.time.YearMonth currentYM = java.time.YearMonth.parse(currentMonth);
+        String previousMonth = currentYM.minusMonths(1).toString();
+
+        long currentRevenue = 0;
+        long previousRevenue = 0;
+
+        for (MonthlyStats ms : monthlyList) {
+            if (currentMonth.equals(ms.getMonth())) {
+                currentRevenue = ms.getTotalPaid() + ms.getTotalUnpaid();
+            } else if (previousMonth.equals(ms.getMonth())) {
+                previousRevenue = ms.getTotalPaid() + ms.getTotalUnpaid();
             }
+        }
+        
+        if (previousRevenue > 0) {
+            double growthPercentage = ((double) (currentRevenue - previousRevenue) / previousRevenue) * 100;
+            stats.setRevenueTrendValue(Math.abs(Math.round(growthPercentage * 10.0) / 10.0));
+            stats.setRevenueTrendDirection(growthPercentage >= 0 ? "up" : "down");
+        } else if (currentRevenue > 0) {
+            stats.setRevenueTrendValue(100.0);
+            stats.setRevenueTrendDirection("up");
+        } else {
+            stats.setRevenueTrendValue(0.0);
+            stats.setRevenueTrendDirection("up");
         }
     }
 

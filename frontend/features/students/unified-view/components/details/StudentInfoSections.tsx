@@ -88,7 +88,7 @@ export function StudentInfoSections({ student, onEdit, onEditParent }: StudentIn
                         <div className="flex flex-col gap-1.5 text-sm">
                             <span className="text-muted-foreground">Lịch học cố định:</span>
                             <span className="font-bold p-3 bg-muted/40 rounded-xl border border-border text-primary leading-relaxed">
-                                {student.schedule}
+                                {student.schedule || 'Chưa có lịch cố định'}
                             </span>
                         </div>
                     </div>

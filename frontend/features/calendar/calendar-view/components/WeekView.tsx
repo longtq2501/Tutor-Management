@@ -122,7 +122,7 @@ function WeekDroppableCell({
                             <DraggableLessonWrapper session={session}>
                                 <LessonCard
                                     session={session}
-                                    compact
+                                    showNotes={true}
                                     onClick={() => onSessionClick?.(session)}
                                     onUpdate={onUpdate}
                                     onEdit={onSessionEdit}

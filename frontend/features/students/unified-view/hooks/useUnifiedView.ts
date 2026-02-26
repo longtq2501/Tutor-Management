@@ -65,11 +65,7 @@ export function useUnifiedView() {
         const uniqueParents = new Set(students.filter(s => s.parentId).map(s => s.parentId));
 
         const totalDebtValue = students.reduce((sum, s) => sum + (s.totalUnpaidTaught || 0), 0);
-        const totalDebt = new Intl.NumberFormat('vi-VN', {
-            notation: "compact",
-            compactDisplay: "short",
-            maximumFractionDigits: 1
-        }).format(totalDebtValue) + 'đ';
+        const totalDebt = new Intl.NumberFormat('vi-VN').format(totalDebtValue);
 
         return {
             active,
