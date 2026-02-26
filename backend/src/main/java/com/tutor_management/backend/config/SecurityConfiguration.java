@@ -40,6 +40,9 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final org.springframework.security.oauth2.client.registration.ClientRegistrationRepository clientRegistrationRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -86,12 +89,13 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ Cụ thể origins (KHÔNG dùng wildcard khi có credentials)
-        configuration.setAllowedOrigins(Arrays.asList(
-                "https://tutor-management-e7zh.vercel.app",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"
-        ));
+        // Split comma-separated origins from application.yaml
+        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        } else {
+            // Fallback for safety
+            configuration.setAllowedOrigins(List.of("https://tutor-pro-app.vercel.app", "http://localhost:3000"));
+        }
 
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
