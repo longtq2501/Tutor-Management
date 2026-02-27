@@ -179,16 +179,6 @@ export default function LoginPage() {
             <LoginForm />
           </Suspense>
 
-          {/* Demo accounts info */}
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <p className="text-sm font-medium mb-2">Tài khoản demo:</p>
-            <div className="text-xs space-y-1 text-muted-foreground">
-              <p>Admin: admin@tutormanagement.com / password123</p>
-              <p>Tutor: tutor@tutormanagement.com / password123</p>
-              <p>Student: student@tutormanagement.com / password123</p>
-            </div>
-          </div>
-
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">Chưa có tài khoản? </span>
             <Link href="/register" className="text-primary font-bold hover:underline transition-all">
