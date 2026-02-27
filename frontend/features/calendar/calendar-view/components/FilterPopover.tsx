@@ -34,9 +34,9 @@ export function FilterPopover({
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10 rounded-2xl px-3 sm:px-4 gap-2 border-border/40 hover:bg-muted/50 bg-card/50 shadow-sm transition-all active:scale-95">
-                    <Filter size={14} className={cn("sm:w-4 sm:h-4", isFiltered ? "text-primary fill-primary" : "")} />
-                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest hidden sm:inline">
+                <Button variant="outline" size="sm" className="h-8 2xl:h-10 rounded-2xl px-2 2xl:px-4 gap-1 border-border/40 hover:bg-muted/50 bg-card/50 shadow-sm transition-all active:scale-95">
+                    <Filter size={14} className={cn("w-3.5 h-3.5 2xl:w-4 2xl:h-4", isFiltered ? "text-primary fill-primary" : "")} />
+                    <span className="text-[8px] 2xl:text-[11px] font-black uppercase tracking-tighter 2xl:tracking-widest hidden sm:inline">
                         Bộ lọc {isFiltered && "•"}
                     </span>
                 </Button>

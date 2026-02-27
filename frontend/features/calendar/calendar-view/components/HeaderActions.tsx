@@ -26,11 +26,10 @@ export function HeaderActions({
     sessionsCount,
 }: HeaderActionsProps) {
     return (
-        <div className="flex items-center gap-2">
-            <Button size="sm" className="h-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] px-4 sm:px-6 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all" onClick={onAddSession}>
-                <Plus className="w-4 h-4 sm:mr-2" strokeWidth={3} />
+        <div className="flex items-center gap-1.5 min-w-0 flex-shrink-1">
+            <Button size="sm" className="h-8 2xl:h-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-tighter 2xl:tracking-widest text-[8px] 2xl:text-[10px] px-2 sm:px-3 2xl:px-6 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all" onClick={onAddSession}>
+                <Plus className="w-4 h-4 2xl:mr-1.5" strokeWidth={3} />
                 <span className="hidden sm:inline">Tiết học mới</span>
-                <span className="sm:hidden">Thêm</span>
             </Button>
 
             <TooltipProvider>
@@ -38,7 +37,7 @@ export function HeaderActions({
                     <Popover>
                         <TooltipTrigger asChild>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" size="icon" className="h-10 w-10 rounded-2xl border-border/40 hover:bg-muted/50">
+                                <Button variant="outline" size="icon" className="h-8 w-8 2xl:h-10 2xl:w-10 rounded-2xl border-border/40 hover:bg-muted/50">
                                     <Info size={16} />
                                 </Button>
                             </PopoverTrigger>
@@ -84,9 +83,9 @@ export function HeaderActions({
             </TooltipProvider>
 
             {sessionsCount === 0 && (
-                <Button size="sm" onClick={onAutoGenerate} disabled={isGenerating} className="h-10 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 font-bold text-[10px] px-4 hidden sm:flex">
-                    <Sparkles size={14} className="mr-2" />
-                    {isGenerating ? "Đang tạo..." : "Tạo lịch tự động"}
+                <Button size="sm" onClick={onAutoGenerate} disabled={isGenerating} className="h-8 2xl:h-10 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 font-bold text-[8px] 2xl:text-[10px] px-2 2xl:px-4 hidden sm:flex tracking-tighter 2xl:tracking-normal">
+                    <Sparkles size={14} className="2xl:mr-2" />
+                    <span>{isGenerating ? "Đang tạo..." : "Tạo lịch tự động"}</span>
                 </Button>
             )}
         </div>

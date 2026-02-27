@@ -155,13 +155,13 @@ const AppHeader = React.memo(({ user, initials, roleBadge, logout }: {
                 </div>
 
                 {/* Hero Title & Actions Bar - Responsive layout */}
-                <div className="px-4 lg:px-8 pb-2 lg:pb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8">
-                    <div className="flex-1 min-w-0 w-full md:w-auto">
+                <div className="px-4 lg:px-8 pb-2 lg:pb-6 xl:pb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4 xl:gap-8 min-w-0">
+                    <div className="flex-1 min-w-0">
                         <HeaderSlot id="title" />
                     </div>
 
                     {/* Actions Slot */}
-                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap md:flex-nowrap shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-nowrap min-w-0 flex-shrink-1">
                         <HeaderSlot id="actions" />
                     </div>
                 </div>

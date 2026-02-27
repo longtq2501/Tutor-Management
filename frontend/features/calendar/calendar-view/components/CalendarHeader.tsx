@@ -37,50 +37,79 @@ export const CalendarActions = ({
   onSearchChange, onDeleteMonth, isFetching = false
 }: Props) => {
   return (
-    <div className="flex flex-wrap items-center gap-3 sm:gap-4 lg:justify-end">
-      {/* Navigation Controls */}
-      <div className="flex items-center bg-muted/50 rounded-2xl p-0.5 border border-border/40 shadow-sm">
-        <Button variant="ghost" size="icon" onClick={() => onNavigate(-1)} className="rounded-xl h-8 w-8 sm:h-9 sm:w-9">
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        <Button variant="ghost" onClick={onToday} className="px-3 font-black uppercase tracking-widest text-[10px] rounded-xl h-8 sm:h-9">
-          Tháng này
-        </Button>
-        <Button variant="ghost" size="icon" onClick={() => onNavigate(1)} className="rounded-xl h-8 w-8 sm:h-9 sm:w-9">
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      </div>
+    // Outer wrapper: stack vertically on small screens, row on xl+
+    <div className="flex flex-col xl:flex-row xl:items-center gap-2 xl:gap-3 w-full">
 
-      {/* Stats - Hidden on very small screens, shown in header portal */}
-      <div className="hidden xl:flex items-center gap-2">
-        <StatsOverview stats={stats} />
-      </div>
+      {/* Row 1 (on mobile/md): Navigation + View Tabs + Filter + Actions */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 xl:contents">
 
-      <div className="flex items-center gap-2">
-        <Tabs value={currentView} onValueChange={(v) => onViewChange(v as CalendarViewType)} className="hidden sm:flex">
-          <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/40 h-9 sm:h-10">
-            <TabsTrigger value="month" className="rounded-xl px-3 font-black uppercase tracking-widest text-[9px]">Tháng</TabsTrigger>
-            <TabsTrigger value="week" className="rounded-xl px-3 font-black uppercase tracking-widest text-[9px]">Tuần</TabsTrigger>
-            <TabsTrigger value="list" className="rounded-xl px-3 font-black uppercase tracking-widest text-[9px]">D.Sách</TabsTrigger>
+        {/* Navigation Controls */}
+        <div className="flex items-center bg-muted/50 rounded-2xl p-0.5 border border-border/40 shadow-sm shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => onNavigate(-1)} className="rounded-xl h-8 w-8">
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={onToday}
+            className="px-2 sm:px-3 font-black uppercase tracking-widest text-[9px] sm:text-[10px] rounded-xl h-8 whitespace-nowrap"
+          >
+            Tháng này
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => onNavigate(1)} className="rounded-xl h-8 w-8">
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* View Tabs — visible from md up */}
+        <Tabs value={currentView} onValueChange={(v) => onViewChange(v as CalendarViewType)} className="hidden md:flex shrink-0">
+          <TabsList className="bg-muted/50 p-0.5 sm:p-1 rounded-2xl border border-border/40 h-8 2xl:h-10">
+            <TabsTrigger value="month" className="rounded-xl px-1.5 2xl:px-3 font-black uppercase tracking-tighter text-[9px] xl:text-[8px] 2xl:text-[9px]">
+              <CalendarIcon className="w-3.5 h-3.5 sm:hidden" />
+              <span className="hidden sm:inline">Tháng</span>
+            </TabsTrigger>
+            <TabsTrigger value="week" className="rounded-xl px-1.5 2xl:px-3 font-black uppercase tracking-tighter text-[9px] xl:text-[8px] 2xl:text-[9px]">
+              <Columns className="w-3.5 h-3.5 sm:hidden" />
+              <span className="hidden sm:inline">Tuần</span>
+            </TabsTrigger>
+            <TabsTrigger value="list" className="rounded-xl px-1.5 2xl:px-3 font-black uppercase tracking-tighter text-[9px] xl:text-[8px] 2xl:text-[9px]">
+              <List className="w-3.5 h-3.5 sm:hidden" />
+              <span className="hidden sm:inline">D.Sách</span>
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <FilterPopover
-          currentFilter={currentFilter}
-          searchQuery={searchQuery}
-          onFilterChange={onFilterChange!}
-          onSearchChange={onSearchChange!}
-        />
+        {/* Spacer pushes Filter + Actions to the right on larger screens */}
+        <div className="flex-1 hidden xl:block" />
 
-        <HeaderActions
-          onAddSession={onAddSession}
-          onGenerateInvoice={onGenerateInvoice}
-          onAutoGenerate={onAutoGenerate}
-          onDeleteMonth={onDeleteMonth!}
-          isGenerating={isGenerating}
-          sessionsCount={sessions.length}
-        />
+        {/* Stats — show from xl, placed inline before filter/actions on xl+ */}
+        <div className="hidden xl:flex items-center gap-1 2xl:gap-2 shrink-0">
+          <StatsOverview stats={stats} />
+        </div>
+
+        {/* Filter + Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 ml-auto xl:ml-0">
+          <FilterPopover
+            currentFilter={currentFilter}
+            searchQuery={searchQuery}
+            onFilterChange={onFilterChange!}
+            onSearchChange={onSearchChange!}
+          />
+          <HeaderActions
+            onAddSession={onAddSession}
+            onGenerateInvoice={onGenerateInvoice}
+            onAutoGenerate={onAutoGenerate}
+            onDeleteMonth={onDeleteMonth!}
+            isGenerating={isGenerating}
+            sessionsCount={sessions.length}
+          />
+        </div>
       </div>
+
+      {/* Stats row visible only on md and below xl (between nav row and calendar) */}
+      <div className="flex xl:hidden items-center gap-2 flex-wrap">
+        <StatsOverview stats={stats} />
+      </div>
+
     </div>
   );
 };

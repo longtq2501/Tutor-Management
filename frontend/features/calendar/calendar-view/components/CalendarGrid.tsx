@@ -32,7 +32,7 @@ export const CalendarGrid = memo(({
           <div
             key={day}
             className={cn(
-              "p-2 sm:p-4 text-center text-[10px] sm:text-xs font-black uppercase tracking-widest sm:tracking-[0.2em]",
+              "p-1 sm:p-4 text-center text-[8px] sm:text-xs font-black uppercase tracking-tighter sm:tracking-[0.2em]",
               index === 0 ? "text-red-500" : "text-muted-foreground"
             )}
           >

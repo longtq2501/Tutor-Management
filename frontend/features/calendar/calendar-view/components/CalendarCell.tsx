@@ -43,8 +43,8 @@ export const CalendarCell = memo(({
             onHoverEnd={() => setIsHovered(false)}
             onClick={() => onDayClick(day)}
             className={cn(
-                "group relative min-h-[100px] sm:min-h-[120px] lg:min-h-[140px]",
-                "border-r border-b p-1.5 sm:p-2 lg:p-3",
+                "group relative min-h-[90px] sm:min-h-[120px] lg:min-h-[140px] xl:min-h-[150px]",
+                "border-r border-b p-1 sm:p-2 lg:p-3",
                 "cursor-pointer transition-colors duration-300",
                 !isCurrentMonth && "bg-muted/10 dark:bg-zinc-900/10 opacity-60",
                 isToday && "bg-blue-50/50 dark:bg-blue-950/20",

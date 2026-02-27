@@ -105,7 +105,7 @@ export function HeaderSlot({ id }: { id: 'title' | 'actions' }) {
                 if (id === 'title') setTitleSlot(el);
                 if (id === 'actions') setActionsSlot(el);
             }}
-            className="w-full h-full"
+            className="h-full min-w-0"
         />
     );
 }
@@ -128,12 +128,12 @@ export function DashboardHeader({ title, subtitle, actions }: { title: string; s
     return (
         <>
             <HeaderPortal to="title">
-                <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-4 duration-500">
-                    <h1 className="text-xl sm:text-2xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-black tracking-tight leading-tight py-1 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent sm:whitespace-normal">
+                <div className="flex-1 min-w-[120px] sm:min-w-[180px] animate-in fade-in slide-in-from-left-4 duration-500 py-1">
+                    <h1 className="text-lg sm:text-x lg:text-2xl 2xl:text-5xl font-black tracking-tight leading-[1.1] bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent break-words sm:whitespace-normal">
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-[11px] sm:text-xs md:text-xs lg:text-sm xl:text-base text-muted-foreground mt-0.5 sm:mt-1 max-w-2xl font-medium line-clamp-2 sm:line-clamp-none">
+                        <p className="text-[10px] sm:text-xs lg:text-[8px] 2xl:text-base text-muted-foreground mt-0.5 sm:mt-1 max-w-2xl font-medium line-clamp-1 sm:line-clamp-none opacity-80">
                             {subtitle}
                         </p>
                     )}
@@ -141,7 +141,7 @@ export function DashboardHeader({ title, subtitle, actions }: { title: string; s
             </HeaderPortal>
             {actions && (
                 <HeaderPortal to="actions">
-                    <div className="flex items-center justify-end gap-3 animate-in fade-in slide-in-from-right-4 duration-500 w-full sm:w-auto">
+                    <div className="flex items-center justify-end gap-1.5 sm:gap-3 animate-in fade-in slide-in-from-right-4 duration-500 w-auto min-w-0 flex-shrink-1">
                         {actions}
                     </div>
                 </HeaderPortal>
