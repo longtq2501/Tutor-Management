@@ -67,7 +67,7 @@ const Hero: React.FC = () => {
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full mb-12 md:mb-16 pointer-events-auto">
                     <button
                         onClick={() => router.push('/login')}
-                        className="w-full sm:w-auto px-12 py-5 bg-primary text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-glow-lg shadow-primary/40 flex items-center justify-center text-lg md:text-xl tracking-widest"
+                        className="w-full sm:w-auto px-12 py-5 bg-[#4a9eff] text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(74,158,255,0.4)] flex items-center justify-center text-lg md:text-xl tracking-widest"
                     >
                         BẮT ĐẦU NGAY
                     </button>

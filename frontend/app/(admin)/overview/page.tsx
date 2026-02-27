@@ -242,7 +242,7 @@ export default function OverviewPage() {
 
                         <button
                             onClick={() => alert('Tính năng sẽ có trong phiên bản tiếp theo')}
-                            className="flex items-center gap-2.5 px-5 py-2.5 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-glow-md shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-300"
+                            className="flex items-center gap-2.5 px-5 py-2.5 bg-primary text-primary-foreground rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-glow-md shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-300"
                         >
                             <Plus className="h-4 w-4" />
                             <span>Thêm Metric</span>

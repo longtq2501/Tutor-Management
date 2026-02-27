@@ -55,7 +55,7 @@ export function RevenueChart({ data, view: controlledView, onViewChange, loading
                         onClick={() => handleViewChange('6m')}
                         disabled={loading}
                         className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all duration-300 disabled:opacity-50 uppercase tracking-widest ${view === '6m'
-                            ? 'bg-primary text-white shadow-glow-sm shadow-primary/30'
+                            ? 'bg-primary text-primary-foreground shadow-glow-sm shadow-primary/30'
                             : 'text-muted-foreground hover:text-foreground'
                             }`}
                     >
@@ -65,7 +65,7 @@ export function RevenueChart({ data, view: controlledView, onViewChange, loading
                         onClick={() => handleViewChange('1y')}
                         disabled={loading}
                         className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all duration-300 disabled:opacity-50 uppercase tracking-widest ${view === '1y'
-                            ? 'bg-primary text-white shadow-glow-sm shadow-primary/30'
+                            ? 'bg-primary text-primary-foreground shadow-glow-sm shadow-primary/30'
                             : 'text-muted-foreground hover:text-foreground'
                             }`}
                     >
@@ -100,8 +100,8 @@ export function RevenueChart({ data, view: controlledView, onViewChange, loading
                                     animate={{ height: `${height}%`, opacity: 1 }}
                                     transition={{ duration: 1.2, delay: idx * 0.08, ease: [0.33, 1, 0.68, 1] }}
                                     className={`w-full max-w-[42px] rounded-t-xl transition-all duration-500 relative group-hover:scale-x-110 overflow-hidden ${isCurrentMonth
-                                            ? 'bg-primary shadow-glow-md shadow-primary/40'
-                                            : 'bg-primary/40 group-hover:bg-primary/60'
+                                        ? 'bg-primary shadow-glow-md shadow-primary/40'
+                                        : 'bg-primary/40 group-hover:bg-primary/60'
                                         }`}
                                 >
                                     <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent" />

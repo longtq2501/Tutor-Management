@@ -1,6 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
-  <title>Tutor Pro</title>
-  <desc>Logo hình tròn vÛi chï T cho éng dång Tutor Pro</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="tp-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#2563EB"/>
@@ -9,7 +7,9 @@
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="16" fill="#0F172A"/>
-  <circle cx="32" cy="24" r="18" fill="url(#tp-gradient)"/>
-  <path d="M24 21h16v4h-5v14h-6V25h-5z" fill="#F9FAFB"/>
+  <!-- Graduation Cap Shape -->
+  <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 26v16M6 26l26-14 26 14-26 14z"/>
+    <path d="M16 32v14c8 8 24 8 32 0v-14"/>
+  </g>
 </svg>
-

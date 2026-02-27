@@ -1,6 +1,11 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/components/shared/theme-provider';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { SessionManager } from '@/components/shared/SessionManager';
+import QueryProvider from '@/providers/QueryProvider';
+import { Toaster } from 'sonner';
 
 const inter = Inter({
     subsets: ['latin'],
@@ -9,18 +14,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    metadataBase: new URL('https://tutor-management-e7zh.vercel.app'),
+    metadataBase: new URL('https://tutor-pro-app.vercel.app'),
     title: 'Tutor Pro',
     description: 'Hệ thống quản lý gia sư chuyên nghiệp, tối ưu hóa quy trình dạy và học.',
-    icons: {
-        icon: '/favicon.svg',
-        shortcut: '/favicon.svg',
-        apple: '/favicon.svg',
-    },
+    manifest: '/manifest.json',
     openGraph: {
         type: 'website',
         locale: 'vi_VN',
-        url: 'https://tutor-management-e7zh.vercel.app',
+        url: 'https://tutor-pro-app.vercel.app',
         title: 'Tutor Pro - Hệ thống quản lý gia sư',
         description: 'Giải pháp quản lý gia sư, học sinh và học phí hiệu quả.',
         siteName: 'Tutor Pro',
@@ -54,11 +55,12 @@ export const metadata: Metadata = {
     },
 };
 
-import { ThemeProvider } from '@/components/shared/theme-provider';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { SessionManager } from '@/components/shared/SessionManager';
-import QueryProvider from '@/providers/QueryProvider';
-import { Toaster } from 'sonner';
+export const viewport: Viewport = {
+    themeColor: '#4f46e5',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+};
 
 export default function RootLayout({
     children,
@@ -87,4 +89,5 @@ export default function RootLayout({
         </html>
     );
 }
+
 

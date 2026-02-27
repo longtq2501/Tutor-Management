@@ -27,10 +27,10 @@ const LandingPageContent: React.FC = () => {
                         whileHover={{ scale: 1.05 }}
                         onClick={() => router.push('/')}
                     >
-                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 group-hover:border-primary/40 transition-all shadow-glow-sm">
-                            <GraduationCap className="w-6 h-6 text-primary" />
+                        <div className="w-10 h-10 bg-[#4a9eff]/10 rounded-xl flex items-center justify-center border border-[#4a9eff]/20 group-hover:border-[#4a9eff]/40 transition-all shadow-glow-sm">
+                            <GraduationCap className="w-6 h-6 text-[#fff]" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white/90">
+                        <span className="text-xl font-bold tracking-tight text-white/90 text-shadow-glow">
                             Tutor Pro
                         </span>
                     </motion.div>
@@ -51,7 +51,7 @@ const LandingPageContent: React.FC = () => {
                         <div className="hidden sm:flex items-center gap-3">
                             <button
                                 onClick={() => router.push('/login')}
-                                className="px-8 py-2.5 bg-primary text-white text-sm font-black rounded-xl hover:scale-105 transition-all shadow-glow shadow-primary/20 pointer-events-auto"
+                                className="px-8 py-2.5 bg-[#4a9eff] text-white text-sm font-black rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(74,158,255,0.4)] pointer-events-auto"
                             >
                                 Bắt đầu ngay
                             </button>
@@ -92,7 +92,7 @@ const LandingPageContent: React.FC = () => {
                                             setIsMenuOpen(false);
                                             router.push('/login');
                                         }}
-                                        className="w-full py-4 bg-primary text-white font-black rounded-2xl shadow-glow"
+                                        className="w-full py-4 bg-[#4a9eff] text-white font-black rounded-2xl shadow-glow"
                                     >
                                         Bắt đầu ngay
                                     </button>
@@ -124,7 +124,7 @@ const LandingPageContent: React.FC = () => {
 
                 {/* CTA Section */}
                 <section className="py-20 md:py-32 px-4 relative overflow-hidden">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#4a9eff]/10 blur-[120px] rounded-full pointer-events-none"></div>
 
                     <div className="max-w-5xl mx-auto text-center relative z-10">
                         <motion.div
@@ -138,7 +138,7 @@ const LandingPageContent: React.FC = () => {
 
                             <h2 className="text-4xl md:text-7xl font-black mb-6 md:mb-10 leading-[1.1] md:leading-tight">
                                 Sẵn sàng nâng tầm <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#06ffa5]">Sự nghiệp gia sư?</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4a9eff] to-[#06ffa5]">Sự nghiệp gia sư?</span>
                             </h2>
 
                             <p className="text-white/50 text-base md:text-xl mb-8 md:mb-12 max-w-2xl mx-auto font-medium">
@@ -146,7 +146,7 @@ const LandingPageContent: React.FC = () => {
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
-                                <button className="w-full sm:w-auto px-10 md:px-12 py-5 md:py-6 bg-primary text-white text-lg md:text-xl font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-glow-lg">
+                                <button className="w-full sm:w-auto px-10 md:px-12 py-5 md:py-6 bg-[#4a9eff] text-white text-lg md:text-xl font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_rgba(74,158,255,0.3)]">
                                     BẮT ĐẦU MIỄN PHÍ
                                 </button>
                                 <button className="w-full sm:w-auto px-10 md:px-12 py-5 md:py-6 glass border-white/20 text-white text-lg md:text-xl font-bold rounded-2xl hover:bg-white/10 transition-all backdrop-blur-md">

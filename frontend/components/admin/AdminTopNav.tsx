@@ -21,6 +21,8 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 const routeMap: Record<string, string> = {
     '/overview': 'Overview',
@@ -37,13 +39,14 @@ const routeMap: Record<string, string> = {
 export function AdminTopNav({ onMenuClick }: { onMenuClick?: () => void }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, logout } = useAuth();
+    const { user, logout, updateAvatar } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
 
     const currentPage = routeMap[pathname] || 'Dashboard';
 
     const handleAvatarClick = () => {
+        if (isUploading) return;
         fileInputRef.current?.click();
     };
 
@@ -51,25 +54,38 @@ export function AdminTopNav({ onMenuClick }: { onMenuClick?: () => void }) {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (!file.type.startsWith('image/')) {
+            toast.error('Vui lòng chọn file ảnh hợp lệ');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('File ảnh không được vượt quá 5MB');
+            return;
+        }
+
         setIsUploading(true);
+        const toastId = toast.loading('Đang tải ảnh lên...');
         try {
-            // TODO: Implement avatar upload
-            // const response = await authService.updateAvatar(file);
-            // Update user context with new avatar URL
-            console.log('Avatar upload:', file);
+            await updateAvatar(file);
+            toast.success('Cập nhật ảnh đại diện thành công', { id: toastId });
         } catch (error) {
             console.error('Avatar upload failed:', error);
+            toast.error('Cập nhật ảnh đại diện thất bại', { id: toastId });
         } finally {
             setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
     const handleLogout = async () => {
         try {
-            logout();
+            await logout();
             router.push('/login');
+            toast.success('Đã đăng xuất');
         } catch (error) {
             console.error('Logout failed:', error);
+            toast.error('Đăng xuất thất bại');
         }
     };
 
@@ -126,39 +142,34 @@ export function AdminTopNav({ onMenuClick }: { onMenuClick?: () => void }) {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button className="flex items-center gap-2 pl-2 border-l border-[var(--admin-border)] hover:opacity-80 transition-opacity">
-                            {user?.avatarUrl ? (
-                                <img
-                                    src={user.avatarUrl}
-                                    alt={user.fullName}
-                                    className="w-8 h-8 rounded-lg object-cover border border-[var(--admin-accent)]/30"
-                                />
-                            ) : (
-                                <div className="w-8 h-8 rounded-lg bg-[var(--admin-accent-dim)] border border-[var(--admin-accent)]/30 flex items-center justify-center text-[var(--admin-accent)] text-xs font-bold">
+                            <Avatar className="h-8 w-8 rounded-lg border border-[var(--admin-accent)]/30">
+                                <AvatarImage src={user?.avatarUrl} alt={user?.fullName} className="object-cover" />
+                                <AvatarFallback className="bg-[var(--admin-accent-dim)] text-[var(--admin-accent)] text-xs font-bold">
                                     {user?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || <User className="h-4 w-4" />}
-                                </div>
-                            )}
+                                </AvatarFallback>
+                            </Avatar>
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 bg-[var(--admin-surface)] border border-[var(--admin-border)]">
-                        <DropdownMenuLabel className="flex flex-col gap-1 px-3 py-3 border-b border-[var(--admin-border)]">
-                            <p className="text-sm font-semibold text-[var(--admin-text)]">{user?.fullName || 'User'}</p>
-                            <p className="text-xs text-[var(--admin-text3)]">{user?.email || ''}</p>
+                    <DropdownMenuContent align="end" className="w-56 bg-[var(--admin-surface)] border border-[var(--admin-border)] shadow-xl p-1">
+                        <DropdownMenuLabel className="flex flex-col gap-1 px-3 py-3 border-b border-[var(--admin-border)] mb-1">
+                            <p className="text-sm font-semibold text-[var(--admin-text)] leading-none">{user?.fullName || 'User'}</p>
+                            <p className="text-[10px] text-[var(--admin-text3)] truncate mt-1">{user?.email || ''}</p>
                         </DropdownMenuLabel>
                         <DropdownMenuItem
                             onClick={handleAvatarClick}
                             disabled={isUploading}
-                            className="flex items-center gap-3 px-3 py-2 cursor-pointer text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] focus:bg-[var(--admin-surface2)] disabled:opacity-50"
+                            className="flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-lg text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] focus:bg-[var(--admin-surface2)] focus:text-[var(--admin-text)] transition-all disabled:opacity-50"
                         >
-                            <Camera className="h-4 w-4" />
-                            <span className="text-sm text-[#fff]">Đổi avatar</span>
+                            <Camera className="h-4 w-4 shrink-0" />
+                            <span className="text-xs font-bold">Đổi ảnh đại diện</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-[var(--admin-border)] my-1" />
                         <DropdownMenuItem
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-3 py-2 cursor-pointer text-[var(--admin-red)] hover:text-[var(--admin-red)] hover:bg-[var(--admin-red)]/10 focus:bg-[var(--admin-red)]/10"
+                            className="flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-lg text-red-500 hover:text-white hover:bg-red-500 focus:bg-red-500 focus:text-white transition-all"
                         >
-                            <LogOut className="h-4 w-4" />
-                            <span className="text-sm text-[#fff]">Đăng xuất</span>
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            <span className="text-xs font-bold">Đăng xuất</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

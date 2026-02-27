@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://tutor-management-e7zh.vercel.app';
+    const baseUrl = 'https://tutor-pro-app.vercel.app';
 
     return [
         {

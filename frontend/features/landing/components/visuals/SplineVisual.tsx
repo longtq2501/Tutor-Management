@@ -29,22 +29,15 @@ const SplineVisual: React.FC = () => {
     if (hasError) {
         return (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-purple-900/20">
-                <div className="relative w-full h-full opacity-50">
-                    <Image
-                        src="/hero_3d_placeholder.png"
-                        alt="3D Education Scene"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                </div>
+                {/* Fallback to a simple blurred sphere if Spline fails */}
+                <div className="w-64 h-64 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-[80px] opacity-20" />
             </div>
         );
     }
 
     return (
         <div className="relative w-full h-full overflow-hidden">
-            {/* High-Quality Placeholder */}
+            {/* Subtle Loading Glow */}
             <AnimatePresence mode="wait">
                 {!isSceneLoaded && (
                     <motion.div
@@ -53,18 +46,9 @@ const SplineVisual: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.8 }}
-                        className="absolute inset-0 z-10"
+                        className="absolute inset-0 z-10 flex items-center justify-center"
                     >
-                        <Image
-                            src="/hero_3d_placeholder.png"
-                            alt="Loading 3D Scene..."
-                            fill
-                            className="object-cover lg:scale-[1.3] translate-y-[5%]"
-                            priority
-                            sizes="(max-width: 1024px) 100vw, 80vw"
-                        />
-                        {/* Shimmer Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                        <div className="w-[40%] h-[40%] bg-blue-500/10 blur-[100px] rounded-full animate-pulse" />
                     </motion.div>
                 )}
             </AnimatePresence>

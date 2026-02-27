@@ -120,11 +120,11 @@ const AppHeader = React.memo(({ user, initials, roleBadge, logout }: {
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-64" align="end" forceMount>
+                            <DropdownMenuContent className="w-64 bg-background/95 backdrop-blur-xl border-border shadow-2xl" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal p-4">
                                     <div className="flex flex-col space-y-2">
                                         <div className="flex flex-col">
-                                            <p className="text-sm font-bold leading-none">{user?.fullName}</p>
+                                            <p className="text-sm font-bold leading-none text-foreground">{user?.fullName}</p>
                                             <p className="text-xs leading-none text-muted-foreground mt-1 truncate">
                                                 {user?.email}
                                             </p>
@@ -136,17 +136,17 @@ const AppHeader = React.memo(({ user, initials, roleBadge, logout }: {
                                         )}
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
+                                <DropdownMenuSeparator className="bg-border/50" />
                                 <DropdownMenuItem
                                     onClick={() => router.push('/dashboard?view=settings')}
-                                    className="cursor-pointer p-3"
+                                    className="cursor-pointer p-3 focus:bg-primary/5 group"
                                 >
-                                    <User className="mr-2 h-4 w-4" />
+                                    <User className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <span className="font-bold">Thông tin cá nhân</span>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => logout()} className="text-red-600 dark:text-red-400 cursor-pointer p-3">
-                                    <LogOut className="mr-2 h-4 w-4" />
+                                <DropdownMenuSeparator className="bg-border/50" />
+                                <DropdownMenuItem onClick={() => logout()} className="text-red-600 dark:text-red-400 cursor-pointer p-3 focus:bg-red-500/5 group">
+                                    <LogOut className="mr-2 h-4 w-4 text-red-600/70 group-hover:text-red-600 transition-colors" />
                                     <span className="font-bold">Đăng xuất</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

@@ -51,8 +51,10 @@ public class AuthenticationService {
 
         User savedUser = userRepository.save(user);
 
-        // ✅ CRITICAL: Auto-provision Tutor profile
-        tutorService.ensureTutorProfile(savedUser);
+        // ✅ CRITICAL: Auto-provision Tutor profile - ONLY for TUTORs
+        if ("TUTOR".equals(savedUser.getRole().getName())) {
+            tutorService.ensureTutorProfile(savedUser);
+        }
 
         // Log administrative activity
         adminStatsService.logActivity(
@@ -82,8 +84,10 @@ public class AuthenticationService {
         // 2. Get user
         User user = (User) authentication.getPrincipal();
 
-        // ✅ Ensure profile exists on every login (idempotent)
-        tutorService.ensureTutorProfile(user);
+        // ✅ Ensure profile exists on every login (idempotent) - ONLY for TUTORs
+        if ("TUTOR".equals(user.getRole().getName())) {
+            tutorService.ensureTutorProfile(user);
+        }
 
         // 3. Generate tokens
         String accessToken = jwtService.generateToken(user);

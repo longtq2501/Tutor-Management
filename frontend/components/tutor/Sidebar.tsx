@@ -1,6 +1,7 @@
 'use client';
 
 import { useUI } from '@/contexts/UIContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { ChevronLeft, GraduationCap } from 'lucide-react';
@@ -21,6 +22,7 @@ const SPRING_CONFIG = { type: "spring", stiffness: 300, damping: 30, mass: 1 } a
 
 export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarProps) => {
     const { isSidebarOpen, setSidebarOpen, isCollapsed, setIsCollapsed } = useUI();
+    const { user } = useAuth();
     const [isMobile, setIsMobile] = useState(false);
     const [isLargeDesktop, setIsLargeDesktop] = useState(false);
 
