@@ -55,6 +55,9 @@ public class User implements UserDetails {
     @Column(name = "student_id")
     private Long studentId;
 
+    @Column(name = "role")
+    private String roleName;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -65,11 +68,19 @@ public class User implements UserDetails {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        syncRoleName();
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        syncRoleName();
+    }
+
+    private void syncRoleName() {
+        if (this.role != null) {
+            this.roleName = this.role.getName();
+        }
     }
 
     // Manual Getters to bypass Lombok issues
@@ -77,7 +88,13 @@ public class User implements UserDetails {
     public String getEmail() { return email; }
     public String getFullName() { return fullName; }
     public RoleEntity getRole() { return role; }
-    public Long getStudentId() { return studentId; }
+    
+    public void setRole(RoleEntity role) {
+        this.role = role;
+        if (role != null) {
+            this.roleName = role.getName();
+        }
+    }
     public boolean isEnabled() { return enabled; }
     public boolean isAccountNonLocked() { return accountNonLocked; }
 
