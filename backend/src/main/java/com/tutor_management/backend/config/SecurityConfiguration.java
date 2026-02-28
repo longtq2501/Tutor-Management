@@ -69,6 +69,7 @@ public class SecurityConfiguration {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization
                                 .authorizationRequestResolver(new CustomOAuth2AuthorizationRequestResolver(clientRegistrationRepository))
+                                .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository())
                         )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)

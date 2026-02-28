@@ -138,31 +138,52 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void repairUsersWithMissingRoles() {
-        List<User> usersWithNoRole = userRepository.findAll().stream()
-                .filter(u -> u.getRole() == null)
-                .toList();
-
-        if (usersWithNoRole.isEmpty()) {
-            return;
-        }
-
-        log.info("🔧 Found {} users with missing roles. Attempting repair...", usersWithNoRole.size());
-        
+        List<User> allUsers = userRepository.findAll();
         RoleEntity adminRole = roleRepository.findByName("ADMIN").orElse(null);
         RoleEntity tutorRole = roleRepository.findByName("TUTOR").orElse(null);
         RoleEntity studentRole = roleRepository.findByName("STUDENT").orElse(null);
 
-        for (User user : usersWithNoRole) {
-            if (user.getEmail().contains("admin") && adminRole != null) {
-                user.setRole(adminRole);
-            } else if (user.getEmail().contains("tutor") && tutorRole != null) {
-                user.setRole(tutorRole);
-            } else if (studentRole != null) {
-                user.setRole(studentRole);
+        // 1. Repair users with NULL role
+        List<User> usersWithNoRole = allUsers.stream()
+                .filter(u -> u.getRole() == null)
+                .toList();
+
+        if (!usersWithNoRole.isEmpty()) {
+            log.info("🔧 Found {} users with missing roles. Attempting repair...", usersWithNoRole.size());
+            for (User user : usersWithNoRole) {
+                repairSingleUser(user, adminRole, tutorRole, studentRole);
             }
-            userRepository.save(user);
-            log.info("✅ Repaired user: {} with role: {}", user.getEmail(), user.getRole().getName());
         }
+
+        // 2. Repair misassigned TUTOR roles (Fix for previous bug)
+        // If a user has role TUTOR but NO tutor profile and look like a student (heuristic)
+        // Note: This is safe because real Tutors have a profile created immediately in CustomOAuth2UserService
+        List<User> misassignedTutors = allUsers.stream()
+                .filter(u -> u.getRole() != null && "TUTOR".equals(u.getRole().getName()))
+                .filter(u -> !u.getEmail().contains("tutor") && !u.getEmail().contains("admin"))
+                .filter(u -> u.getStudentId() != null) // If they have a studentId, they are definitely a student
+                .toList();
+
+        if (!misassignedTutors.isEmpty()) {
+            log.info("🔧 Found {} misassigned TUTOR accounts. Converting back to STUDENT...", misassignedTutors.size());
+            for (User user : misassignedTutors) {
+                user.setRole(studentRole);
+                userRepository.save(user);
+                log.info("✅ Repaired misassigned user: {} -> STUDENT", user.getEmail());
+            }
+        }
+    }
+
+    private void repairSingleUser(User user, RoleEntity adminRole, RoleEntity tutorRole, RoleEntity studentRole) {
+        if (user.getEmail().contains("admin") && adminRole != null) {
+            user.setRole(adminRole);
+        } else if (user.getEmail().contains("tutor") && tutorRole != null) {
+            user.setRole(tutorRole);
+        } else if (studentRole != null) {
+            user.setRole(studentRole);
+        }
+        userRepository.save(user);
+        log.info("✅ Repaired user: {} with role: {}", user.getEmail(), user.getRole().getName());
     }
 
     private User createUser(String email, String fullName, RoleEntity role) {
