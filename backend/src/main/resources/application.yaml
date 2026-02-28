@@ -107,6 +107,7 @@ jwt:
 
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: native # ✅ FIX: Detect HTTPS protocol from proxy (Railway/Render)
   error:
     include-message: always
     include-binding-errors: always

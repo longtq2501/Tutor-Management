@@ -56,12 +56,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             String roleName = "TUTOR";
             ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-            HttpSession session = attr.getRequest().getSession(false);
+            jakarta.servlet.http.HttpServletRequest request = attr.getRequest();
+            
+            // 1. Try reading from Session (Local/Classic)
+            HttpSession session = request.getSession(false);
             if (session != null) {
                 String roleHint = (String) session.getAttribute("OAUTH2_ROLE_HINT");
                 if (roleHint != null) {
                     roleName = roleHint.toUpperCase();
                     session.removeAttribute("OAUTH2_ROLE_HINT");
+                }
+            }
+
+            // 2. Try reading from Cookie (Production/Railway Fix)
+            if ("TUTOR".equals(roleName) && request.getCookies() != null) {
+                for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                    if ("OAUTH2_ROLE_HINT".equals(cookie.getName())) {
+                        roleName = cookie.getValue().toUpperCase();
+                        
+                        // Clear the cookie immediately
+                        jakarta.servlet.http.HttpServletResponse response = attr.getResponse();
+                        if (response != null) {
+                            String clearCookie = "OAUTH2_ROLE_HINT=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None";
+                            response.addHeader("Set-Cookie", clearCookie);
+                        }
+                        break;
+                    }
                 }
             }
 

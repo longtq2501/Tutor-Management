@@ -39,9 +39,25 @@ public class CustomOAuth2AuthorizationRequestResolver implements OAuth2Authoriza
             Map<String, Object> additionalParameters = new LinkedHashMap<>(authorizationRequest.getAdditionalParameters());
             additionalParameters.put("role_hint", role);
             
-            // Also store it in session so CustomOAuth2UserService can retrieve it
+            // 1. Store it in session (Existing logic - works for local)
             request.getSession().setAttribute("OAUTH2_ROLE_HINT", role);
 
+            // 2. Store it in a Secure, Cross-Site Cookie (Fix for Production/Railway)
+            try {
+                org.springframework.web.context.request.ServletRequestAttributes attr = 
+                    (org.springframework.web.context.request.ServletRequestAttributes) 
+                    org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes();
+                jakarta.servlet.http.HttpServletResponse response = attr.getResponse();
+                
+                if (response != null) {
+                    // Manual header for SameSite=None support
+                    String cookieHeader = String.format("OAUTH2_ROLE_HINT=%s; Path=/; Max-Age=300; HttpOnly; Secure; SameSite=None", role);
+                    response.addHeader("Set-Cookie", cookieHeader);
+                }
+            } catch (Exception e) {
+                // Fallback: log error but continue with session-only
+            }
+            
             return OAuth2AuthorizationRequest.from(authorizationRequest)
                     .additionalParameters(additionalParameters)
                     .build();
