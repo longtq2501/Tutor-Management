@@ -47,9 +47,10 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const isAuthPath = originalRequest.url && ['/auth/login', '/auth/register', '/auth/refresh-token'].some(path => originalRequest.url.includes(path));
 
-    // KIỂM TRA NẾU LỖI LÀ 401 (UNAUTHORIZED) VÀ CHƯA THỬ LẠI
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // KIỂM TRA NẾU LỖI LÀ 401 (UNAUTHORIZED), CHƯA THỬ LẠI VÀ KHÔNG PHẢI API AUTH
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthPath) {
       originalRequest._retry = true;
 
       try {
@@ -78,7 +79,11 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+
+        // Chỉ redirect nếu không ở trang login để tránh lặp vô tận
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

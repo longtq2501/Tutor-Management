@@ -52,13 +52,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user;
         if (userOptional.isPresent()) {
             user = userOptional.get();
-            
-            // ✅ CRITICAL: Prevent students from logging in via Google
-            if ("STUDENT".equals(user.getRole().getName())) {
-                log.warn("Blocked Google login attempt for student account: {}", email);
-                throw new OAuth2AuthenticationException("Học sinh vui lòng đăng nhập bằng tài khoản được cấp từ Gia sư.");
-            }
-            
             updateExistingUser(user, name, picture);
         } else {
             String roleName = "TUTOR";
@@ -77,10 +70,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .orElseThrow(() -> new OAuth2AuthenticationException("Role not found: " + finalRoleName));
             
             user = registerNewUser(email, name, picture, role);
-        }
 
-        // ✅ CRITICAL: Centralized Tutor profile provisioning
-        tutorService.ensureTutorProfile(user);
+            // ✅ CRITICAL: Provision Tutor profile ONLY for new TUTOR registrations
+            if ("TUTOR".equals(user.getRole().getName())) {
+                tutorService.ensureTutorProfile(user);
+            }
+        }
 
         return oAuth2User;
     }

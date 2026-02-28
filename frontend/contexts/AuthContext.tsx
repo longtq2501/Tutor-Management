@@ -122,7 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Login error:', error);
-      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Đăng nhập thất bại';
+      const errorData = (error as any).response?.data;
+      const message = errorData?.message || 'Đăng nhập thất bại';
       throw new Error(message);
     }
   }, [router]);
@@ -140,7 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Update avatar error:', error);
-      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Cập nhật ảnh đại diện thất bại';
+      const errorData = (error as any).response?.data;
+      const message = errorData?.message || 'Cập nhật ảnh đại diện thất bại';
       throw new Error(message);
     }
   }, [user]);
@@ -157,7 +159,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Update profile error:', error);
-      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Cập nhật thông tin thất bại';
+      const errorData = (error as any).response?.data;
+
+      let message = errorData?.message || 'Cập nhật thông tin thất bại';
+
+      // Handle validation errors if present
+      if (errorData?.data && typeof errorData.data === 'object') {
+        const validationErrors = Object.values(errorData.data).join(', ');
+        if (validationErrors) message = `${message}: ${validationErrors}`;
+      }
+
       throw new Error(message);
     }
   }, [user]);

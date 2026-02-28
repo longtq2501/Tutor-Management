@@ -32,7 +32,7 @@ public class AuthenticationService {
     public AuthResponse register(RegisterRequest request) {
         // Check if user already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new com.tutor_management.backend.exception.AlreadyExistsException("Email này đã được sử dụng bởi một tài khoản khác.");
         }
 
         // Find role
@@ -73,7 +73,12 @@ public class AuthenticationService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // 1. Authenticate user
+        // 1. Check if user exists first to give granular feedback
+        if (!userRepository.existsByEmail(request.getEmail())) {
+            throw new com.tutor_management.backend.exception.EmailNotFoundException("Email không tồn tại trong hệ thống.");
+        }
+
+        // 2. Authenticate user
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
