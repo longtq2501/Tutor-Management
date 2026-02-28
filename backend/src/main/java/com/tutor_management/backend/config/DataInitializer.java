@@ -143,7 +143,7 @@ public class DataInitializer implements CommandLineRunner {
         RoleEntity tutorRole = roleRepository.findByName("TUTOR").orElse(null);
         RoleEntity studentRole = roleRepository.findByName("STUDENT").orElse(null);
 
-        // 1. Repair users with NULL role
+        // Repair users with NULL role
         List<User> usersWithNoRole = allUsers.stream()
                 .filter(u -> u.getRole() == null)
                 .toList();
@@ -152,24 +152,6 @@ public class DataInitializer implements CommandLineRunner {
             log.info("🔧 Found {} users with missing roles. Attempting repair...", usersWithNoRole.size());
             for (User user : usersWithNoRole) {
                 repairSingleUser(user, adminRole, tutorRole, studentRole);
-            }
-        }
-
-        // 2. Repair misassigned TUTOR roles (Fix for previous bug)
-        // If a user has role TUTOR but NO tutor profile and look like a student (heuristic)
-        // Note: This is safe because real Tutors have a profile created immediately in CustomOAuth2UserService
-        List<User> misassignedTutors = allUsers.stream()
-                .filter(u -> u.getRole() != null && "TUTOR".equals(u.getRole().getName()))
-                .filter(u -> !u.getEmail().contains("tutor") && !u.getEmail().contains("admin"))
-                .filter(u -> u.getStudentId() != null) // If they have a studentId, they are definitely a student
-                .toList();
-
-        if (!misassignedTutors.isEmpty()) {
-            log.info("🔧 Found {} misassigned TUTOR accounts. Converting back to STUDENT...", misassignedTutors.size());
-            for (User user : misassignedTutors) {
-                user.setRole(studentRole);
-                userRepository.save(user);
-                log.info("✅ Repaired misassigned user: {} -> STUDENT", user.getEmail());
             }
         }
     }
