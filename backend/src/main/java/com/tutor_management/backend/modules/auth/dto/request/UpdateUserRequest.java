@@ -14,4 +14,9 @@ public class UpdateUserRequest {
 
     @NotBlank(message = "Full name is required")
     private String fullName;
+
+    private String bankName;
+    private String accountNumber;
+    private String accountName;
+    private String bankCode;
 }

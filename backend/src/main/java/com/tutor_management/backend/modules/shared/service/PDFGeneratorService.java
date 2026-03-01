@@ -273,7 +273,7 @@ public class PDFGeneratorService {
         Paragraph bankDetails = new Paragraph().setFont(getRegularFont()).setFontSize(10)
                 .add(new Text("THÔNG TIN CHUYỂN KHOẢN\n").setFont(getBoldFont()).setFontSize(12))
                 .add("Ngân hàng: " + invoice.getBankInfo().getBankName() + "\n")
-                .add("Số tài khoản: 1041819355\n")
+                .add("Số tài khoản: " + invoice.getBankInfo().getAccountNumber() + "\n")
                 .add("Tên tài khoản: " + invoice.getBankInfo().getAccountName() + "\n")
                 .add("Nội dung: " + invoice.getInvoiceNumber());
 

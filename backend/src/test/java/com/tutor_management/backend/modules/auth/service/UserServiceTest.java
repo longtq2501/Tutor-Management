@@ -72,6 +72,9 @@ class UserServiceTest {
         // Given
         UpdateUserRequest request = UpdateUserRequest.builder()
                 .fullName("Updated Name")
+                .bankName("Vietcombank")
+                .accountNumber("123456789")
+                .accountName("TEST USER")
                 .build();
         
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -81,7 +84,13 @@ class UserServiceTest {
         AuthResponse.UserInfo result = userService.updateUserProfile(1L, request);
 
         // Then
-        verify(userRepository).save(argThat(u -> u.getFullName().equals("Updated Name")));
+        verify(userRepository).save(argThat(u -> 
+            u.getFullName().equals("Updated Name") &&
+            u.getBankName().equals("Vietcombank") &&
+            u.getAccountNumber().equals("123456789") &&
+            u.getAccountName().equals("TEST USER")
+        ));
         assertEquals("Updated Name", result.getFullName());
+        assertEquals("Vietcombank", result.getBankName());
     }
 }

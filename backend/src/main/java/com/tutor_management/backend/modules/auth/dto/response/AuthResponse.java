@@ -30,5 +30,9 @@ public class AuthResponse {
         private String avatarUrl;
 
         private Long studentId;
+        private String bankName;
+        private String accountNumber;
+        private String accountName;
+        private String bankCode;
     }
 }

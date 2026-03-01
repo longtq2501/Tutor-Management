@@ -28,6 +28,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
         
         user.setFullName(request.getFullName());
+        user.setBankName(request.getBankName());
+        user.setAccountNumber(request.getAccountNumber());
+        user.setAccountName(request.getAccountName());
+        user.setBankCode(request.getBankCode());
         
         return mapToUserInfo(userRepository.save(user));
     }
@@ -40,6 +44,10 @@ public class UserService {
                 .role(user.getRole().getName())
                 .avatarUrl(user.getAvatarUrl())
                 .studentId(user.getStudentId())
+                .bankName(user.getBankName())
+                .accountNumber(user.getAccountNumber())
+                .accountName(user.getAccountName())
+                .bankCode(user.getBankCode())
                 .build();
     }
 }

@@ -21,6 +21,10 @@ import com.tutor_management.backend.modules.student.repository.StudentRepository
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.tutor_management.backend.modules.auth.User;
+import com.tutor_management.backend.modules.auth.UserRepository;
+import com.tutor_management.backend.modules.auth.RoleEntity;
 
 /**
  * Service for dynamically generating financial invoices from session data.
@@ -34,6 +38,7 @@ public class InvoiceService {
 
     private final SessionRecordRepository sessionRecordRepository;
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
 
     private final DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -160,15 +165,39 @@ public class InvoiceService {
     }
 
     private InvoiceResponse buildResponse(String num, String name, String month, List<SessionRecord> records, List<InvoiceItem> items, long total) {
+        BankInfo bankInfo = getCurrentTutorBankInfo();
+        
         return InvoiceResponse.builder()
                 .invoiceNumber(num).studentName(name).month(month)
                 .totalSessions(records.stream().mapToInt(SessionRecord::getSessions).sum())
                 .totalHours(records.stream().mapToDouble(SessionRecord::getHours).sum())
                 .totalAmount(total).items(items)
-                .bankInfo(BankInfo.getDefault())
-                .qrCodeUrl(generateQRContent(total, num))
+                .bankInfo(bankInfo)
+                .qrCodeUrl(generateQRContent(total, num, bankInfo.getAccountNumber(), bankInfo.getBankCode()))
                 .createdDate(LocalDate.now().format(dayFormatter))
                 .build();
+    }
+
+    private BankInfo getCurrentTutorBankInfo() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof User user) {
+                // Refresh user from DB to get latest bank info
+                User latestUser = userRepository.findById(user.getId()).orElse(user);
+                
+                if (latestUser.getBankName() != null && latestUser.getAccountNumber() != null) {
+                    return BankInfo.builder()
+                            .bankName(latestUser.getBankName())
+                            .accountNumber(latestUser.getAccountNumber())
+                            .accountName(latestUser.getAccountName())
+                            .bankCode(latestUser.getBankCode())
+                            .build();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch current tutor bank info, using default: {}", e.getMessage());
+        }
+        return BankInfo.getDefault();
     }
 
     private String formatMultipleMonths(Set<String> months) {
@@ -191,10 +220,10 @@ public class InvoiceService {
         return String.format("INV-%s-%03d%s", base, count + 1, suffix.isEmpty() ? "" : "-" + suffix);
     }
 
-    private String generateQRContent(long amount, String num) {
-        String bankCode = "970436"; // Vietcombank
-        String acc = "1041819355";
+    private String generateQRContent(long amount, String num, String accountNumber, String bankCode) {
+        String code = (bankCode != null && !bankCode.isEmpty()) ? bankCode : "970436"; // Vietcombank default
+        String acc = accountNumber != null ? accountNumber : "1041819355"; // Fallback to demo if null
         return String.format("https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s", 
-                bankCode, acc, amount, num.replace("-", ""));
+                code, acc, amount, num.replace("-", ""));
     }
 }

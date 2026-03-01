@@ -55,6 +55,18 @@ public class User implements UserDetails {
     @Column(name = "student_id")
     private Long studentId;
 
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "account_number")
+    private String accountNumber;
+
+    @Column(name = "account_name")
+    private String accountName;
+
+    @Column(name = "bank_code")
+    private String bankCode;
+
     @Column(name = "role")
     private String roleName;
 

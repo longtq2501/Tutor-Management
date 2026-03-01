@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,7 @@ public class AdminDocumentService {
         // Batch fetch tutor names for optimization
         Set<Long> tutorIds = documents.getContent().stream()
                 .map(d -> d.getTutor() != null ? d.getTutor().getId() : null)
-                .filter(id -> id != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         
         Map<Long, String> tutorNames = tutorRepository.findAllById(tutorIds).stream()

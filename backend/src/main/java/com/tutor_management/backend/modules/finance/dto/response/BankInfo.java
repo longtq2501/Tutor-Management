@@ -14,6 +14,7 @@ public class BankInfo {
     private String bankName;
     private String accountNumber;
     private String accountName;
+    private String bankCode;
     private String swiftCode;
 
     /**
@@ -24,6 +25,7 @@ public class BankInfo {
                 .bankName("Vietcombank")
                 .accountNumber("1041819355")
                 .accountName("TON QUYNH LONG")
+                .bankCode("970436")
                 .swiftCode("BFTVVNVX")
                 .build();
     }

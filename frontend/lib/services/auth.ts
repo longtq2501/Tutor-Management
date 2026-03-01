@@ -8,6 +8,10 @@ export interface UserInfo {
   role: 'ADMIN' | 'TUTOR' | 'STUDENT';
   avatarUrl?: string;
   studentId?: number;
+  bankName?: string;
+  accountNumber?: string;
+  accountName?: string;
+  bankCode?: string;
 }
 
 export interface ApiResponse<T> {
@@ -79,10 +83,16 @@ export const authService = {
   },
 
   /** * CẬP NHẬT THÔNG TIN CÁ NHÂN
-   * @param {Object} data - Chứa fullName
+   * @param {Object} data - Chứa fullName và các trường thanh toán
    * @returns {Promise<any>}
    */
-  updateProfile: async (data: { fullName: string }): Promise<ApiResponse<UserInfo>> => {
+  updateProfile: async (data: {
+    fullName: string;
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
+    bankCode?: string;
+  }): Promise<ApiResponse<UserInfo>> => {
     const response = await api.put('/users/me', data);
     return response.data;
   },

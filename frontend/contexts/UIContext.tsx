@@ -129,11 +129,11 @@ export function DashboardHeader({ title, subtitle, actions }: { title: string; s
         <>
             <HeaderPortal to="title">
                 <div className="flex-1 min-w-[120px] sm:min-w-[180px] animate-in fade-in slide-in-from-left-4 duration-500 py-1">
-                    <h1 className="text-lg sm:text-x lg:text-2xl 2xl:text-5xl font-black tracking-tight leading-[1.1] bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent break-words sm:whitespace-normal">
+                    <h1 className="text-lg sm:text-xl lg:text-2xl 2xl:text-4xl 3xl:text-6xl font-black tracking-tight leading-[1.1] bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent break-words sm:whitespace-normal">
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-[10px] sm:text-xs lg:text-[8px] 2xl:text-base text-muted-foreground mt-0.5 sm:mt-1 max-w-2xl font-medium line-clamp-1 sm:line-clamp-none opacity-80">
+                        <p className="text-[10px] sm:text-xs lg:text-sm 2xl:text-lg 3xl:text-2xl text-muted-foreground mt-0.5 sm:mt-1 max-w-2xl 2xl:max-w-4xl font-medium line-clamp-1 sm:line-clamp-none opacity-80">
                             {subtitle}
                         </p>
                     )}

@@ -12,7 +12,13 @@ interface AuthContextType {
   loginWithToken: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   updateAvatar: (file: File) => Promise<void>;
-  updateProfile: (data: { fullName: string }) => Promise<void>;
+  updateProfile: (data: {
+    fullName: string;
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
+    bankCode?: string;
+  }) => Promise<void>;
   isAuthenticated: boolean;
   hasRole: (role: 'ADMIN' | 'TUTOR' | 'STUDENT') => boolean;
   hasAnyRole: (roles: Array<'ADMIN' | 'TUTOR' | 'STUDENT'>) => boolean;
@@ -147,13 +153,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const updateProfile = useCallback(async (data: { fullName: string }) => {
+  const updateProfile = useCallback(async (data: {
+    fullName: string;
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
+    bankCode?: string;
+  }) => {
     try {
       const response = await authService.updateProfile(data);
       const updatedData = response.data;
 
       if (user) {
-        const updatedUser = { ...user, fullName: updatedData.fullName };
+        const updatedUser = {
+          ...user,
+          fullName: updatedData.fullName,
+          bankName: updatedData.bankName,
+          accountNumber: updatedData.accountNumber,
+          accountName: updatedData.accountName,
+          bankCode: updatedData.bankCode
+        };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }

@@ -10,6 +10,7 @@ import com.tutor_management.backend.modules.admin.repository.ActivityLogReposito
 import com.tutor_management.backend.modules.finance.dto.response.MonthlyStats;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
+import com.tutor_management.backend.modules.tutor.entity.Tutor;
 import com.tutor_management.backend.modules.tutor.repository.TutorRepository;
 import com.tutor_management.backend.util.FormatterUtils;
 import lombok.RequiredArgsConstructor;
@@ -98,7 +99,7 @@ public class AdminStatsService {
                 .map(r -> {
                     Long tutorId = (Long) r[0];
                     String name = tutorRepository.findById(tutorId)
-                            .map(t -> t.getFullName())
+                            .map(Tutor::getFullName)
                             .orElse("Unknown");
                     return TopTutorResponse.builder()
                             .tutorId(tutorId)
