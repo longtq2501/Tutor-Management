@@ -17,6 +17,7 @@ import { MediaFallbackUI } from './MediaFallbackUI';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useHeartbeat } from '../hooks/useHeartbeat';
 import { useRoomSync } from '../hooks/useRoomSync';
+import { useWebRTCSignaling } from '../hooks/useWebRTCSignaling';
 
 interface LiveRoomDisplayProps {
     roomId: string;
@@ -43,6 +44,9 @@ export const LiveRoomDisplay: React.FC<LiveRoomDisplayProps> = ({ roomId, curren
 
     // ✅ Sync Room State (Guarded against infinite loops)
     useRoomSync(roomId);
+
+    // ✅ WebRTC Signaling
+    useWebRTCSignaling(roomId, currentUserId, media);
 
     // Start heartbeat
     useHeartbeat(roomId);

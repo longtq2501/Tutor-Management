@@ -22,9 +22,13 @@ export interface UseMediaStreamResult {
     isLoading: boolean;
     isMicMuted: boolean;
     isCameraMuted: boolean;
+    isScreenSharing: boolean;
+    screenStream: MediaStream | null;
     retry: (newConstraints?: MediaStreamConstraints) => void;
     toggleMic: () => void;
     toggleCamera: () => void;
+    startScreenShare: () => Promise<MediaStream | null>;
+    stopScreenShare: () => void;
     devices: MediaDeviceInfo[];
     switchDevice: (deviceId: string, kind: 'audio' | 'video') => void;
 }
@@ -44,6 +48,8 @@ export const useMediaStream = (
     const [constraints, setConstraints] = useState(initialConstraints);
     const [isMicMuted, setIsMicMuted] = useState<boolean>(false);
     const [isCameraMuted, setIsCameraMuted] = useState<boolean>(false);
+    const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+    const [isScreenSharing, setIsScreenSharing] = useState<boolean>(false);
     const streamRef = useRef<MediaStream | null>(null);
     const muteStateRef = useRef({ audio: false, video: false });
 
@@ -72,16 +78,47 @@ export const useMediaStream = (
     }, []);
 
     const toggleCamera = useCallback(() => {
+        console.log('[MediaStream] Toggling camera. Current muted state:', isCameraMuted);
         setIsCameraMuted(prev => {
             const newMutedState = !prev;
             if (streamRef.current) {
+                console.log('[MediaStream] Setting video tracks enabled to:', !newMutedState);
                 streamRef.current.getVideoTracks().forEach(track => {
                     track.enabled = !newMutedState;
                 });
             }
             return newMutedState;
         });
+    }, [isCameraMuted]);
+
+    const startScreenShare = useCallback(async () => {
+        try {
+            console.log('[MediaStream] Requesting screen share');
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: false
+            });
+            setScreenStream(stream);
+            setIsScreenSharing(true);
+
+            stream.getVideoTracks()[0].onended = () => {
+                stopScreenShare();
+            };
+
+            return stream;
+        } catch (err) {
+            console.error('[MediaStream] Failed to start screen share:', err);
+            return null;
+        }
     }, []);
+
+    const stopScreenShare = useCallback(() => {
+        if (screenStream) {
+            screenStream.getTracks().forEach(track => track.stop());
+        }
+        setScreenStream(null);
+        setIsScreenSharing(false);
+    }, [screenStream]);
 
     const getDevices = useCallback(async () => {
         try {
@@ -169,5 +206,20 @@ export const useMediaStream = (
         }));
     }, []);
 
-    return { stream, error, isLoading, isMicMuted, isCameraMuted, retry, toggleMic, toggleCamera, devices, switchDevice };
+    return {
+        stream,
+        screenStream,
+        error,
+        isLoading,
+        isMicMuted,
+        isCameraMuted,
+        isScreenSharing,
+        retry,
+        toggleMic,
+        toggleCamera,
+        startScreenShare,
+        stopScreenShare,
+        devices,
+        switchDevice
+    };
 };

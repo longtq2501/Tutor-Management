@@ -19,6 +19,32 @@
     - Backend: `OnlineSessionWebSocketController.java`, `WhiteboardStrokeMessage.java`, `WhiteboardDeltaMessage.java`, `WhiteboardUndoMessage.java`
     - Frontend: `useWhiteboardSync.ts`, `Whiteboard.tsx`
 
+- [x] [P1-High] No remote video/WebRTC P2P connection
+  - **RESOLVED**: Implemented complete WebRTC signaling flow (Offer/Answer/Candidate) via WebSocket.
+  - **Solution**: 
+    1. Backend: Added `WebRTCSignalMessage` DTO and implemented signaling forwarding in `OnlineSessionWebSocketController`.
+    2. Frontend: Created `useWebRTCSignaling` hook to manage `RTCPeerConnection` lifecycle and handle track replacement.
+  - **Impact**: Participants can now see each other's camera streams in real-time with P2P efficiency.
+  - **Files Changed**: `OnlineSessionWebSocketController.java`, `useWebRTCSignaling.ts`, `LiveRoomDisplay.tsx`.
+
+- [x] [P1-High] Camera button suspected of triggering screen share (Task 1)
+  - **STATUS**: VERIFIED & LOGGED. Mapping in `MediaControls.tsx` is correct. Added detailed logging in `useMediaStream.ts` to trace `getUserMedia` calls and track enablement.
+  - **Action**: Use browser console to verify if `getDisplayMedia` is actually called when clicking camera.
+
+- [x] [P2-Medium] No screen sharing capability (Task 4)
+  - **RESOLVED**: Implemented "Screen Share" mode for Tutors.
+  - **Solution**: 
+    1. State: Added `contentMode` ('whiteboard' | 'screen') to `RoomStateContext`.
+    2. Logic: Integrated `getDisplayMedia` into `useMediaStream` and implemented track replacement in `useWebRTCSignaling`.
+    3. UI: Added mode-toggle buttons for Tutors and conditional rendering in `RoomMainContent`.
+  - **Impact**: Tutors can now switch between a whiteboard and their screen for better presentation.
+  - **Files Changed**: `RoomStateContext.tsx`, `useMediaStream.ts`, `useWebRTCSignaling.ts`, `RoomMainContent.tsx`.
+
+- [x] [P2-Medium] UI/UX: Suboptimal layout for video and chat (Task 3)
+  - **RESOLVED**: Refactored `RoomMainContent` for vertical sidebar stacking.
+  - **Solution**: Stacked local and remote video players in a vertical sidebar and integrated the `ChatPanel` into the same sidebar to maximize space for the whiteboard/screen.
+  - **Files Changed**: `RoomMainContent.tsx`.
+
 - [ ] [P1-High] No TURN server for users behind restrictive firewalls
   - Root cause: P2P fails if both users behind NAT/firewall.
   - Target: Integrate free TURN server (Twilio STUN/TURN or self-hosted coturn).

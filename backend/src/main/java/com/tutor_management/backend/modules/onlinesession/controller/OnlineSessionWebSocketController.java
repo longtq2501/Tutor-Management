@@ -1,9 +1,6 @@
 package com.tutor_management.backend.modules.onlinesession.controller;
 
-import com.tutor_management.backend.modules.onlinesession.dto.request.TypingRequest;
-import com.tutor_management.backend.modules.onlinesession.dto.request.WhiteboardStrokeMessage;
-import com.tutor_management.backend.modules.onlinesession.dto.request.WhiteboardDeltaMessage;
-import com.tutor_management.backend.modules.onlinesession.dto.request.WhiteboardUndoMessage;
+import com.tutor_management.backend.modules.onlinesession.dto.request.*;
 import com.tutor_management.backend.modules.onlinesession.dto.response.ChatMessageResponse;
 import com.tutor_management.backend.modules.onlinesession.dto.response.TypingResponse;
 import com.tutor_management.backend.modules.onlinesession.service.ChatService;
@@ -254,20 +251,43 @@ public class OnlineSessionWebSocketController {
     public void handleWhiteboardUndo(
             @DestinationVariable String roomId,
             WhiteboardUndoMessage payload) {
-        
+
         // ✅ Validate payload structure
         if (payload == null || payload.getId() == null) {
             log.warn("Received invalid whiteboard undo message for room {}", roomId);
             return;
         }
-        
+
         // ✅ Log for debugging
         log.debug("Whiteboard undo for room {}: strokeId={}", roomId, payload.getId());
-        
+
         // ✅ Persist undo command to DB
         whiteboardService.deleteStroke(roomId, payload.getId());
-        
+
         // ✅ Broadcast with properly preserved structure
         messagingTemplate.convertAndSend("/topic/room/" + roomId + "/whiteboard/undo", payload);
+    }
+    /**
+     * Handles WebRTC signaling messages (Offer, Answer, ICE Candidate).
+     * Forwards the signal to the receiver specified in the payload.
+     * 
+     * @param roomId The room ID
+     * @param signal The signaling message
+     */
+    @MessageMapping("/room/{roomId}/signal")
+    public void handleWebRTCSignal(
+            @DestinationVariable String roomId,
+            WebRTCSignalMessage signal) {
+        
+        if (signal == null || signal.getReceiverId() == null) {
+            log.warn("Received invalid WebRTC signal for room {}", roomId);
+            return;
+        }
+
+        log.debug("WebRTC signal in room {}: type={}, from={}, to={}", 
+            roomId, signal.getType(), signal.getSenderId(), signal.getReceiverId());
+
+        // Forward the signal to the specific receiver
+        messagingTemplate.convertAndSend("/topic/room/" + roomId + "/signal/" + signal.getReceiverId(), signal);
     }
 }

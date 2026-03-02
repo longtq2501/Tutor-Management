@@ -10,15 +10,18 @@ import { cn } from '@/lib/utils';
 
 import { useSwipeable } from 'react-swipeable';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useRoomState } from '../context/RoomStateContext';
+import { Monitor, Layout } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RoomMainContentProps {
     roomId: string;
     currentUserId: number;
     activeTab: RoomTab;
-    media: any;
-    sendMessage: (destination: string, body: any) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    media: any; // Using any for large combined hook result
+    sendMessage: (destination: string, body: unknown) => void;
     onTabChange: (tab: RoomTab) => void;
 }
 
@@ -37,6 +40,8 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
 }) => {
     const tabs: RoomTab[] = ['board', 'video', 'chat'];
     const isMobile = useIsMobile();
+    const { state, actions } = useRoomState();
+    const isTutor = state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
 
     const handlers = useSwipeable({
         onSwipedLeft: () => {
@@ -57,7 +62,21 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
     });
 
     const [isTransitioning, setIsTransitioning] = React.useState(false);
-    const transitionTimerRef = React.useRef<NodeJS.Timeout>(null);
+    const transitionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Handle Screen Share Trigger
+    React.useEffect(() => {
+        if (state.contentMode === 'screen' && isTutor && !media.isScreenSharing) {
+            media.startScreenShare().then((stream: any) => {
+                if (!stream) {
+                    // Fallback to whiteboard if screen share fails or is cancelled
+                    actions.setContentMode('whiteboard');
+                }
+            });
+        } else if (state.contentMode === 'whiteboard' && media.isScreenSharing) {
+            media.stopScreenShare();
+        }
+    }, [state.contentMode, isTutor, media, actions]);
 
     React.useEffect(() => {
         if (!isMobile) return; // Skip transition on desktop
@@ -103,11 +122,58 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
 
             {/* Board Section */}
             <div className={cn(
-                "flex-1 relative p-2 md:p-4 flex flex-col min-h-0",
+                "flex-1 relative flex flex-col min-h-0",
                 activeTab !== 'board' && "hidden md:flex",
                 activeTab === 'board' && "md:border-t-2 md:border-t-primary"
             )}>
-                <Whiteboard roomId={roomId} currentUserId={currentUserId} sendMessage={sendMessage} className="shadow-sm border border-border rounded-lg bg-white h-full" />
+                {/* Header for Content Mode Toggle (Tutor Only) */}
+                {isTutor && (
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-20">
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant={state.contentMode === 'whiteboard' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => actions.setContentMode('whiteboard')}
+                                className="h-8 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                            >
+                                <Layout className="w-3 h-3 mr-1.5" />
+                                Bảng trắng
+                            </Button>
+                            <Button
+                                variant={state.contentMode === 'screen' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => actions.setContentMode('screen')}
+                                className="h-8 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                            >
+                                <Monitor className="w-3 h-3 mr-1.5" />
+                                Chia sẻ màn hình
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
+                    {state.contentMode === 'whiteboard' ? (
+                        <Whiteboard
+                            roomId={roomId}
+                            currentUserId={currentUserId}
+                            sendMessage={sendMessage}
+                            className="h-full border-none rounded-none"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-slate-900 overflow-hidden">
+                            <VideoPlayer
+                                stream={isTutor ? media.screenStream : state.remoteStream}
+                                className="w-full h-full max-w-5xl mx-auto rounded-xl shadow-2xl overflow-hidden border border-white/5"
+                            />
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-2 whitespace-nowrap">
+                                <Monitor className="w-4 h-4 text-primary" />
+                                <span className="text-white text-[10px] font-bold uppercase tracking-tight">Đang xem: Màn hình của {isTutor ? 'bạn' : 'Giáo viên'}</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
                 <MediaControls
                     {...media}
                     onToggleMic={media.toggleMic}
@@ -121,29 +187,48 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
 
             {/* Video Side Area */}
             <div className={cn(
-                "w-full md:w-64 p-4 flex-col gap-4 bg-background md:bg-card border-l border-border overflow-y-auto",
-                activeTab === 'video' ? "flex flex-1" : "hidden md:flex",
+                "w-full md:w-80 p-3 flex-col gap-3 bg-background md:bg-card border-l border-border",
+                activeTab === 'video' ? "flex flex-1 min-h-0" : "hidden md:flex min-h-0",
                 activeTab === 'video' && "md:border-t-2 md:border-t-primary"
             )}>
-                <VideoPlayer stream={media.stream} className="aspect-video w-full rounded-md border border-border bg-muted shadow-sm" />
+                <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-hidden">
+                    <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
+                            {state.contentMode === 'screen' ? 'Camera (Bạn)' : 'Bạn (Local)'}
+                        </span>
+                        <VideoPlayer
+                            stream={media.stream}
+                            muted
+                            className="aspect-video w-full rounded-xl border border-border bg-slate-900 shadow-lg"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
+                            {state.contentMode === 'screen' ? 'Camera (Đối phương)' : 'Đối phương (Remote)'}
+                        </span>
+                        <VideoPlayer
+                            stream={state.remoteStream}
+                            className="aspect-video w-full rounded-xl border border-border bg-slate-900 shadow-lg"
+                        />
+                    </div>
+
+                    {/* Chat Section integrated into sidebar */}
+                    <div className="mt-2 flex-1 flex flex-col min-h-0 border-t border-border pt-3 overflow-hidden">
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1 mb-2">Trò chuyện</span>
+                        <div className="flex-1 min-h-0 h-full">
+                            <ChatPanel roomId={roomId} currentUserId={currentUserId} />
+                        </div>
+                    </div>
+                </div>
+
                 {media.warning && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs rounded-lg animate-in fade-in slide-in-from-top-2">
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] rounded-lg animate-in fade-in slide-in-from-top-2">
                         {media.warning}
                     </div>
                 )}
-                <div className="hidden md:block mt-auto text-[10px] text-muted-foreground text-center">
-                    Tự động tối ưu băng thông
-                </div>
             </div>
 
-            {/* Chat Side Area */}
-            <aside className={cn(
-                "w-full md:w-80 border-l border-border flex flex-col shrink-0 bg-background overflow-hidden",
-                activeTab === 'chat' ? "flex flex-1" : "hidden md:flex",
-                activeTab === 'chat' && "md:border-t-2 md:border-t-primary"
-            )}>
-                <ChatPanel roomId={roomId} currentUserId={currentUserId} />
-            </aside>
         </main>
     );
 };
