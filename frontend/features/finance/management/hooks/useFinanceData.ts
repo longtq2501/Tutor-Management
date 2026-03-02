@@ -28,7 +28,7 @@ export function useFinanceData() {
     // Maintain existing filtering logic but handle paginated response
     const content = response.content || [];
     if (viewMode === 'DEBT') {
-      return content.filter((r: SessionRecord) => r.status === 'COMPLETED' || r.status === 'PENDING_PAYMENT');
+      return content.filter((r: SessionRecord) => r.status && !['CANCELLED_BY_STUDENT', 'CANCELLED_BY_TUTOR'].includes(r.status));
     }
     return content;
   };

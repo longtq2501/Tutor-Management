@@ -170,17 +170,20 @@ public class SessionRecordService {
         double hours = r.getHoursPerSession() * r.getSessions();
         long amount = (long) (hours * student.getPricePerHour());
 
+        LocalDate sessionDate = LocalDate.parse(r.getSessionDate());
+        String month = sessionDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+
         SessionRecord record = SessionRecord.builder()
                 .student(student)
                 .tutorId(student.getTutorId()) // Explicitly set tutorId from student
-                .month(r.getMonth())
+                .month(month)
                 .sessions(r.getSessions())
                 .hours(hours)
                 .pricePerHour(student.getPricePerHour())
                 .totalAmount(amount)
                 .paid(false)
                 .notes(r.getNotes())
-                .sessionDate(LocalDate.parse(r.getSessionDate()))
+                .sessionDate(sessionDate)
                 .startTime(parseTime(r.getStartTime()))
                 .endTime(parseTime(r.getEndTime()))
                 .subject(r.getSubject())
@@ -222,8 +225,12 @@ public class SessionRecordService {
         log.info("Checking version for Session {}: DB={}, Request={}", id, record.getVersion(), r.getVersion());
         checkVersion(record, r.getVersion());
 
-        if (r.getMonth() != null) record.setMonth(r.getMonth());
-        if (r.getSessionDate() != null) record.setSessionDate(LocalDate.parse(r.getSessionDate()));
+        if (r.getSessionDate() != null) {
+            record.setSessionDate(LocalDate.parse(r.getSessionDate()));
+            syncMonthWithDate(record);
+        } else if (r.getMonth() != null) {
+            record.setMonth(r.getMonth());
+        }
         if (r.getNotes() != null) record.setNotes(r.getNotes());
         
         if (r.getSessions() != null) {
@@ -499,6 +506,19 @@ public class SessionRecordService {
             if (h > 0) {
                 r.setHours(h);
                 r.setTotalAmount((long) (h * r.getPricePerHour()));
+            }
+        }
+    }
+
+    /**
+     * Ensures the billing month is synchronized with the actual session date.
+     */
+    private void syncMonthWithDate(SessionRecord r) {
+        if (r.getSessionDate() != null) {
+            String derivedMonth = r.getSessionDate().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            if (r.getMonth() == null || !r.getMonth().equals(derivedMonth)) {
+                log.info("🔄 Syncing month for session {}: {} -> {}", r.getId(), r.getMonth(), derivedMonth);
+                r.setMonth(derivedMonth);
             }
         }
     }
