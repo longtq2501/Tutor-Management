@@ -61,6 +61,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
         delta: 50,
     });
 
+    const whiteboardCanvasRef = React.useRef<HTMLCanvasElement>(null);
     const [isTransitioning, setIsTransitioning] = React.useState(false);
     const transitionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -95,6 +96,25 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
         };
     }, [activeTab, isMobile]);
 
+    const handleToggleRecording = React.useCallback(async () => {
+        if (media.isRecording) {
+            media.stopRecording();
+        } else {
+            // Quality is already set in the hook state from MediaControls
+            let sourceStream: MediaStream | undefined = undefined;
+
+            if (state.contentMode === 'screen' && media.screenStream) {
+                sourceStream = media.screenStream;
+                console.log('[Recording] Using active screen stream as source');
+            } else if (state.contentMode === 'whiteboard' && whiteboardCanvasRef.current) {
+                sourceStream = whiteboardCanvasRef.current.captureStream(10);
+                console.log('[Recording] Using whiteboard canvas as source');
+            }
+
+            await media.startRecording(sourceStream);
+        }
+    }, [media.isRecording, media.startRecording, media.stopRecording, state.contentMode, media.screenStream]); // eslint-disable-line react-hooks/exhaustive-deps
+
     return (
         <main
             {...handlers}
@@ -122,7 +142,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
 
             {/* Board Section */}
             <div className={cn(
-                "flex-1 relative flex flex-col min-h-0",
+                "flex-1 relative flex flex-col min-h-0 min-w-0 transition-all duration-300 ease-in-out",
                 activeTab !== 'board' && "hidden md:flex",
                 activeTab === 'board' && "md:border-t-2 md:border-t-primary"
             )}>
@@ -155,9 +175,11 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                 <div className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-950">
                     {state.contentMode === 'whiteboard' ? (
                         <Whiteboard
+                            ref={isTutor ? whiteboardCanvasRef : null}
                             roomId={roomId}
                             currentUserId={currentUserId}
                             sendMessage={sendMessage}
+                            isReadOnly={!isTutor}
                             className="h-full border-none rounded-none"
                         />
                     ) : (
@@ -178,16 +200,16 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                     {...media}
                     onToggleMic={media.toggleMic}
                     onToggleCamera={media.toggleCamera}
-                    onToggleRecording={media.isRecording ? media.stopRecording : media.startRecording}
+                    onToggleRecording={handleToggleRecording}
                     onQualityChange={media.setQuality}
-                    isRecordingSupported={media.isSupported}
+                    isRecordingSupported={media.isSupported && isTutor}
                     className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 scale-90 md:scale-100 origin-bottom"
                 />
             </div>
 
             {/* Video Side Area */}
             <div className={cn(
-                "w-full md:w-80 p-3 flex-col gap-3 bg-background md:bg-card border-l border-border",
+                "w-full md:w-80 p-3 flex-col gap-3 bg-background md:bg-card border-t md:border-t-0 md:border-l border-border",
                 activeTab === 'video' ? "flex flex-1 min-h-0" : "hidden md:flex min-h-0",
                 activeTab === 'video' && "md:border-t-2 md:border-t-primary"
             )}>

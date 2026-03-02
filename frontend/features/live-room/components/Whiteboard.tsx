@@ -11,20 +11,34 @@ export interface WhiteboardProps {
     currentUserId?: string | number;
     sendMessage?: (destination: string, payload: unknown) => void;
     className?: string;
+    isReadOnly?: boolean;
 }
 
 /**
  * Interactive whiteboard component with drawing capabilities.
  * Supports mouse/touch drawing with throttled WebSocket sync (50ms).
  */
-export const Whiteboard: React.FC<WhiteboardProps> = ({
+export const Whiteboard = React.forwardRef<HTMLCanvasElement, WhiteboardProps>(({
     roomId,
     currentUserId,
     sendMessage,
     className,
-}) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    isReadOnly = false,
+}, ref) => {
+    const internalCanvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Sync external ref with internal canvas ref
+    useEffect(() => {
+        if (!ref) return;
+        if (typeof ref === 'function') {
+            ref(internalCanvasRef.current);
+        } else {
+            (ref as React.MutableRefObject<HTMLCanvasElement | null>).current = internalCanvasRef.current;
+        }
+    }, [ref]);
+
+    const canvasRef = internalCanvasRef;
 
     // ✅ Add state for confirmation dialog
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -175,65 +189,68 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({
 
     const handleMouseDown = useCallback(
         (e: React.MouseEvent) => {
+            if (isReadOnly) return;
             const point = getNormalizedPoint(e.clientX, e.clientY);
             if (point) startStroke(point);
         },
-        [getNormalizedPoint, startStroke]
+        [getNormalizedPoint, startStroke, isReadOnly]
     );
 
     const handleMouseMove = useCallback(
         (e: React.MouseEvent) => {
-            if (!isDrawing) return;
+            if (isReadOnly || !isDrawing) return;
             const point = getNormalizedPoint(e.clientX, e.clientY);
             if (point) addPoint(point);
         },
-        [isDrawing, getNormalizedPoint, addPoint]
+        [isDrawing, getNormalizedPoint, addPoint, isReadOnly]
     );
 
     const handleMouseUp = useCallback(() => {
-        if (isDrawing) endStroke();
-    }, [isDrawing, endStroke]);
+        if (!isReadOnly && isDrawing) endStroke();
+    }, [isDrawing, endStroke, isReadOnly]);
 
     const handleTouchStart = useCallback(
         (e: React.TouchEvent) => {
-            if (e.touches.length === 0) return;
+            if (isReadOnly || e.touches.length === 0) return;
             const touch = e.touches[0];
             const point = getNormalizedPoint(touch.clientX, touch.clientY);
             if (point) startStroke(point);
         },
-        [getNormalizedPoint, startStroke]
+        [getNormalizedPoint, startStroke, isReadOnly]
     );
 
     const handleTouchMove = useCallback(
         (e: React.TouchEvent) => {
-            if (!isDrawing || e.touches.length === 0) return;
+            if (isReadOnly || !isDrawing || e.touches.length === 0) return;
             const touch = e.touches[0];
             const point = getNormalizedPoint(touch.clientX, touch.clientY);
             if (point) addPoint(point);
         },
-        [isDrawing, getNormalizedPoint, addPoint]
+        [isDrawing, getNormalizedPoint, addPoint, isReadOnly]
     );
 
     const handleTouchEnd = useCallback(() => {
-        if (isDrawing) endStroke();
-    }, [isDrawing, endStroke]);
+        if (!isReadOnly && isDrawing) endStroke();
+    }, [isDrawing, endStroke, isReadOnly]);
 
     return (
         <div className={`flex flex-col gap-2 ${className || ''}`}>
-            <WhiteboardToolbar
-                selectedColor={selectedColor}
-                selectedWidth={selectedWidth}
-                selectedTool={selectedTool}
-                onColorChange={setColor}
-                onWidthChange={setWidth}
-                onToolChange={setTool}
-                onClear={clearBoard}
-                onClearRequest={handleClearRequest} // ✅ Add
-                onUndo={undoBoard}
-                onRedo={redoBoard}
-                canUndo={canUndo} // ✅ Updated logic
-                canRedo={redoStack.length > 0}
-            />
+            {!isReadOnly && (
+                <WhiteboardToolbar
+                    selectedColor={selectedColor}
+                    selectedWidth={selectedWidth}
+                    selectedTool={selectedTool}
+                    onColorChange={setColor}
+                    onWidthChange={setWidth}
+                    onToolChange={setTool}
+                    onClear={clearBoard}
+                    onClearRequest={handleClearRequest} // ✅ Add
+                    onUndo={undoBoard}
+                    onRedo={redoBoard}
+                    canUndo={canUndo} // ✅ Updated logic
+                    canRedo={redoStack.length > 0}
+                />
+            )}
 
             {/* ✅ Add Confirmation Dialog */}
             <ConfirmDialog
@@ -267,4 +284,4 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({
             </div>
         </div>
     );
-};
+});

@@ -1,11 +1,11 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
 import { useRoomState } from '../context/RoomStateContext';
 
 /**
  * Hook to manage WebRTC P2P connection and signaling.
  */
-export const useWebRTCSignaling = (roomId: string, currentUserId: number, media: any) => {
+export const useWebRTCSignaling = (roomId: string, currentUserId: number, media: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const { subscribe, sendMessage, isConnected } = useWebSocket();
     const { state, actions } = useRoomState();
 
@@ -23,12 +23,12 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
     }, [state.localStream]);
 
     // Initial configuration for PeerConnection
-    const configuration: RTCConfiguration = {
+    const configuration: RTCConfiguration = useMemo(() => ({
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
         ],
-    };
+    }), []);
 
     const cleanup = useCallback(() => {
         if (pcRef.current) {
@@ -88,7 +88,7 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
 
         pcRef.current = pc;
         return pc;
-    }, [roomId, currentUserId, sendMessage, actions, cleanup]);
+    }, [roomId, currentUserId, sendMessage, actions, cleanup, configuration]);
 
     // Handle track replacement (Camera <-> Screen)
     useEffect(() => {
@@ -124,7 +124,7 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
 
         console.log(`[WebRTC] Subscribing to signals for user ${currentUserId} in room ${roomId}`);
 
-        const unsubscribe = subscribe(`/topic/room/${roomId}/signal/${currentUserId}`, async (signal: any) => {
+        const unsubscribe = subscribe(`/topic/room/${roomId}/signal/${currentUserId}`, async (signal: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             console.log('[WebRTC] Received signal:', signal.type, 'from:', signal.senderId);
 
             try {
@@ -161,7 +161,23 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
         });
 
         return () => unsubscribe();
-    }, [isConnected, roomId, currentUserId, subscribe, sendMessage, createPeerConnection]);
+    }, [isConnected, roomId, currentUserId, subscribe, sendMessage, createPeerConnection, actions]);
+
+    // Track synchronization: Ensure tracks are added to the PC if they become available after connection
+    useEffect(() => {
+        if (!pcRef.current || !state.localStream) return;
+
+        const pc = pcRef.current;
+        const currentSenders = pc.getSenders();
+
+        state.localStream.getTracks().forEach(track => {
+            const existingSender = currentSenders.find(s => s.track?.kind === track.kind);
+            if (!existingSender) {
+                console.log(`[WebRTC] Adding late track: ${track.kind}`);
+                pc.addTrack(track, state.localStream!);
+            }
+        });
+    }, [state.localStream]);
 
     // Role-based initiation (Tutor initiates offer to Student)
     useEffect(() => {
@@ -191,35 +207,30 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
         initiateConnection();
     }, [state.participants, state.localStream, currentUserId, roomId, isConnected, sendMessage, createPeerConnection]);
 
-    // Handle Content Mode Change (Whiteboard <-> Screen Share)
+    // Handle Content Mode Change Signaling
+    // NOTE: This signal is now sent only by the Tutor when their mode changes
     useEffect(() => {
-        const updateTracks = async () => {
-            if (!pcRef.current || !state.localStream) return;
+        if (!isConnected) return;
 
-            const isTutor = state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
-            if (!isTutor) return;
+        const isTutor = state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
+        if (!isTutor) return;
 
-            console.log('[WebRTC] Content mode changed to:', state.contentMode);
+        console.log('[WebRTC] Detected mode change to:', state.contentMode);
 
-            // Broadcast mode change to other participant
-            const otherPlayer = state.participants.find(p => Number(p.id) !== currentUserId);
-            if (otherPlayer) {
-                sendMessage(`/app/room/${roomId}/signal`, {
-                    type: 'mode-change',
-                    data: state.contentMode,
-                    senderId: currentUserId,
-                    receiverId: Number(otherPlayer.id)
-                });
-            }
-        };
-
-        updateTracks();
+        // Broadcast mode change to other participant
+        const otherPlayer = state.participants.find(p => Number(p.id) !== currentUserId);
+        if (otherPlayer) {
+            sendMessage(`/app/room/${roomId}/signal`, {
+                type: 'mode-change',
+                data: state.contentMode,
+                senderId: currentUserId,
+                receiverId: Number(otherPlayer.id)
+            });
+        }
     }, [state.contentMode, roomId, currentUserId, state.participants, isConnected, sendMessage]);
 
     // Cleanup on unmount
     useEffect(() => {
         return () => cleanup();
     }, [cleanup]);
-
-    return { pc: pcRef.current };
 };

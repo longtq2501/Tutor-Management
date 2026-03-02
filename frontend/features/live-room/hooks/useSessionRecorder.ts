@@ -26,22 +26,22 @@ const useRecordingTimer = (isRecording: boolean, onLimitReached: () => void) => 
     const [duration, setDuration] = useState(0);
     const [warning, setWarning] = useState<string | null>(null);
     const startTimeRef = useRef<number>(0);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Reset logic separated from the interval logic
     useEffect(() => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-
         if (!isRecording) {
             setDuration(0);
             setWarning(null);
+        }
+    }, [isRecording]);
+
+    useEffect(() => {
+        if (!isRecording) {
             return;
         }
 
         startTimeRef.current = Date.now();
-        intervalRef.current = setInterval(() => {
+        const interval = setInterval(() => {
             const currentDuration = Date.now() - startTimeRef.current;
             setDuration(currentDuration);
 
@@ -54,12 +54,7 @@ const useRecordingTimer = (isRecording: boolean, onLimitReached: () => void) => 
             }
         }, 1000);
 
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-        };
+        return () => clearInterval(interval);
     }, [isRecording, onLimitReached]);
 
     return { duration, warning };
@@ -212,7 +207,7 @@ export const useSessionRecorder = (stream: MediaStream | null) => {
         }
     }, []);
 
-    const startRecording = useCallback(async () => {
+    const startRecording = useCallback(async (sourceStream?: MediaStream) => {
         const mimeType = getSupportedMimeType();
         if (!mimeType) {
             console.error('[Recording] No supported MIME type');
@@ -223,14 +218,34 @@ export const useSessionRecorder = (stream: MediaStream | null) => {
         chunksRef.current = [];
         startTimeRef.current = Date.now();
 
-        // ✅ NO DELAY NEEDED - screen capture invitation is an explicit UI action
-        console.log('[Recording] Requesting screen capture...');
+        // ✅ If sourceStream is provided, use it for video but keep using the original stream for audio.
+        const useScreenCapture = !sourceStream;
+        console.log(useScreenCapture ? '[Recording] Requesting screen capture...' : '[Recording] Using provided source stream');
 
-        // ✅ FIX: Use screen capture (async)
-        const recordingStream = await createRecordingStream(stream, true); // true = use screen capture
+        // Logic: if sourceStream is provided (canvas), it might not have audio.
+        // We pass the provided stream as first arg to createRecordingStream (which it uses as primary video/audio source).
+        // BUT createRecordingStream also takes the "userMediaStream" (the mic).
+        // Wait, current useSessionRecorder uses 'stream' as the source for createRecordingStream.
+
+        const recordingStream = await createRecordingStream(
+            stream, // microphone source
+            useScreenCapture
+        );
+
         if (!recordingStream) {
-            console.error('[Recording] Failed to create recording stream (user may have cancelled)');
+            console.error('[Recording] Failed to create recording stream');
             return;
+        }
+
+        if (sourceStream) {
+            // If we have a custom video source (canvas), replace the video tracks in recordingStream
+            const canvasVideoTrack = sourceStream.getVideoTracks()[0];
+            if (canvasVideoTrack) {
+                const currentVideoTracks = recordingStream.getVideoTracks();
+                currentVideoTracks.forEach(t => recordingStream.removeTrack(t));
+                recordingStream.addTrack(canvasVideoTrack);
+                console.log('[Recording] Replaced video source with provided stream (canvas)');
+            }
         }
 
         // ✅ Validate stream has video track
