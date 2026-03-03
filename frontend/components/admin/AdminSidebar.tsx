@@ -71,7 +71,9 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({
     collapsed,
-    onToggleCollapse
+    onToggleCollapse,
+    mobileOpen,
+    onCloseMobile
 }: AdminSidebarProps) {
     const pathname = usePathname();
 
@@ -118,6 +120,7 @@ export function AdminSidebar({
                                             <TooltipTrigger asChild>
                                                 <Link
                                                     href={item.href}
+                                                    onClick={onCloseMobile}
                                                     className={`
                                                         flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative
                                                         ${isActive
