@@ -82,7 +82,7 @@ describe('useWhiteboardSync - Delta Protocol', () => {
         });
 
         expect(mockSendMessage).toHaveBeenCalledTimes(2);
-        const secondDelta = mockSendMessage.mock.calls[1][1] as any;
+        const secondDelta = mockSendMessage.mock.calls[1][1] as { startIndex: number; points: unknown[] };
         expect(secondDelta.startIndex).toBe(6); // After 6 points from first batch
         expect(secondDelta.points).toHaveLength(3); // Only new points
     });

@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useChatMessages } from '../useChatMessages';
-import { chatApi } from '@/lib/services/chat';
+import { chatApi, type PaginatedChatResponse } from '@/lib/services/chat';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
@@ -36,9 +36,9 @@ describe('useChatMessages', () => {
             last: true,
             number: 0,
             totalPages: 1,
-        } as any;
+        } as unknown as PaginatedChatResponse;
 
-        (chatApi.getMessages as any).mockResolvedValue(mockData);
+        vi.mocked(chatApi.getMessages).mockResolvedValue(mockData);
 
         const { result } = renderHook(() => useChatMessages('room-1'), { wrapper });
 
@@ -50,12 +50,12 @@ describe('useChatMessages', () => {
     });
 
     it('should handle real-time messages correctly', async () => {
-        (chatApi.getMessages as any).mockResolvedValue({
+        vi.mocked(chatApi.getMessages).mockResolvedValue({
             content: [],
             last: true,
             number: 0,
             totalPages: 1,
-        } as any);
+        } as unknown as PaginatedChatResponse);
 
         const { result } = renderHook(() => useChatMessages('room-1'), { wrapper });
 
@@ -82,14 +82,14 @@ describe('useChatMessages', () => {
         const mockHistory = [
             { id: 2, roomId: 'room-1', senderId: 1, senderName: 'User', senderRole: 'TUTOR', content: 'Middle', timestamp: '2024-01-01T10:01:00Z' },
             { id: 1, roomId: 'room-1', senderId: 1, senderName: 'User', senderRole: 'TUTOR', content: 'Oldest', timestamp: '2024-01-01T10:00:00Z' }
-        ] as any;
+        ] as unknown as NonNullable<PaginatedChatResponse['content']>; // Intentional bypass for partial mock list
 
-        (chatApi.getMessages as any).mockResolvedValue({
+        vi.mocked(chatApi.getMessages).mockResolvedValue({
             content: mockHistory,
             last: true,
             number: 0,
             totalPages: 1,
-        } as any);
+        } as unknown as PaginatedChatResponse);
 
         const { result } = renderHook(() => useChatMessages('room-1'), { wrapper });
 

@@ -51,7 +51,7 @@ export function useFinanceData() {
   // Derived State: Filtering and Grouping
   const records = useMemo((): SessionRecord[] => {
     if (!rawRecords) return [];
-    return Array.isArray(rawRecords) ? rawRecords : ((rawRecords as any).content || []);
+    return Array.isArray(rawRecords) ? rawRecords : ((rawRecords as PageResponse<SessionRecord>).content || []);
   }, [rawRecords]);
 
   const filteredRecords = useMemo(() => {

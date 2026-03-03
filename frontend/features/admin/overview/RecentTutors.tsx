@@ -227,16 +227,10 @@ export function RecentTutors() {
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-4">
                                                 <div className="relative group-hover:scale-110 transition-transform duration-500">
-                                                    {tutor.avatarUrl ? (
-                                                        <img
-                                                            src={tutor.avatarUrl}
-                                                            alt={tutor.fullName}
-                                                            className="w-11 h-11 rounded-xl object-cover border-2 border-border/20 shadow-glow-sm group-hover:border-primary transition-colors"
-                                                        />
-                                                    ) : (
-                                                        <div className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center font-black text-sm shadow-glow-sm group-hover:border-primary transition-all ${avatarStyle}`}>
-                                                            {getInitials(tutor.fullName)}
-                                                        </div>
+                                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                                    <div className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center font-black text-sm shadow-glow-sm group-hover:border-primary transition-all ${avatarStyle}`}>
+                                                        {getInitials(tutor.fullName)}
+                                                    </div>
                                                     )}
                                                     {tutor.subscriptionStatus === 'ACTIVE' && (
                                                         <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full shadow-glow-sm shadow-green-500/50" />

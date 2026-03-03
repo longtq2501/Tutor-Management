@@ -60,3 +60,4 @@ export const CalendarGrid = memo(({
     </div>
   );
 });
+CalendarGrid.displayName = 'CalendarGrid';

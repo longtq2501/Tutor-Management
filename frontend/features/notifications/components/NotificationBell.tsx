@@ -27,6 +27,7 @@ export const NotificationBell = () => {
         refetchInterval: 60000, // Poll every minute as fallback
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleNotification = useCallback((notification: any) => {
         console.debug('SSE Notification received:', notification);
         // Invalidate both count and list to trigger refetch

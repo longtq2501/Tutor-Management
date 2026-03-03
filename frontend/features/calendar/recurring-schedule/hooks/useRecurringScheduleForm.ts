@@ -63,8 +63,8 @@ export function useRecurringScheduleForm(
     });
   }, []);
 
-  const updateField = useCallback((field: keyof RecurringScheduleRequest, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const updateField = useCallback((field: keyof RecurringScheduleRequest, value: unknown) => {
+    setFormData(prev => ({ ...prev, [field]: value } as RecurringScheduleRequest));
   }, []);
 
   const validate = (): boolean => {

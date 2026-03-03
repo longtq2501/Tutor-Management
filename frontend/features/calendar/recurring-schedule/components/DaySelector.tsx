@@ -38,3 +38,4 @@ export const DaySelector = memo(({ selectedDays, onToggle }: DaySelectorProps) =
     </div>
   );
 });
+DaySelector.displayName = 'DaySelector';

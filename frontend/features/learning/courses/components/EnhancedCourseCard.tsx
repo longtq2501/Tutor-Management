@@ -259,3 +259,4 @@ export const EnhancedCourseCard = memo(({
         </motion.div>
     );
 });
+EnhancedCourseCard.displayName = 'EnhancedCourseCard';

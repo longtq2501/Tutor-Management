@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
@@ -142,7 +143,7 @@ export function UnassignStudentsDialog({
           const allStudents = await studentsApi.getAll(0, 1000);
           const studentMap = new Map(allStudents.content.map(s => [s.id, s]));
 
-          return (result as StudentAssignmentDTO[])
+          return (result as any[])
             .map(assignment => {
               const student = studentMap.get(assignment.studentId);
               if (!student) return null;
@@ -159,7 +160,7 @@ export function UnassignStudentsDialog({
 
         // Nếu có id và name => Student[] (API đã trả về students trực tiếp)
         if ('id' in firstItem && 'name' in firstItem) {
-          return (result as any[]).map(student => ({
+          return (result as unknown as { id: number; name: string; phone?: string | null }[]).map(student => ({
             id: student.id,
             name: student.name,
             phone: student.phone || null,
@@ -192,9 +193,13 @@ export function UnassignStudentsDialog({
       setShowConfirmDialog(false);
       onOpenChange(false);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      let errorMessage = 'Có lỗi xảy ra';
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || errorMessage;
+      }
       toast.error('Thu hồi bài giảng thất bại', {
-        description: error?.response?.data?.message || 'Có lỗi xảy ra',
+        description: errorMessage,
       });
     },
   });
@@ -254,7 +259,7 @@ export function UnassignStudentsDialog({
               Thu hồi bài giảng
             </DialogTitle>
             <DialogDescription>
-              Thu hồi bài giảng "<strong>{lesson.title}</strong>" từ các học sinh
+              Thu hồi bài giảng &quot;<strong>{lesson.title}</strong>&quot; từ các học sinh
             </DialogDescription>
           </DialogHeader>
 
@@ -373,8 +378,8 @@ export function UnassignStudentsDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận thu hồi bài giảng</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn thu hồi bài giảng "
-              <span className="font-semibold">{lesson.title}</span>" từ{' '}
+              Bạn có chắc chắn muốn thu hồi bài giảng &quot;
+              <span className="font-semibold">{lesson.title}</span>&quot; từ{' '}
               <span className="font-semibold">{selectedStudentIds.length}</span> học
               sinh đã chọn?
               <br />

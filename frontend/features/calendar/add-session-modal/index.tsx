@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Plus, X, Calendar, Users, BookOpen, Sparkles, Zap } from 'lucide-react';
+import { Clock, Plus, X, Sparkles, Zap } from 'lucide-react';
 import type { AddSessionModalProps } from './types';
 import { useSessionForm } from './hooks/useSessionForm';
 import { DateField, NumberField, StudentField } from './components/FormField';
@@ -40,7 +40,7 @@ export default function AddSessionModal({ onClose, onSubmit, initialDate, studen
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [openDialog, closeDialog, onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

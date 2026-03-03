@@ -44,14 +44,18 @@ export function AssignCourseDialog({
     const assignMutation = useAssignCourse();
     const unassignMutation = useUnassignCourse();
 
-    useEffect(() => {
-        if (open) {
-            const currentAssignedIds = assignedStudents.map((a) => a.studentId);
-            setSelectedStudentIds(currentAssignedIds);
-            setDeadline(undefined);
-            setSearchQuery('');
-        }
-    }, [open, course.id]);
+    const [prevOpen, setPrevOpen] = useState(open);
+
+    // Sync state when dialog opens
+    if (open && !prevOpen) {
+        setPrevOpen(true);
+        const currentAssignedIds = assignedStudents.map((a) => a.studentId);
+        setSelectedStudentIds(currentAssignedIds);
+        setDeadline(undefined);
+        setSearchQuery('');
+    } else if (!open && prevOpen) {
+        setPrevOpen(false);
+    }
 
     const handleToggleStudent = (studentId: number) => {
         setSelectedStudentIds((prev) =>
@@ -111,7 +115,7 @@ export function AssignCourseDialog({
                         <span className="truncate">Giao khóa học</span>
                     </DialogTitle>
                     <DialogDescription className="text-xs sm:text-sm line-clamp-2">
-                        Chọn học sinh và đặt hạn hoàn thành cho khóa học "{course.title}"
+                        Chọn học sinh và đặt hạn hoàn thành cho khóa học &quot;{course.title}&quot;
                     </DialogDescription>
                 </DialogHeader>
 

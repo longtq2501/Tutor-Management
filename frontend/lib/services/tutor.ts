@@ -1,6 +1,10 @@
 import api from './axios-instance';
 import type { PageResponse } from '../types/common';
 import { Tutor, TutorRequest, TutorStats } from '@/lib/types/tutor';
+import { Student } from '@/lib/types/student';
+import { SessionRecord } from '@/lib/types/finance';
+import { Document } from '@/lib/types/document';
+
 
 
 export const tutorsApi = {
@@ -74,7 +78,7 @@ export const tutorsApi = {
   /**
    * Get students belonging to a specific tutor
    */
-  getStudents: async (id: number, page = 0, size = 10): Promise<PageResponse<any>> => {
+  getStudents: async (id: number, page = 0, size = 10): Promise<PageResponse<Student>> => {
     const response = await api.get(`/admin/tutors/${id}/students?page=${page}&size=${size}`);
     return response.data.data;
   },
@@ -82,7 +86,7 @@ export const tutorsApi = {
   /**
    * Get sessions belonging to a specific tutor
    */
-  getSessions: async (id: number, month?: string, page = 0, size = 10): Promise<PageResponse<any>> => {
+  getSessions: async (id: number, month?: string, page = 0, size = 10): Promise<PageResponse<SessionRecord>> => {
     let url = `/admin/tutors/${id}/sessions?page=${page}&size=${size}`;
     if (month) url += `&month=${month}`;
     const response = await api.get(url);
@@ -92,7 +96,7 @@ export const tutorsApi = {
   /**
    * Get documents belonging to a specific tutor
    */
-  getDocuments: async (id: number, page = 0, size = 10): Promise<PageResponse<any>> => {
+  getDocuments: async (id: number, page = 0, size = 10): Promise<PageResponse<Document>> => {
     const response = await api.get(`/admin/tutors/${id}/documents?page=${page}&size=${size}`);
     return response.data.data;
   },

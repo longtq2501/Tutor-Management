@@ -14,16 +14,24 @@ export const useSessionForm = (initialDate?: string, initialStudentId?: number |
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
 
-  // Auto-calculate hours if time is provided
-  useEffect(() => {
-    if (startTime && endTime) {
-      const [h1, m1] = startTime.split(':').map(Number);
-      const [h2, m2] = endTime.split(':').map(Number);
-      let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-      if (diff < 0) diff += 24 * 60;
-      setHoursPerSession(diff / 60);
-    }
-  }, [startTime, endTime]);
+  const calculateHours = (start: string, end: string) => {
+    if (!start || !end) return;
+    const [h1, m1] = start.split(':').map(Number);
+    const [h2, m2] = end.split(':').map(Number);
+    let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+    if (diff < 0) diff += 24 * 60;
+    setHoursPerSession(diff / 60);
+  };
+
+  const handleStartTimeChange = (val: string) => {
+    setStartTime(val);
+    calculateHours(val, endTime);
+  };
+
+  const handleEndTimeChange = (val: string) => {
+    setEndTime(val);
+    calculateHours(startTime, val);
+  };
 
   const totalHours = sessions * hoursPerSession;
   const month = sessionDate.substring(0, 7);
@@ -46,8 +54,8 @@ export const useSessionForm = (initialDate?: string, initialStudentId?: number |
     hoursPerSession, setHoursPerSession,
     sessionDate, setSessionDate,
     subject, setSubject,
-    startTime, setStartTime,
-    endTime, setEndTime,
+    startTime, setStartTime: handleStartTimeChange,
+    endTime, setEndTime: handleEndTimeChange,
     totalHours, month, validate
   };
 };

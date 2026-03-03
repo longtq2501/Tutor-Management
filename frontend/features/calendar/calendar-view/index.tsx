@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core';
 import { useState } from 'react';
 import type { SessionRecord } from '@/lib/types/finance';
@@ -28,7 +29,7 @@ export default function CalendarView() {
     useSensor(KeyboardSensor)
   );
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
     setActiveSession(event.active.data.current as SessionRecord);
   };
 

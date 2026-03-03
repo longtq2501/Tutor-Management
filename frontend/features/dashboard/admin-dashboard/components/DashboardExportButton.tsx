@@ -34,9 +34,10 @@ export function DashboardExportButton({ currentMonth, filename = 'bao-cao-he-tho
             window.URL.revokeObjectURL(url);
 
             toast.success('Xuất báo cáo PDF thành công!');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Export error:', error);
-            toast.error(`Lỗi xuất PDF từ hệ thống: ${error.message || 'Lỗi không xác định'}`);
+            const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+            toast.error(`Lỗi xuất PDF từ hệ thống: ${message}`);
         } finally {
             setIsExporting(false);
         }

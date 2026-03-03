@@ -42,11 +42,11 @@ describe('useUpcomingSessions', () => {
             position: { value: 'cursor-2' }
         };
 
-        (onlineSessionApi.getMySessions as any).mockImplementation((cursor: any) => {
+        vi.mocked(onlineSessionApi.getMySessions).mockImplementation(((cursor: unknown) => {
             if (!cursor) return Promise.resolve(page1);
             if (cursor === 'cursor-1') return Promise.resolve(page2);
             return Promise.reject(new Error('Invalid cursor: ' + cursor));
-        });
+        }) as any);
 
         const { result } = renderHook(() => useUpcomingSessions(5), { wrapper });
 

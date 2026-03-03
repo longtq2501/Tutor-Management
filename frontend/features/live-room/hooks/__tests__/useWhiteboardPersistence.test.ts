@@ -22,7 +22,7 @@ describe('useWhiteboardPersistence', () => {
 
     it('should save and load data correctly', () => {
         const { result } = renderHook(() => useWhiteboardPersistence(roomId));
-        const mockStrokes = [{ id: '1', points: [], color: '#000', width: 2, tool: 'pen', timestamp: Date.now() }] as any;
+        const mockStrokes = [{ id: '1', points: [], color: '#000', width: 2, tool: 'pen' as const, timestamp: Date.now() }];
 
         act(() => {
             result.current.saveToStorage(mockStrokes);
@@ -44,11 +44,10 @@ describe('useWhiteboardPersistence', () => {
     });
 
     it('should auto-save at intervals', () => {
-        const mockStrokes = [{ id: '1', content: 'test' }] as any;
-        const { result } = renderHook(() => {
+        const mockStrokes = [{ id: '1', content: 'test' }];
+        renderHook(() => {
             const persistence = useWhiteboardPersistence(roomId);
-            persistence.useAutoSave(mockStrokes);
-            return persistence;
+            persistence.useAutoSave(mockStrokes as unknown as Parameters<typeof persistence.useAutoSave>[0]);
         });
 
         // Advance time by 10 seconds

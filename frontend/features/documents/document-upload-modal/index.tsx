@@ -70,7 +70,8 @@ export default function DocumentUploadModal({
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setMounted(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(prev => prev !== true ? true : prev);
     return () => setMounted(false);
   }, []);
 

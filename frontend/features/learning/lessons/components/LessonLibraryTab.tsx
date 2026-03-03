@@ -172,6 +172,8 @@ const LessonLibraryRow = memo(({
   </TableRow>
 ));
 
+LessonLibraryRow.displayName = 'LessonLibraryRow';
+
 export function LessonLibraryTab() {
   const router = useRouter();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -476,7 +478,7 @@ export function LessonLibraryTab() {
                 <h3 className="text-xl font-bold">Không tìm thấy bài giảng</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
                   {searchQuery
-                    ? `Không có kết quả nào cho "${searchQuery}". Thử tìm kiếm với từ khóa khác.`
+                    ? `Không có kết quả nào cho &quot;${searchQuery}&quot;. Thử tìm kiếm với từ khóa khác.`
                     : "Chưa có bài giảng nào trong danh mục này. Hãy bắt đầu bằng cách thêm bài giảng mới."}
                 </p>
               </div>
@@ -643,8 +645,8 @@ export function LessonLibraryTab() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-bold">Xác nhận xóa</AlertDialogTitle>
             <AlertDialogDescription className="text-base">
-              Bạn có chắc chắn muốn xóa bài giảng "
-              <span className="font-bold text-foreground">{selectedLesson?.title}</span>"?
+              Bạn có chắc chắn muốn xóa bài giảng &quot;
+              <span className="font-bold text-foreground">{selectedLesson?.title}</span>&quot;?
               <br /><br />
               <span className="text-destructive font-semibold">Cảnh báo:</span> Hành động này sẽ gỡ bài giảng khỏi
               <span className="font-bold"> toàn bộ buổi học và khóa học </span>

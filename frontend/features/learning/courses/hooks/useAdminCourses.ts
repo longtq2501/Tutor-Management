@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { courseAdminApi } from '@/lib/services/course-admin';
 import type {
     CourseRequest,
@@ -51,11 +52,12 @@ export const useCreateCourse = () => {
             queryClient.invalidateQueries({ queryKey: adminCourseKeys.lists() });
             toast.success('Tạo khóa học thành công!', { id: context?.toastId });
         },
-        onError: (error: any, __, context) => {
-            toast.error(
-                error?.response?.data?.message || 'Có lỗi xảy ra khi tạo khóa học',
-                { id: context?.toastId }
-            );
+        onError: (error: unknown, __, context) => {
+            let message = 'Có lỗi xảy ra khi tạo khóa học';
+            if (axios.isAxiosError(error)) {
+                message = error?.response?.data?.message || message;
+            }
+            toast.error(message, { id: context?.toastId });
         },
     });
 };
@@ -78,11 +80,12 @@ export const useUpdateCourse = () => {
             queryClient.invalidateQueries({ queryKey: adminCourseKeys.detail(variables.id) });
             toast.success('Cập nhật khóa học thành công!', { id: context?.toastId });
         },
-        onError: (error: any, __, context) => {
-            toast.error(
-                error?.response?.data?.message || 'Có lỗi xảy ra khi cập nhật khóa học',
-                { id: context?.toastId }
-            );
+        onError: (error: unknown, __, context) => {
+            let message = 'Có lỗi xảy ra khi cập nhật khóa học';
+            if (axios.isAxiosError(error)) {
+                message = error?.response?.data?.message || message;
+            }
+            toast.error(message, { id: context?.toastId });
         },
     });
 };
@@ -103,11 +106,12 @@ export const useDeleteCourse = () => {
             queryClient.invalidateQueries({ queryKey: adminCourseKeys.lists() });
             toast.success('Xóa khóa học thành công!', { id: context?.toastId });
         },
-        onError: (error: any, __, context) => {
-            toast.error(
-                error?.response?.data?.message || 'Có lỗi xảy ra khi xóa khóa học',
-                { id: context?.toastId }
-            );
+        onError: (error: unknown, __, context) => {
+            let message = 'Có lỗi xảy ra khi xóa khóa học';
+            if (axios.isAxiosError(error)) {
+                message = error?.response?.data?.message || message;
+            }
+            toast.error(message, { id: context?.toastId });
         },
     });
 };
@@ -129,11 +133,12 @@ export const useAssignCourse = () => {
             queryClient.invalidateQueries({ queryKey: adminCourseKeys.assignments(variables.id) });
             toast.success('Giao khóa học thành công!', { id: context?.toastId });
         },
-        onError: (error: any, __, context) => {
-            toast.error(
-                error?.response?.data?.message || 'Có lỗi xảy ra khi giao khóa học',
-                { id: context?.toastId }
-            );
+        onError: (error: unknown, __, context) => {
+            let message = 'Có lỗi xảy ra khi giao khóa học';
+            if (axios.isAxiosError(error)) {
+                message = error?.response?.data?.message || message;
+            }
+            toast.error(message, { id: context?.toastId });
         },
     });
 };
@@ -166,11 +171,12 @@ export const useUnassignCourse = () => {
             queryClient.invalidateQueries({ queryKey: adminCourseKeys.assignments(variables.courseId) });
             toast.success('Thu hồi khóa học thành công!', { id: context?.toastId });
         },
-        onError: (error: any, __, context) => {
-            toast.error(
-                error?.response?.data?.message || 'Có lỗi xảy ra khi thu hồi khóa học',
-                { id: context?.toastId }
-            );
+        onError: (error: unknown, __, context) => {
+            let message = 'Có lỗi xảy ra khi thu hồi khóa học';
+            if (axios.isAxiosError(error)) {
+                message = error?.response?.data?.message || message;
+            }
+            toast.error(message, { id: context?.toastId });
         },
     });
 };

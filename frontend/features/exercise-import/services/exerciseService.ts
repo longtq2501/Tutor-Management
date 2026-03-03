@@ -49,7 +49,7 @@ export const exerciseService = {
      * List exercises with optional filters and pagination
      */
     getAll: async (classId?: string, status?: ExerciseStatus, search?: string, page = 0, size = 10): Promise<PageResponse<ExerciseListItemResponse>> => {
-        const params: any = { page, size };
+        const params: Record<string, string | number | undefined> = { page, size };
         if (classId) params.classId = classId;
         if (status) params.status = status;
         if (search) params.search = search;

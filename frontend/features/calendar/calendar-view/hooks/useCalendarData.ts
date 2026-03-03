@@ -57,7 +57,7 @@ export const useCalendarData = (currentDate: Date) => {
 
   const handleUpdateSession = (updated: SessionRecord) => {
     // Update the TanStack Query Cache (The Source of Truth)
-    queryClient.setQueryData(['sessions', monthStr], (oldData: any) => {
+    queryClient.setQueryData(['sessions', monthStr], (oldData: PageResponse<SessionRecord> | SessionRecord[] | undefined) => {
       if (!oldData) return undefined;
 
       const isPage = !Array.isArray(oldData) && 'content' in oldData;

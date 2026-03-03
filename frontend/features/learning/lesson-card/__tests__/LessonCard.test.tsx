@@ -15,7 +15,7 @@ const mockLesson: Lesson = {
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
     // images and resources are missing (undefined) as in summary response
-} as any;
+} as unknown as Lesson;
 
 describe('LessonCard', () => {
     it('renders correctly without images or resources', () => {

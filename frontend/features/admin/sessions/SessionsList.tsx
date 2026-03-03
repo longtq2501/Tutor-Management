@@ -13,7 +13,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useConfirm } from '@/hooks/useConfirm';
 import { SessionDetailsDrawer } from './components/SessionDetailsDrawer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+
 
 export function SessionsList() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -164,8 +164,8 @@ export function SessionsList() {
                             handleTogglePayment(s.id);
                         }}
                         className={`flex items-center gap-2.5 px-4 py-1.5 rounded-full border transition-all duration-300 group ${isPaid
-                                ? 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500 hover:text-white'
-                                : 'bg-red-500/10 border-red-500/20 text-red-500 animate-pulse hover:animate-none hover:bg-red-500 hover:text-white'
+                            ? 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500 hover:text-white'
+                            : 'bg-red-500/10 border-red-500/20 text-red-500 animate-pulse hover:animate-none hover:bg-red-500 hover:text-white'
                             }`}
                     >
                         <div className={`w-1.5 h-1.5 rounded-full shadow-glow-sm ${isPaid ? 'bg-green-500 group-hover:bg-white' : 'bg-red-500 group-hover:bg-white shadow-red-500'}`} />

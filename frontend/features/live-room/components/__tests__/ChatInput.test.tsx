@@ -6,7 +6,7 @@ import { vi, describe, it, expect } from 'vitest';
 // Mock next/dynamic for EmojiPicker
 vi.mock('next/dynamic', () => ({
     default: () => {
-        const MockPicker = ({ onEmojiClick }: { onEmojiClick: any }) => (
+        const MockPicker = ({ onEmojiClick }: { onEmojiClick: (data: { emoji: string }) => void }) => (
             <button
                 data-testid="emoji-picker"
                 onClick={() => onEmojiClick({ emoji: '😀' })}

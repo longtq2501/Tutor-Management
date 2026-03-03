@@ -10,6 +10,8 @@ import { LESSON_STATUS_LABELS } from '@/lib/types/lesson-status';
 import { Clock } from 'lucide-react';
 import { LessonDetailFormData } from '../types';
 import { LibrarySelection } from './LibrarySelection';
+import type { LessonLibraryDTO } from '@/features/learning/lessons/types';
+import type { Document } from '@/lib/types/document';
 
 interface EditModeFormProps {
     formData: LessonDetailFormData;
@@ -23,11 +25,13 @@ interface EditModeFormProps {
     selectedCategory: string;
     setSelectedCategory: (cat: string) => void;
     categories: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filteredItems: any[];
     selectedLessonIds: Set<number>;
     selectedDocumentIds: Set<number>;
     currentTabSelectedCount: number;
     toggleSelection: (id: number) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getCategoryName: (item: any) => string;
 }
 

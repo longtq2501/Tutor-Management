@@ -66,7 +66,8 @@ export const LiveRoomDisplay: React.FC<LiveRoomDisplayProps> = ({ roomId, curren
     // Set mobile default tab
     useEffect(() => {
         if (isMobile && typeof window !== 'undefined' && !sessionStorage.getItem(`room-${roomId}-active-tab`)) {
-            setActiveTab('video');
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setActiveTab(prev => prev !== 'video' ? 'video' : prev);
         }
     }, [isMobile, roomId]);
 

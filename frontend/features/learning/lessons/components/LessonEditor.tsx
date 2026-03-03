@@ -87,7 +87,7 @@ const EditorToolbar = ({ editor, disabled }: { editor: Editor | null, disabled?:
                     if (value === 'p') {
                         editor.chain().focus().setParagraph().run();
                     } else {
-                        const level = parseInt(value.replace('h', '')) as any;
+                        const level = parseInt(value.replace('h', '')) as 1 | 2 | 3 | 4 | 5;
                         editor.chain().focus().toggleHeading({ level }).run();
                     }
                 }}

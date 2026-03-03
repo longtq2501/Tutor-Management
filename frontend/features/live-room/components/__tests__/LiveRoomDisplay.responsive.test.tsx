@@ -40,17 +40,17 @@ vi.mock('../../hooks/useRoomStatus', () => ({
 // Mock child components
 vi.mock('../RoomHeader', () => ({ RoomHeader: () => <div>Header</div> }));
 vi.mock('../InactivityWarning', () => ({ InactivityWarning: () => null }));
-vi.mock('../RoomErrorBoundary', () => ({ RoomErrorBoundary: ({ children }: any) => <>{children}</> }));
+vi.mock('../RoomErrorBoundary', () => ({ RoomErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('../RecordingPreviewDialog', () => ({ RecordingPreviewDialog: () => null }));
 vi.mock('../RoomMainContent', () => ({
-    RoomMainContent: ({ onTabChange }: any) => (
+    RoomMainContent: ({ onTabChange }: { onTabChange: (tab: string) => void }) => (
         <div>
             <button onClick={() => onTabChange('chat')}>Switch to Chat</button>
         </div>
     )
 }));
 vi.mock('../MobileNavigation', () => ({
-    MobileNavigation: ({ activeTab }: any) => (
+    MobileNavigation: ({ activeTab }: { activeTab: string }) => (
         <div data-testid="active-tab">{activeTab}</div>
     )
 }));

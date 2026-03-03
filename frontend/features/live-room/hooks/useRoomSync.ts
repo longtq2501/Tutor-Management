@@ -88,6 +88,7 @@ export const useRoomSync = (roomId: string) => {
         console.log('🔗 Subscribing to presence events for room:', roomId);
 
         // 1. Subscribe to presence events
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const unsubscribe = subscribe(`/topic/room/${roomId}/presence`, (message: any) => {
             console.log('Presence update:', message);
 

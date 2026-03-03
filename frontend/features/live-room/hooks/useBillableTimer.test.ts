@@ -19,15 +19,14 @@ describe('useBillableTimer', () => {
         vi.setSystemTime(new Date('2024-01-01T10:00:00Z'));
 
         // Default mock implementation
-        (useRoomState as any).mockReturnValue({
-            state: {
-                participants: []
-            }
-        });
+        vi.mocked(useRoomState).mockReturnValue({
+            state: { participants: [] },
+            dispatch: vi.fn(),
+        } as unknown as ReturnType<typeof useRoomState>);
 
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             durationMinutes: 0
-        });
+        } as any);
     });
 
     afterEach(() => {
@@ -41,9 +40,9 @@ describe('useBillableTimer', () => {
     });
 
     it('should load historical duration from API', async () => {
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             durationMinutes: 10 // 600 seconds
-        });
+        } as any);
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -60,14 +59,15 @@ describe('useBillableTimer', () => {
         // Both joined at start time
         const joinedAt = startTime.toISOString();
 
-        (useRoomState as any).mockReturnValue({
+        vi.mocked(useRoomState).mockReturnValue({
             state: {
                 participants: [
                     { id: '1', role: 'TUTOR', joinedAt },
                     { id: '2', role: 'STUDENT', joinedAt }
                 ]
-            }
-        });
+            },
+            dispatch: vi.fn()
+        } as unknown as ReturnType<typeof useRoomState>);
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -84,13 +84,14 @@ describe('useBillableTimer', () => {
         const startTime = new Date('2024-01-01T10:00:00Z');
         const joinedAt = startTime.toISOString();
 
-        (useRoomState as any).mockReturnValue({
+        vi.mocked(useRoomState).mockReturnValue({
             state: {
                 participants: [
                     { id: '1', role: 'TUTOR', joinedAt }
                 ]
-            }
-        });
+            },
+            dispatch: vi.fn(),
+        } as unknown as ReturnType<typeof useRoomState>);
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -103,21 +104,22 @@ describe('useBillableTimer', () => {
     });
 
     it('should combine base duration with real-time overlap', async () => {
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             durationMinutes: 10 // 600 seconds base
-        });
+        } as any);
 
         const startTime = new Date('2024-01-01T10:00:00Z');
         const joinedAt = startTime.toISOString();
 
-        (useRoomState as any).mockReturnValue({
+        vi.mocked(useRoomState).mockReturnValue({
             state: {
                 participants: [
                     { id: '1', role: 'TUTOR', joinedAt },
                     { id: '2', role: 'STUDENT', joinedAt }
                 ]
-            }
-        });
+            },
+            dispatch: vi.fn()
+        } as unknown as ReturnType<typeof useRoomState>);
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -137,9 +139,9 @@ describe('useBillableTimer', () => {
 
     it('should poll for stats updates', async () => {
         // First call returns 0
-        (onlineSessionApi.getRoomStats as any)
-            .mockResolvedValueOnce({ durationMinutes: 0 })
-            .mockResolvedValueOnce({ durationMinutes: 5 }); // Second call (poll) returns 5 min
+        vi.mocked(onlineSessionApi.getRoomStats)
+            .mockResolvedValueOnce({ durationMinutes: 0 } as any)
+            .mockResolvedValueOnce({ durationMinutes: 5 } as any); // Second call (poll) returns 5 min
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -161,10 +163,10 @@ describe('useBillableTimer', () => {
     it('should abort API call on unmount', async () => {
         const abortSpy = vi.fn();
 
-        (onlineSessionApi.getRoomStats as any).mockImplementation(
+        vi.mocked(onlineSessionApi.getRoomStats).mockImplementation(
             (roomId: string, options?: { signal?: AbortSignal }) => {
                 options?.signal?.addEventListener('abort', abortSpy);
-                return new Promise(resolve => setTimeout(() => resolve({ durationMinutes: 0 }), 1000));
+                return new Promise(resolve => setTimeout(() => resolve({ durationMinutes: 0 } as any), 1000));
             }
         );
 
@@ -180,14 +182,15 @@ describe('useBillableTimer', () => {
         const startTime = new Date('2024-01-01T10:00:00Z');
 
         // Initial: both joined at 10:00
-        (useRoomState as any).mockReturnValue({
+        vi.mocked(useRoomState).mockReturnValue({
             state: {
                 participants: [
                     { id: '1', role: 'TUTOR', joinedAt: startTime.toISOString() },
                     { id: '2', role: 'STUDENT', joinedAt: startTime.toISOString() }
                 ]
-            }
-        });
+            },
+            dispatch: vi.fn()
+        } as unknown as ReturnType<typeof useRoomState>);
 
         const { result, rerender } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -198,9 +201,10 @@ describe('useBillableTimer', () => {
         expect(result.current.formattedTime).toBe('05:00');
 
         // Tutor leaves
-        (useRoomState as any).mockReturnValue({
-            state: { participants: [{ id: '2', role: 'STUDENT', joinedAt: startTime.toISOString() }] }
-        });
+        vi.mocked(useRoomState).mockReturnValue({
+            state: { participants: [{ id: '2', role: 'STUDENT', joinedAt: startTime.toISOString() }] },
+            dispatch: vi.fn()
+        } as unknown as ReturnType<typeof useRoomState>);
         rerender();
 
         await act(async () => {
@@ -209,22 +213,23 @@ describe('useBillableTimer', () => {
         expect(result.current.isBillable).toBe(false);
 
         // Backend saves the 5 minutes
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             durationMinutes: 5
-        });
+        } as any);
 
         // Tutor rejoins 1 minute later
         const rejoinTime = new Date('2024-01-01T10:06:00Z');
         vi.setSystemTime(rejoinTime);
 
-        (useRoomState as any).mockReturnValue({
+        vi.mocked(useRoomState).mockReturnValue({
             state: {
                 participants: [
                     { id: '1', role: 'TUTOR', joinedAt: rejoinTime.toISOString() }, // New joinedAt
                     { id: '2', role: 'STUDENT', joinedAt: startTime.toISOString() }
                 ]
-            }
-        });
+            },
+            dispatch: vi.fn()
+        } as unknown as ReturnType<typeof useRoomState>);
         rerender();
 
         // Polling happens
@@ -237,9 +242,9 @@ describe('useBillableTimer', () => {
     });
 
     it('should format time correctly for hours', async () => {
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             durationMinutes: 65 // 1 hour 5 minutes
-        });
+        } as any);
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 
@@ -254,18 +259,19 @@ describe('useBillableTimer', () => {
         const startTime = new Date('2024-01-01T10:00:00Z');
 
         // Mock API to return 0 (simulating no background save)
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             durationMinutes: 0
-        });
+        } as any);
 
-        (useRoomState as any).mockReturnValue({
+        vi.mocked(useRoomState).mockReturnValue({
             state: {
                 participants: [
                     { id: '1', role: 'TUTOR', joinedAt: startTime.toISOString() },
                     { id: '2', role: 'STUDENT', joinedAt: startTime.toISOString() }
                 ]
-            }
-        });
+            },
+            dispatch: vi.fn()
+        } as unknown as ReturnType<typeof useRoomState>);
 
         const { result } = renderHook(() => useBillableTimer(mockRoomId));
 

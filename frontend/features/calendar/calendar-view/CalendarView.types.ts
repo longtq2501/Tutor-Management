@@ -1,7 +1,8 @@
-import type { SessionRecord } from '@/lib/types/finance';
 import type { DragEndEvent } from '@dnd-kit/core';
+import type { SessionRecord } from '@/lib/types/finance';
 import type { CalendarViewType } from './components/ViewSwitcher';
-import type { CalendarDay } from './types';
+import type { CalendarDay, CalendarStats } from './types';
+import type { Student } from '@/lib/types/student';
 
 /**
  * Phản hồi từ useCalendarView hook
@@ -30,9 +31,9 @@ export interface UseCalendarViewReturn {
     searchQuery: string;
     filteredSessions: SessionRecord[];
     filteredCalendarDays: CalendarDay[];
-    stats: any; // Ideally this would be typed specifically
+    stats: CalendarStats;
     currentDayInfo: CalendarDay | null;
-    students: any[];
+    students: Student[];
 
     // === Actions ===
     setCurrentView: (view: CalendarViewType) => void;

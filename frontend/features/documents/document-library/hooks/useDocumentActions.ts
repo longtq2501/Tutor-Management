@@ -5,7 +5,7 @@ import { documentsApi } from '@/lib/services';
 import type { Document } from '@/lib/types';
 import { toast } from 'sonner';
 
-export const useDocumentActions = (loadDocuments: () => void, loadCategoryDocuments: () => void, selectedCategory: any) => {
+export const useDocumentActions = (loadDocuments: () => void, loadCategoryDocuments: () => void, selectedCategory: string | null) => {
   const handleDownload = async (doc: Document) => {
     try {
       const response = await documentsApi.download(doc.id);
@@ -36,7 +36,7 @@ export const useDocumentActions = (loadDocuments: () => void, loadCategoryDocume
     toast.promise(promise(), {
       loading: 'Đang xóa tài liệu...',
       success: 'Đã xóa tài liệu thành công',
-      error: (err: any) => {
+      error: (err: unknown) => {
         console.error('Error deleting document:', err);
         return 'Không thể xóa tài liệu!';
       }

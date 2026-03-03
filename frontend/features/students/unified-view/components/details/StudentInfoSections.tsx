@@ -24,6 +24,7 @@ const Label = ({ children, className }: { children: React.ReactNode, className?:
 interface StudentInfoSectionsProps {
     student: Student;
     onEdit: (student: Student) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onEditParent?: (parent: any) => void;
 }
 

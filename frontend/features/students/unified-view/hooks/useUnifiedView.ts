@@ -134,12 +134,14 @@ export function useUnifiedView() {
         if (selectedStudentDetail) {
             const freshData = students.find(s => s.id === selectedStudentDetail.id);
             if (freshData && freshData !== selectedStudentDetail) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setSelectedStudentDetail(freshData);
             }
         }
         if (selectedStudent) {
             const freshData = students.find(s => s.id === selectedStudent.id);
             if (freshData && freshData !== selectedStudent) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setSelectedStudent(freshData);
             }
         }

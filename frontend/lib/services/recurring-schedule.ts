@@ -76,7 +76,7 @@ export const recurringSchedulesApi = {
    * @param {string} month - Tháng cần tạo (Ví dụ: "2023-12")
    * @param {number[]} [studentIds] - Danh sách ID học sinh cụ thể (tùy chọn)
    */
-  generateSessions: async (month: string, studentIds?: number[]): Promise<any> => {
+  generateSessions: async (month: string, studentIds?: number[]): Promise<void> => {
     const response = await api.post('/recurring-schedules/generate-sessions', {
       month,
       studentIds
@@ -88,7 +88,7 @@ export const recurringSchedulesApi = {
    * @param {string} month - Tháng cần kiểm tra
    * @param {number} [studentId] - ID học sinh (tùy chọn)
    */
-  checkMonth: async (month: string, studentId?: number): Promise<any> => {
+  checkMonth: async (month: string, studentId?: number): Promise<boolean> => {
     const response = await api.get('/recurring-schedules/check-month', {
       params: { month, studentId }
     });
@@ -99,7 +99,7 @@ export const recurringSchedulesApi = {
    * @param {string} month - Tháng cần đếm
    * @param {number[]} [studentIds] - Danh sách ID học sinh (tùy chọn)
    */
-  countSessions: async (month: string, studentIds?: number[]): Promise<any> => {
+  countSessions: async (month: string, studentIds?: number[]): Promise<number> => {
     const response = await api.post('/recurring-schedules/count-sessions', {
       month,
       studentIds

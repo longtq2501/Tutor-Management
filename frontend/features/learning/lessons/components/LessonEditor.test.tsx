@@ -42,7 +42,7 @@ if (typeof window.PointerEvent === 'undefined') {
             super(type, props);
         }
     }
-    window.PointerEvent = MockPointerEvent as any;
+    window.PointerEvent = MockPointerEvent as unknown as typeof PointerEvent;
 }
 
 describe('LessonEditor Heading Recognition', () => {

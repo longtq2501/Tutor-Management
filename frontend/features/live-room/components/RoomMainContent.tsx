@@ -68,7 +68,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
     // Handle Screen Share Trigger
     React.useEffect(() => {
         if (state.contentMode === 'screen' && isTutor && !media.isScreenSharing) {
-            media.startScreenShare().then((stream: any) => {
+            media.startScreenShare().then((stream: MediaStream | null) => {
                 if (!stream) {
                     // Fallback to whiteboard if screen share fails or is cancelled
                     actions.setContentMode('whiteboard');
@@ -96,7 +96,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
         };
     }, [activeTab, isMobile]);
 
-    const handleToggleRecording = React.useCallback(async () => {
+    const handleToggleRecording = async () => {
         if (media.isRecording) {
             media.stopRecording();
         } else {
@@ -113,7 +113,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
 
             await media.startRecording(sourceStream);
         }
-    }, [media.isRecording, media.startRecording, media.stopRecording, state.contentMode, media.screenStream]); // eslint-disable-line react-hooks/exhaustive-deps
+    };
 
     return (
         <main

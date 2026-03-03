@@ -8,8 +8,7 @@ import {
 import type { Student } from '@/lib/types';
 import {
     CalendarClock,
-    Plus,
-    Edit2
+    Plus
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { DetailModalHeader } from './details/DetailModalHeader';

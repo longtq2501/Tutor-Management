@@ -30,7 +30,7 @@ export const useSSE = (onNotification?: (notification: Notification) => void): U
     /**
      * Initiates the SSE connection to the backend.
      */
-    const establishConnection = useCallback(() => {
+    const establishConnection = useCallback(function doConnect() {
         if (typeof window === 'undefined') return;
 
         // Cleanup any pending reconnection attempts
@@ -103,7 +103,7 @@ export const useSSE = (onNotification?: (notification: Notification) => void): U
             console.log(`Retrying SSE connection in ${Math.round(backoffDelay)}ms (Attempt ${retryAttemptsRef.current})`);
 
             reconnectTimeoutRef.current = setTimeout(() => {
-                establishConnection();
+                doConnect();
             }, backoffDelay);
         };
     }, [onNotification]);

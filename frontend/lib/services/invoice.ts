@@ -1,5 +1,6 @@
 import api from './axios-instance';
-import type { InvoiceRequest, InvoiceResponse } from '../types';
+import type { InvoiceRequest, InvoiceResponse, ApiResponse } from '../types';
+
 
 export const invoicesApi = {
   /** * TẠO DỮ LIỆU HÓA ĐƠN (XEM TRƯỚC)
@@ -50,27 +51,27 @@ export const invoicesApi = {
 
   /** * GỬI EMAIL HÓA ĐƠN CHO MỘT PHỤ HUYNH CỤ THỂ
    * @param {InvoiceRequest} request - Thông tin yêu cầu gửi email
-   * @returns {Promise<any>} Kết quả gửi email thành công/thất bại
+   * @returns {Promise<ApiResponse<void>>} Kết quả gửi email thành công/thất bại
    */
-  sendInvoiceEmail: async (request: InvoiceRequest): Promise<any> => {
+  sendInvoiceEmail: async (request: InvoiceRequest): Promise<ApiResponse<void>> => {
     const response = await api.post('/invoices/send-email', request);
     return response.data;
   },
 
   /** * GỬI EMAIL HÓA ĐƠN HÀNG LOẠT THEO DANH SÁCH CHỈ ĐỊNH
    * @param {InvoiceRequest} request - Chứa danh sách các ID học sinh cụ thể
-   * @returns {Promise<any>}
+   * @returns {Promise<ApiResponse<void>>}
    */
-  sendInvoiceEmailBatch: async (request: InvoiceRequest): Promise<any> => {
+  sendInvoiceEmailBatch: async (request: InvoiceRequest): Promise<ApiResponse<void>> => {
     const response = await api.post('/invoices/send-email-batch', request);
     return response.data;
   },
 
   /** * GỬI EMAIL HÓA ĐƠN CHO TOÀN BỘ PHỤ HUYNH TRONG THÁNG
    * @param {InvoiceRequest} request - Chứa thông tin tháng cần gửi
-   * @returns {Promise<any>}
+   * @returns {Promise<ApiResponse<void>>}
    */
-  sendInvoiceEmailAll: async (request: InvoiceRequest): Promise<any> => {
+  sendInvoiceEmailAll: async (request: InvoiceRequest): Promise<ApiResponse<void>> => {
     const response = await api.post('/invoices/send-email-all', request);
     return response.data;
   },

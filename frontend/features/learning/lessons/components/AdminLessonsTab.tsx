@@ -32,11 +32,12 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import {
   useAdminLessons
 } from '../hooks/useAdminLessons';
+import type { AdminLessonDTO } from '../types';
 import { CategoryDashboard } from './CategoryDashboard';
 
 const ITEMS_PER_PAGE = 10;
 
-const AdminLessonRow = memo(({ lesson, onPreview }: { lesson: any; onPreview: (id: number) => void }) => (
+const AdminLessonRow = memo(({ lesson, onPreview }: { lesson: AdminLessonDTO; onPreview: (id: number) => void }) => (
   <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => onPreview(lesson.id)}>
     <TableCell className="font-medium">
       <div className="flex flex-col gap-1">
@@ -112,6 +113,8 @@ const AdminLessonRow = memo(({ lesson, onPreview }: { lesson: any; onPreview: (i
     </TableCell>
   </TableRow>
 ));
+
+AdminLessonRow.displayName = 'AdminLessonRow';
 
 export function AdminLessonsTab() {
   const router = useRouter();
@@ -221,7 +224,7 @@ export function AdminLessonsTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedLessons.map((lesson: any) => (
+                    {paginatedLessons.map((lesson: AdminLessonDTO) => (
                       <AdminLessonRow key={lesson.id} lesson={lesson} onPreview={handlePreview} />
                     ))}
                   </TableBody>

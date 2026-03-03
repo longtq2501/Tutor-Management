@@ -1,12 +1,15 @@
-import type { DashboardStats } from './types/dashboard.types';
+import type { SessionRecord, Document, RecurringSchedule } from '@/lib/types';
+import type { UserInfo } from '@/lib/services/auth';
+import type { StudentDashboardStats } from './types/dashboard.types';
 
 export interface UseStudentDashboardReturn {
   loading: boolean;
-  stats: DashboardStats;
-  sessions: any[];
-  documents: any[];
-  schedule: any;
+  stats: StudentDashboardStats;
+  sessions: SessionRecord[];
+  documents: Document[];
+  schedule: RecurringSchedule | null;
   currentMonth: string;
   setCurrentMonth: (month: string) => void;
-  user: any;
+  user: UserInfo | null;
+  hasStudentId: boolean;
 }

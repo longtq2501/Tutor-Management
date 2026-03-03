@@ -6,8 +6,8 @@ import { BookOpen, FileText } from 'lucide-react';
 import React from 'react';
 
 interface AttachmentSectionProps {
-    lessons: any[];
-    documents: any[];
+    lessons: { id: number; title: string; summary?: string }[];
+    documents: { id: number; title?: string; fileName?: string }[];
     selectedLessonIds: number[];
     selectedDocIds: number[];
     toggleLesson: (id: number) => void;

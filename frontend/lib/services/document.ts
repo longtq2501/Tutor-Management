@@ -41,7 +41,7 @@ export const documentsApi = {
    * @param {File} file - File vật lý cần upload
    * @param {DocumentUploadRequest} data - Thông tin mô tả tài liệu
    */
-  upload: async (file: File, data: DocumentUploadRequest): Promise<any> => {
+  upload: async (file: File, data: DocumentUploadRequest): Promise<AppDocument> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
@@ -101,7 +101,7 @@ export const documentsApi = {
   },
 
   /** * LẤY DANH SÁCH CÁC DANH MỤC TÀI LIỆU HIỆN CÓ */
-  getCategories: async (): Promise<any[]> => {
+  getCategories: async (): Promise<Category[]> => {
     const response = await api.get('/document-categories');
     return response.data.data;
   },

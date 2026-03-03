@@ -2,6 +2,7 @@
 
 import { invoicesApi, sessionsApi } from '@/lib/services';
 import { useState } from 'react';
+import axios from 'axios';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useFinanceContext } from '../context/FinanceContext';
@@ -115,17 +116,23 @@ export function useFinanceActions({ confirm }: UseFinanceActionsProps = {}) {
       window.URL.revokeObjectURL(url);
 
       toast.success('Đã tải xuống báo giá!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Invoice error:', error);
       let message = 'Không thể tạo báo giá.';
 
-      if (error.response?.data instanceof Blob) {
-        try {
-          const text = await error.response.data.text();
-          if (text) message = text;
-        } catch (e) {
-          // Fallback to generic
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data instanceof Blob) {
+          try {
+            const text = await error.response.data.text();
+            if (text) message = text;
+          } catch (e: unknown) {
+            // Fallback to generic
+          }
+        } else if (error.response?.data?.message) {
+          message = error.response.data.message;
         }
+      } else if (error instanceof Error) {
+        message = error.message;
       }
       toast.error(message);
     } finally {
@@ -152,8 +159,13 @@ export function useFinanceActions({ confirm }: UseFinanceActionsProps = {}) {
       });
       toast.success('Gửi email thành công!');
       clearSelection();
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.response?.data?.error || 'Lỗi khi gửi email';
+    } catch (error: unknown) {
+      let message = 'Lỗi khi gửi email';
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || error.response?.data?.error || message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
       toast.error(message);
     } finally {
       setSendingEmail(false);

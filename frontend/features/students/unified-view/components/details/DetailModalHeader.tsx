@@ -39,7 +39,7 @@ export function DetailModalHeader({ student }: DetailModalHeaderProps) {
                     </div>
 
                     <p className="text-muted-foreground font-medium flex items-center justify-center sm:justify-start gap-2 italic">
-                        "{student.notes || 'Không có ghi chú'}"
+                        &quot;{student.notes || 'Không có ghi chú'}&quot;
                     </p>
 
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">

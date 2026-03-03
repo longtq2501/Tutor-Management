@@ -1,5 +1,6 @@
 import { sessionsApi } from '@/lib/services/session';
 import type { SessionRecord } from '@/lib/types/finance';
+import type { PageResponse } from '@/lib/types/common';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -32,7 +33,7 @@ export function useConvertToOffline() {
             // Optimistically update to the new value (isOnline = false)
             // Note: We need to match the structure of useCalendarData which uses ['sessions', month]
             // We'll iterate over all 'sessions' queries to update them
-            queryClient.setQueriesData({ queryKey: ['sessions'] }, (old: any) => {
+            queryClient.setQueriesData({ queryKey: ['sessions'] }, (old: PageResponse<SessionRecord> | SessionRecord[] | undefined) => {
                 if (!old) return old;
 
                 const isPage = !Array.isArray(old) && 'content' in old;

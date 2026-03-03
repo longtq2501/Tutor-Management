@@ -93,3 +93,5 @@ export const PremiumCategoryCard = memo(({
         </motion.button>
     );
 });
+
+PremiumCategoryCard.displayName = 'PremiumCategoryCard';

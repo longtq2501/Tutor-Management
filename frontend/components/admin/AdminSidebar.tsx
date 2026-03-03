@@ -71,8 +71,6 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({
     collapsed,
-    mobileOpen,
-    onCloseMobile,
     onToggleCollapse
 }: AdminSidebarProps) {
     const pathname = usePathname();

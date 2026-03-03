@@ -2,6 +2,9 @@ import { cn } from '@/lib/utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Check, Search, X } from 'lucide-react';
 import { useRef } from 'react';
+import type { LessonLibraryDTO } from '@/features/learning/lessons/types';
+import type { Document } from '@/lib/types/document';
+
 import {
     Select,
     SelectContent,
@@ -18,11 +21,13 @@ interface LibrarySelectionProps {
     selectedCategory: string;
     setSelectedCategory: (cat: string) => void;
     categories: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filteredItems: any[];
     selectedLessonIds: Set<number>;
     selectedDocumentIds: Set<number>;
     currentTabSelectedCount: number;
     toggleSelection: (id: number) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getCategoryName: (item: any) => string;
 }
 
@@ -159,7 +164,7 @@ export function LibrarySelection({
                     </div>
                 ) : (
                     <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-                        {virtualizer.getVirtualItems().map((v: any) => {
+                        {virtualizer.getVirtualItems().map((v) => {
                             const item = filteredItems[v.index];
                             const isSelected = activeTab === 'lessons'
                                 ? selectedLessonIds.has(Number(item.id))

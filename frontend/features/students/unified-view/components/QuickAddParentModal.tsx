@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import {
     Dialog,
     DialogContent,
@@ -84,8 +85,13 @@ export function QuickAddParentModal({ open, onClose, onSuccess, initialData }: Q
 
             onSuccess(res.id);
             onClose();
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || error.message || (initialData?.id ? 'Không thể cập nhật phụ huynh' : 'Không thể thêm phụ huynh');
+        } catch (error: unknown) {
+            let errorMessage = (initialData?.id ? 'Không thể cập nhật phụ huynh' : 'Không thể thêm phụ huynh');
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || errorMessage;
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
             toast.error(errorMessage);
         } finally {
             setLoading(false);

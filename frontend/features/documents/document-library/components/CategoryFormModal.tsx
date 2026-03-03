@@ -37,25 +37,28 @@ export function CategoryFormModal({ open, onOpenChange, initialData, onSuccess }
     });
 
     useEffect(() => {
-        if (initialData) {
-            setFormData({
-                name: initialData.name,
-                code: initialData.code,
-                description: initialData.description || '',
-                active: initialData.active ?? true,
-                displayOrder: initialData.displayOrder || 0,
-                color: initialData.color || '#3b82f6',
-            });
-        } else {
-            // Reset for create mode
-            setFormData({
-                name: '',
-                code: '',
-                description: '',
-                active: true,
-                displayOrder: 0,
-                color: '#3b82f6',
-            });
+        if (open) {
+            if (initialData) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+                setFormData(prev => ({
+                    ...prev,
+                    name: initialData.name,
+                    code: initialData.code,
+                    description: initialData.description || '',
+                    active: initialData.active ?? true,
+                    displayOrder: initialData.displayOrder || 0,
+                    color: initialData.color || '#3b82f6',
+                }));
+            } else {
+                setFormData({
+                    name: '',
+                    code: '',
+                    description: '',
+                    active: true,
+                    displayOrder: 0,
+                    color: '#3b82f6',
+                });
+            }
         }
     }, [initialData, open]);
 

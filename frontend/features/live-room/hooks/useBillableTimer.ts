@@ -55,8 +55,8 @@ export const useBillableTimer = (roomId: string): UseBillableTimerResult => {
                     // Reset local accumulation on sync to prevent double counting
                     accumulatedSeconds: 0
                 }));
-            } catch (error: any) {
-                if (error.name !== 'AbortError' && !axios.isCancel(error)) {
+            } catch (error: unknown) {
+                if (!axios.isCancel(error) && (error as Error).name !== 'AbortError') {
                     console.error('Failed to fetch room stats:', error);
                 }
             }

@@ -188,3 +188,5 @@ export const PremiumLessonCard = memo(({
         </motion.div>
     );
 });
+
+PremiumLessonCard.displayName = 'PremiumLessonCard';

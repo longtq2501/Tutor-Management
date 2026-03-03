@@ -31,9 +31,10 @@ export default function RegisterPage() {
         try {
             await authService.register({ email, password, fullName, role });
             router.push('/login?registered=true');
-        } catch (err: any) {
-            console.error('Registration error details:', err.response?.data);
-            const errorData = err.response?.data;
+        } catch (err: unknown) {
+            const errorResponse = err as { response?: { data?: { message?: string; data?: Record<string, string> } } };
+            console.error('Registration error details:', errorResponse.response?.data);
+            const errorData = errorResponse.response?.data;
             let message = errorData?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
 
             // Handle validation errors (Map of field -> message)

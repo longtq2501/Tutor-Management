@@ -1,9 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useConvertToOnline } from '../useConvertToOnline';
 import { sessionsApi } from '@/lib/services/session';
+import type { SessionRecord } from '@/lib/types/finance';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createElement } from 'react';
+import { createElement, type ReactNode } from 'react';
 import { toast } from 'sonner';
 
 // Mock dependencies
@@ -34,7 +35,7 @@ describe('useConvertToOnline', () => {
         vi.clearAllMocks();
     });
 
-    const wrapper = ({ children }: { children: React.ReactNode }) =>
+    const wrapper = ({ children }: { children: ReactNode }) =>
         createElement(QueryClientProvider, { client: queryClient }, children);
 
     it('should handle successful conversion', async () => {
@@ -51,7 +52,7 @@ describe('useConvertToOnline', () => {
             canJoinNow: true
         };
 
-        (sessionsApi.convertToOnline as any).mockResolvedValue(mockResponse);
+        vi.mocked(sessionsApi.convertToOnline).mockResolvedValue(mockResponse as any);
 
         const { result } = renderHook(() => useConvertToOnline(), { wrapper });
 
@@ -61,10 +62,6 @@ describe('useConvertToOnline', () => {
 
         expect(sessionsApi.convertToOnline).toHaveBeenCalledWith(1);
         expect(toast.success).toHaveBeenCalled();
-
-        // Verify cache invalidation
-        // Since we can't easily spy on queryClient inside the hook without more mocking,
-        // we rely on the toast and api call verification.
     });
 
     it('should handle optimistically update cache (simulated)', async () => {
@@ -72,7 +69,7 @@ describe('useConvertToOnline', () => {
         queryClient.setQueryData(['calendar-sessions'], [{ id: 1, type: 'OFFLINE' }]);
 
         const mockResponse = { roomId: 'room-123' };
-        (sessionsApi.convertToOnline as any).mockResolvedValue(mockResponse);
+        vi.mocked(sessionsApi.convertToOnline).mockResolvedValue(mockResponse as any);
 
         const { result } = renderHook(() => useConvertToOnline(), { wrapper });
 
@@ -80,8 +77,6 @@ describe('useConvertToOnline', () => {
             await result.current.mutateAsync(1);
         });
 
-        // In a real integration test, we would check if the UI updated instantly.
-        // Here we verify the mutation was called.
         expect(sessionsApi.convertToOnline).toHaveBeenCalledWith(1);
     });
 
@@ -93,7 +88,7 @@ describe('useConvertToOnline', () => {
             }
         };
 
-        (sessionsApi.convertToOnline as any).mockRejectedValue(error);
+        vi.mocked(sessionsApi.convertToOnline).mockRejectedValue(error);
 
         const { result } = renderHook(() => useConvertToOnline(), { wrapper });
 
@@ -119,7 +114,7 @@ describe('useConvertToOnline', () => {
             }
         };
 
-        (sessionsApi.convertToOnline as any).mockRejectedValue(error);
+        vi.mocked(sessionsApi.convertToOnline).mockRejectedValue(error);
 
         const { result } = renderHook(() => useConvertToOnline(), { wrapper });
 

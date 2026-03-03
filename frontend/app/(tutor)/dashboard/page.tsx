@@ -9,13 +9,12 @@ import {
     LogOut,
     Menu,
     Settings,
-    Shield,
     TrendingUp,
     User,
     Users,
     Video
 } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 // ============================================================================
 // FEATURE-BASED IMPORTS (All refactored)
@@ -253,7 +252,7 @@ function AppContent() {
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [setIsCollapsed]);
 
     // Sync state to URL when currentView changes
     React.useEffect(() => {
@@ -309,10 +308,6 @@ function AppContent() {
             return true;
         });
     }, [hasAnyRole]);
-
-    const currentTitle = useMemo(() => {
-        return navItems.find(item => item.id === currentView)?.label || 'Dashboard';
-    }, [currentView, navItems]);
 
     const getInitials = (name: string) => {
         return name

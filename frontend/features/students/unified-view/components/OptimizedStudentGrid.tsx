@@ -53,7 +53,8 @@ export function OptimizedStudentGrid(props: OptimizedStudentGridProps) {
     const [visibleCount, setVisibleCount] = useState(6);
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => { setVisibleCount(6); }, [props.students, props.students.length]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    useEffect(() => { setVisibleCount(prev => prev !== 6 ? 6 : prev); }, [props.students, props.students.length]);
 
     useEffect(() => {
         const currentRef = loadMoreRef.current;

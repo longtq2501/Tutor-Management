@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import axios from 'axios';
 import { Eye, EyeOff, X, Loader2 } from 'lucide-react';
 import {
     Dialog,
@@ -165,8 +166,13 @@ export function CreateTutorModal({ isOpen, onClose, onSuccess }: CreateTutorModa
             resetForm();
             onClose();
             onSuccess?.();
-        } catch (error: any) {
-            const message = error?.response?.data?.message || 'Không thể tạo gia sư';
+        } catch (error: unknown) {
+            let message = 'Không thể tạo gia sư';
+            if (axios.isAxiosError(error)) {
+                message = error?.response?.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
             toast.error(message);
             console.error('Create tutor error:', error);
         } finally {

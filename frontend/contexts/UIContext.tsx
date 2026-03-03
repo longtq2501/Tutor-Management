@@ -151,6 +151,6 @@ export function DashboardHeader({ title, subtitle, actions }: { title: string; s
 }
 
 // Keep useHeader for backward compatibility but mark as deprecated
-export function useHeader(title: string, subtitle?: string | null, actions?: React.ReactNode | null) {
+export function useHeader() {
     // This is now handled by DashboardHeader component using Portals
 }

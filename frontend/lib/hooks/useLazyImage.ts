@@ -12,8 +12,10 @@ export const useLazyImage = (src: string) => {
     useEffect(() => {
         // If IntersectionObserver is not supported, load immediately
         if (!window.IntersectionObserver) {
-            setImageSrc(src);
-            setIsLoaded(true);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setImageSrc(prev => prev !== src ? src : prev);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsLoaded(prev => prev !== true ? true : prev);
             return;
         }
 

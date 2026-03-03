@@ -183,7 +183,16 @@ export function useLessonDetailModal({ session, onClose, onUpdate, onDelete, ini
         };
     }, []);
 
-    const getCategoryName = (item: any): string => {
+    interface LibraryItem {
+        id: number;
+        title?: string;
+        category?: string | { name: string };
+        categoryName?: string;
+        categoryDisplayName?: string;
+        createdAt?: string;
+    }
+
+    const getCategoryName = (item: LibraryItem): string => {
         // For Documents: Prefer display name or dynamic name
         if (item.categoryDisplayName) return item.categoryDisplayName;
         if (item.categoryName) return item.categoryName;
@@ -199,7 +208,7 @@ export function useLessonDetailModal({ session, onClose, onUpdate, onDelete, ini
     };
 
     const filteredItems = useMemo(() => {
-        const items = activeTab === 'lessons' ? libraryLessons : libraryDocuments;
+        const items = (activeTab === 'lessons' ? libraryLessons : libraryDocuments) as LibraryItem[];
 
         return items
             .filter(item => {
@@ -217,9 +226,8 @@ export function useLessonDetailModal({ session, onClose, onUpdate, onDelete, ini
     }, [activeTab, libraryLessons, libraryDocuments, debouncedSearch, selectedCategory]);
 
     const categories: string[] = useMemo(() => {
-        const items = activeTab === 'lessons' ? libraryLessons : libraryDocuments;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const cats = items.map((item: any) => getCategoryName(item));
+        const items = (activeTab === 'lessons' ? libraryLessons : libraryDocuments) as LibraryItem[];
+        const cats = items.map((item) => getCategoryName(item));
         const uniqueCats = Array.from(new Set(cats)).filter(Boolean);
         return ['all', ...uniqueCats];
     }, [activeTab, libraryLessons, libraryDocuments]);

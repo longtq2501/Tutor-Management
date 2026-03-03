@@ -1,5 +1,6 @@
 // 📁 parents-view/hooks/useParentForm.ts
 import { useState } from 'react';
+import axios from 'axios';
 import { parentsApi } from '@/lib/services';
 import type { Parent, ParentRequest } from '@/lib/types';
 
@@ -52,12 +53,16 @@ export function useParentForm(onSuccess: () => void) {
       } else {
         await parentsApi.create(formData);
       }
-      
+
       close();
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving parent:', error);
-      alert(error.response?.data?.message || 'Không thể lưu thông tin phụ huynh!');
+      let errorMessage = 'Không thể lưu thông tin phụ huynh!';
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || errorMessage;
+      }
+      alert(errorMessage);
     }
   };
 

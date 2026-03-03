@@ -5,6 +5,7 @@ import { sessionsApi } from '@/lib/services/session';
 import { toast } from 'sonner';
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import type { SessionRecord, PageResponse } from '@/lib/types';
 
 // Mock dependencies
 vi.mock('@/lib/services/session', () => ({
@@ -39,7 +40,7 @@ describe('useConvertToOffline', () => {
     );
 
     it('should revert to offline successfully', async () => {
-        (sessionsApi.revertToOffline as any).mockResolvedValue();
+        vi.mocked(sessionsApi.revertToOffline).mockResolvedValue(undefined as void);
 
         const { result } = renderHook(() => useConvertToOffline(), { wrapper });
 
@@ -51,14 +52,14 @@ describe('useConvertToOffline', () => {
         expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Đã hủy phòng học Online'), expect.any(Object));
     });
 
-    it('should handle API errors correctly', async () => {
+    it('should handle error during reversion', async () => {
         const error = {
             response: {
                 status: 400,
                 data: { message: 'Cannot revert' }
             }
         };
-        (sessionsApi.revertToOffline as any).mockRejectedValue(error);
+        vi.mocked(sessionsApi.revertToOffline).mockRejectedValue(error);
 
         const { result } = renderHook(() => useConvertToOffline(), { wrapper });
 
@@ -73,16 +74,15 @@ describe('useConvertToOffline', () => {
     });
 
     it('should perform optimistic update', async () => {
-        // Setup initial cache
         queryClient.setQueryData(['sessions', '2023-10'], {
             content: [{ id: 1, isOnline: true }]
         });
 
-        (sessionsApi.revertToOffline as any).mockImplementation(async () => {
+        vi.mocked(sessionsApi.revertToOffline).mockImplementation(async () => {
             // Check cache during mutation
-            const cache = queryClient.getQueryData<any>(['sessions', '2023-10']);
-            expect(cache.content[0].isOnline).toBe(false);
-            return;
+            const cache = queryClient.getQueryData<PageResponse<SessionRecord>>(['sessions', '2023-10']);
+            expect(cache?.content[0].isOnline).toBe(false);
+            return undefined as void;
         });
 
         const { result } = renderHook(() => useConvertToOffline(), { wrapper });

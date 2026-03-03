@@ -21,10 +21,13 @@ export const useRoomStatus = (roomId: string) => {
         if (!isConnected || !roomId) return;
 
         // Clear existing warnings on reconnection to handle fresh state
-        setWarning(null);
-        setSecondsRemaining(null);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setWarning(prev => prev !== null ? null : prev);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSecondsRemaining(prev => prev !== null ? null : prev);
         targetEndTimeRef.current = null;
-        setIsCountdownActive(false);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsCountdownActive(prev => prev !== false ? false : prev);
 
         const unsubscribe = subscribe(`/topic/room/${roomId}/status`, (data) => {
             try {
@@ -46,7 +49,7 @@ export const useRoomStatus = (roomId: string) => {
                             actions.addParticipant({
                                 id: update.userId.toString(),
                                 name: update.role === 'TUTOR' ? 'Giáo viên' : 'Học viên',
-                                role: update.role as any,
+                                role: update.role as 'TUTOR' | 'STUDENT',
                                 joinedAt: new Date(),
                                 isMicMuted: false,
                                 isCameraMuted: false
@@ -89,13 +92,13 @@ export const useRoomStatus = (roomId: string) => {
                     default:
                         console.warn('Unknown session status type:', update.type);
                 }
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error('Error processing room status message:', err);
             }
         });
 
         return unsubscribe;
-    }, [isConnected, roomId, subscribe]);
+    }, [isConnected, roomId, subscribe, actions]);
 
     // Precise countdown based on target timestamp to avoid drift
     useEffect(() => {

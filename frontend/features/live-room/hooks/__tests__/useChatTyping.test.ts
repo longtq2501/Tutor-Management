@@ -17,10 +17,10 @@ describe('useChatTyping', () => {
         mockUnsubscribe = vi.fn();
         mockSubscribe = vi.fn().mockReturnValue(mockUnsubscribe);
 
-        (useWebSocket as any).mockReturnValue({
+        vi.mocked(useWebSocket).mockReturnValue({
             isConnected: true,
-            sendMessage: mockSendMessage,
-            subscribe: mockSubscribe,
+            sendMessage: mockSendMessage as any,
+            subscribe: mockSubscribe as any,
         });
 
         vi.useFakeTimers();

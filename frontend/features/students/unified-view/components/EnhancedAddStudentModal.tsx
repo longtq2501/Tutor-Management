@@ -53,10 +53,10 @@ export function EnhancedAddStudentModal({
     // Use parents hook for selector
     const { parents, loadParents } = useParents();
 
-    // Reset step when reopening
     useEffect(() => {
         if (open) {
-            setStep(1);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setStep(prev => prev !== 1 ? 1 : prev);
         }
     }, [open]);
 

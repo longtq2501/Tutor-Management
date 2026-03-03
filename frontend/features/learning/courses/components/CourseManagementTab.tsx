@@ -206,7 +206,7 @@ export function CourseManagementTab() {
                             <h3 className="text-2xl font-bold tracking-tight">Không tìm thấy khóa học</h3>
                             <p className="text-muted-foreground leading-relaxed">
                                 {searchQuery
-                                    ? `Không có kết quả nào cho "${searchQuery}". Hãy thử tìm kiếm với từ khóa khác.`
+                                    ? `Không có kết quả nào cho &quot;${searchQuery}&quot;. Hãy thử tìm kiếm với từ khóa khác.`
                                     : "Bạn chưa tạo khóa học nào. Hãy bắt đầu xây dựng lộ trình học tập đầu tiên!"}
                             </p>
                         </div>
@@ -373,8 +373,8 @@ export function CourseManagementTab() {
                     <AlertDialogHeader>
                         <AlertDialogTitle className="text-2xl font-bold">Xác nhận xóa lộ trình</AlertDialogTitle>
                         <AlertDialogDescription className="text-base">
-                            Bạn có chắc chắn muốn xóa lộ trình học tập "
-                            <span className="font-bold text-foreground">{selectedCourse?.title}</span>"?
+                            Bạn có chắc chắn muốn xóa lộ trình học tập &quot;
+                            <span className="font-bold text-foreground">{selectedCourse?.title}</span>&quot;?
                             Hành động này <span className="text-destructive font-bold">không thể hoàn tác</span>.
                             <br /><br />
                             <span className="text-sm italic text-muted-foreground">* Các bài giảng bên trong lộ trình sẽ không bị xóa.</span>

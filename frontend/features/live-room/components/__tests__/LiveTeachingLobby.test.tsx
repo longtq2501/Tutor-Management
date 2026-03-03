@@ -13,7 +13,7 @@ vi.mock('../../hooks/useUpcomingSessions');
 vi.mock('lucide-react', async (importOriginal) => {
     const actual = await importOriginal();
     return {
-        ...actual as any,
+        ...(actual as object),
         Video: () => <div data-testid="icon-video" />,
         RefreshCw: () => <div data-testid="icon-refresh" />,
         CalendarDays: () => <div data-testid="icon-calendar" />,
@@ -25,7 +25,7 @@ vi.mock('lucide-react', async (importOriginal) => {
 
 // Mock SessionCard
 vi.mock('../SessionCard', () => ({
-    SessionCard: ({ session }: { session: any }) => (
+    SessionCard: ({ session }: { session: { id: number; title: string; scheduledStart: string } }) => (
         <div data-testid={`session-card-${session.id}`}>
             {session.title}
         </div>
@@ -34,7 +34,7 @@ vi.mock('../SessionCard', () => ({
 
 // Mock UI components
 vi.mock('@/components/ui/button', () => ({
-    Button: ({ children, onClick, disabled }: any) => (
+    Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
         <button onClick={onClick} disabled={disabled} data-testid="button">
             {children}
         </button>
@@ -42,13 +42,13 @@ vi.mock('@/components/ui/button', () => ({
 }));
 
 vi.mock('@/components/ui/badge', () => ({
-    Badge: ({ children }: any) => <div data-testid="badge">{children}</div>
+    Badge: ({ children }: { children: React.ReactNode }) => <div data-testid="badge">{children}</div>
 }));
 
 vi.mock('@/components/ui/alert', () => ({
-    Alert: ({ children }: any) => <div data-testid="alert">{children}</div>,
-    AlertTitle: ({ children }: any) => <div>{children}</div>,
-    AlertDescription: ({ children }: any) => <div>{children}</div>
+    Alert: ({ children }: { children: React.ReactNode }) => <div data-testid="alert">{children}</div>,
+    AlertTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
 }));
 
 vi.mock('@/components/ui/skeleton', () => ({
@@ -82,22 +82,22 @@ describe('LiveTeachingLobby', () => {
         window.IntersectionObserver = mockIntersectionObserver;
 
         // Default mock return values
-        (useCurrentSession as any).mockReturnValue({
-            data: null,
+        vi.mocked(useCurrentSession).mockReturnValue({
+            data: undefined,
             isLoading: false,
             isError: false,
             refetch: mockRefetchCurrent
-        });
+        } as unknown as ReturnType<typeof useCurrentSession>);
 
-        (useUpcomingSessions as any).mockReturnValue({
-            data: { pages: [] },
+        vi.mocked(useUpcomingSessions).mockReturnValue({
+            data: { pages: [] } as unknown as ReturnType<typeof useUpcomingSessions>['data'],
             fetchNextPage: mockFetchNextPage,
             hasNextPage: false,
             isFetchingNextPage: false,
             isLoading: false,
             isError: false,
             refetch: mockRefetchUpcoming
-        });
+        } as unknown as ReturnType<typeof useUpcomingSessions>);
     });
 
     it('renders header correctly', () => {
@@ -107,12 +107,12 @@ describe('LiveTeachingLobby', () => {
     });
 
     it('renders loading skeletons when retrieving data', () => {
-        (useCurrentSession as any).mockReturnValue({
-            data: null,
+        vi.mocked(useCurrentSession).mockReturnValue({
+            data: undefined,
             isLoading: true, // Loading
             isError: false,
             refetch: mockRefetchCurrent
-        });
+        } as unknown as ReturnType<typeof useCurrentSession>);
 
         render(<LiveTeachingLobby {...defaultProps} />);
 
@@ -123,12 +123,12 @@ describe('LiveTeachingLobby', () => {
     });
 
     it('renders error alert when data fetch fails', () => {
-        (useUpcomingSessions as any).mockReturnValue({
-            data: null,
+        vi.mocked(useUpcomingSessions).mockReturnValue({
+            data: undefined,
             isLoading: false,
             isError: true, // Error
             refetch: mockRefetchUpcoming
-        });
+        } as unknown as ReturnType<typeof useUpcomingSessions>);
 
         render(<LiveTeachingLobby {...defaultProps} />);
         expect(screen.getByTestId('alert')).toBeInTheDocument();
@@ -150,12 +150,12 @@ describe('LiveTeachingLobby', () => {
             { id: 2, title: 'Upcoming Session', scheduledStart: tomorrow.toISOString() }
         ];
 
-        (useUpcomingSessions as any).mockReturnValue({
-            data: { pages: [{ content: mockSessions }] },
+        vi.mocked(useUpcomingSessions).mockReturnValue({
+            data: { pages: [{ content: mockSessions }] } as unknown as ReturnType<typeof useUpcomingSessions>['data'],
             isLoading: false,
             isError: false,
             refetch: mockRefetchUpcoming
-        });
+        } as unknown as ReturnType<typeof useUpcomingSessions>);
 
         render(<LiveTeachingLobby {...defaultProps} />);
 

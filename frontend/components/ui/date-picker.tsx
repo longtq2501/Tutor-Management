@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { CalendarIcon } from "lucide-react"
-import { DateValue, CalendarDate, getLocalTimeZone, today } from "@internationalized/date"
+import { DateValue, CalendarDate, getLocalTimeZone } from "@internationalized/date"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar-rac"
@@ -33,12 +33,7 @@ function formatDate(date: Date | undefined) {
     })
 }
 
-function isValidDate(date: Date | undefined) {
-    if (!date) {
-        return false
-    }
-    return !isNaN(date.getTime())
-}
+
 
 // Helper: Date -> CalendarDate
 function toCalendarDate(date?: Date): CalendarDate | undefined {

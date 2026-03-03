@@ -19,10 +19,12 @@ export const TutorDetailModal = ({ open, onOpenChange, tutor, onEdit }: TutorDet
 
     useEffect(() => {
         if (tutor && open) {
-            setIsLoading(true);
-            tutorsApi.getStats(tutor.id).then(setStats).catch(console.error).finally(() => setIsLoading(false));
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsLoading(prev => prev !== true ? true : prev);
+            tutorsApi.getStats(tutor.id).then(setStats).catch(console.error).finally(() => setIsLoading(prev => prev !== false ? false : prev));
         } else {
-            setStats(null);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setStats(prev => prev !== null ? null : prev);
         }
     }, [tutor, open]);
 

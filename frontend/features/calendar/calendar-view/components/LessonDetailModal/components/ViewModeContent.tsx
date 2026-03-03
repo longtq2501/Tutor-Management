@@ -67,7 +67,7 @@ export function ViewModeContent({ session }: ViewModeContentProps) {
                         <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest text-muted-foreground">Ghi chú</span>
                     </div>
                     <p className="text-[9px] sm:text-xs font-medium leading-relaxed italic opacity-80 whitespace-pre-wrap">
-                        "{session.notes}"
+                        &quot;{session.notes}&quot;
                     </p>
                 </div>
             )}

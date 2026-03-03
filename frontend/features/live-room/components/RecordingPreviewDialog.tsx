@@ -37,10 +37,11 @@ export const RecordingPreviewDialog: React.FC<RecordingPreviewDialogProps> = ({
             videoRef.current.play()
                 .catch((error) => {
                     console.warn('Autoplay failed, user interaction needed:', error);
-                    setAutoplayFailed(true);
+                    setAutoplayFailed(prev => prev !== true ? true : prev);
                 });
         } else {
-            setAutoplayFailed(false);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setAutoplayFailed(prev => prev !== false ? false : prev);
         }
     }, [isOpen]);
 

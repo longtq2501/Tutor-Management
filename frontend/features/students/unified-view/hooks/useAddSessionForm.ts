@@ -121,6 +121,7 @@ export function useAddSessionForm(student: Student | null, onClose: () => void, 
         queryKey: ['lesson-library'],
         queryFn: () => lessonLibraryApi.getAll()
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lessons = lessonsData && !Array.isArray(lessonsData) ? (lessonsData as { content: any[] }).content : (lessonsData || []);
 
     return {

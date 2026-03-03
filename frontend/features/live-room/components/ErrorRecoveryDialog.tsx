@@ -3,7 +3,6 @@
 import React from 'react';
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -44,7 +43,7 @@ export const ErrorRecoveryDialog: React.FC<ErrorRecoveryDialogProps> = ({
     const connectionQuality = React.useMemo(() => {
         if (typeof navigator === 'undefined') return 'unknown';
         if (!navigator.onLine) return 'offline';
-        const conn = (navigator as any).connection;
+        const conn = (navigator as Navigator & { connection?: { effectiveType: string } }).connection;
         if (conn?.effectiveType === '4g') return 'good';
         if (conn?.effectiveType === '3g' || conn?.effectiveType === '2g') return 'poor';
         return 'unknown';
@@ -106,7 +105,7 @@ export const ErrorRecoveryDialog: React.FC<ErrorRecoveryDialogProps> = ({
                             <div className="mt-2 p-3 bg-muted rounded-md text-[10px] font-mono text-muted-foreground break-all space-y-1 animate-in fade-in zoom-in-95">
                                 <div>OS/Browser: {navigator.userAgent}</div>
                                 <div>Online Status: {navigator.onLine ? 'Connected' : 'Offline'}</div>
-                                <div>Network Type: {(navigator as any).connection?.effectiveType || 'Unknown'}</div>
+                                <div>Network Type: {(navigator as Navigator & { connection?: { effectiveType: string } }).connection?.effectiveType || 'Unknown'}</div>
                                 <div>Timestamp: {new Date().toISOString()}</div>
                             </div>
                         )}

@@ -14,16 +14,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, FieldValues, Path } from "react-hook-form";
 
 /**
  * Interface for RatingSelect component props.
  */
-interface RatingSelectProps {
+interface RatingSelectProps<TFieldValues extends FieldValues> {
     /** The form instance from react-hook-form */
-    form: UseFormReturn<any>;
+    form: UseFormReturn<TFieldValues>;
     /** The field name to map to the select value */
-    name: string;
+    name: Path<TFieldValues>;
     /** Display label for the rating field */
     label: string;
     /** List of available rating options */
@@ -33,7 +33,7 @@ interface RatingSelectProps {
 /**
  * A themed select component for choosing student performance levels.
  */
-export function RatingSelect({ form, name, label, ratings }: RatingSelectProps) {
+export function RatingSelect<TFieldValues extends FieldValues>({ form, name, label, ratings }: RatingSelectProps<TFieldValues>) {
     return (
         <FormField
             control={form.control}

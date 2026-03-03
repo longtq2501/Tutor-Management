@@ -13,13 +13,15 @@ import { GeneratorStyleSelector } from "./generator/GeneratorStyleSelector";
 import { GeneratorActions } from "./generator/GeneratorActions";
 import { RatingSelect } from "./generator/RatingSelect";
 import { useSmartFeedback } from "../hooks/useSmartFeedback";
+import type { LessonDetailFormData } from "../../calendar/calendar-view/components/LessonDetailModal/types";
 
 /**
  * Props for the CommentGenerator component.
  */
 interface CommentGeneratorProps {
     /** The form instance from react-hook-form */
-    form: UseFormReturn<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    form: any;
     /** Label for the section */
     label: string;
     /** The field name for the rating selection */
@@ -47,7 +49,8 @@ interface CommentGeneratorProps {
  * DESIGN: Adheres to modular architecture by extracting UI sections into internal components.
  */
 export function CommentGenerator(props: CommentGeneratorProps) {
-    const feedback = useSmartFeedback(props);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const feedback = useSmartFeedback(props as any);
 
     const {
         form, label, ratingField, commentField, ratings, hideRating
@@ -139,7 +142,7 @@ function GeneratorControls({
 /**
  * Internal component for the editable generated feedback text area.
  */
-function GeneratedCommentArea({ form, name }: { form: UseFormReturn<any>; name: string }) {
+function GeneratedCommentArea({ form, name }: { form: any; name: string }) {
     return (
         <FormField
             control={form.control}

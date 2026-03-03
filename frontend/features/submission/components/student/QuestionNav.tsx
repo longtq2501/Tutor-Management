@@ -7,6 +7,7 @@ import React from 'react';
 interface QuestionNavProps {
     questions: Question[];
     currentIndex: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     answers: Map<string, any>; // Using Map to detect if answered
     onQuestionClick: (index: number) => void;
 }

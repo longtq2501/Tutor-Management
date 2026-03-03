@@ -59,7 +59,7 @@ export const AssignExerciseDialog: React.FC<AssignExerciseDialogProps> = ({
                 <DialogHeader>
                     <DialogTitle>Giao bài tập</DialogTitle>
                     <DialogDescription>
-                        Chọn học sinh để giao bài tập "{selectedExercise?.title}"
+                        Chọn học sinh để giao bài tập &quot;{selectedExercise?.title}&quot;
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">

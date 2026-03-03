@@ -27,10 +27,11 @@ export const useImport = (classId?: string) => {
                     description: "Please check the errors and try again."
                 });
             }
-        } catch (err: any) {
-            setError(err.message || 'Failed to parse content');
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to parse content';
+            setError(message);
             toast.error("Error", {
-                description: err.message || 'Failed to parse content'
+                description: message
             });
         } finally {
             setIsLoading(false);
@@ -48,9 +49,10 @@ export const useImport = (classId?: string) => {
                 description: "Exercise created successfully!"
             });
             setStep(3); // Success step or redirect
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to create exercise';
             toast.error("Error", {
-                description: err.message || 'Failed to create exercise'
+                description: message
             });
         } finally {
             setIsLoading(false);

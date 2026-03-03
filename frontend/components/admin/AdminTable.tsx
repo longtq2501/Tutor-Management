@@ -4,7 +4,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, ArrowUpDown, SearchX } from 'lucide-react';
 import { AdminTableSkeleton } from './AdminTableSkeleton';
 import { EmptyState } from './EmptyState';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export interface Column<T> {
     header: string;

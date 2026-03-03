@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { lessonLibraryApi } from '@/lib/services/lesson-admin';
 import type {
   CreateLibraryLessonRequest,
@@ -74,8 +75,12 @@ export const useCreateLibraryLesson = () => {
       queryClient.invalidateQueries({ queryKey: lessonLibraryKeys.unassigned() });
       toast.success('Tạo bài giảng thành công!', { id: context?.toastId });
     },
-    onError: (error: any, __, context) => {
-      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi tạo bài giảng', { id: context?.toastId });
+    onError: (error: unknown, __, context) => {
+      let message = 'Có lỗi xảy ra khi tạo bài giảng';
+      if (axios.isAxiosError(error)) {
+        message = error?.response?.data?.message || message;
+      }
+      toast.error(message, { id: context?.toastId });
     },
   });
 };
@@ -98,8 +103,12 @@ export const useAssignLibraryLesson = () => {
       queryClient.invalidateQueries({ queryKey: lessonLibraryKeys.students(variables.lessonId) });
       toast.success('Giao bài giảng thành công!', { id: context?.toastId });
     },
-    onError: (error: any, __, context) => {
-      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi giao bài giảng', { id: context?.toastId });
+    onError: (error: unknown, __, context) => {
+      let message = 'Có lỗi xảy ra khi giao bài giảng';
+      if (axios.isAxiosError(error)) {
+        message = error?.response?.data?.message || message;
+      }
+      toast.error(message, { id: context?.toastId });
     },
   });
 };
@@ -122,8 +131,12 @@ export const useUnassignLibraryLesson = () => {
       queryClient.invalidateQueries({ queryKey: lessonLibraryKeys.students(variables.lessonId) });
       toast.success('Thu hồi bài giảng thành công!', { id: context?.toastId });
     },
-    onError: (error: any, __, context) => {
-      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi thu hồi bài giảng', { id: context?.toastId });
+    onError: (error: unknown, __, context) => {
+      let message = 'Có lỗi xảy ra khi thu hồi bài giảng';
+      if (axios.isAxiosError(error)) {
+        message = error?.response?.data?.message || message;
+      }
+      toast.error(message, { id: context?.toastId });
     },
   });
 };
@@ -145,8 +158,12 @@ export const useDeleteLibraryLesson = () => {
       queryClient.invalidateQueries({ queryKey: lessonLibraryKeys.unassigned() });
       toast.success('Xóa bài giảng thành công!', { id: context?.toastId });
     },
-    onError: (error: any, __, context) => {
-      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi xóa bài giảng', { id: context?.toastId });
+    onError: (error: unknown, __, context) => {
+      let message = 'Có lỗi xảy ra khi xóa bài giảng';
+      if (axios.isAxiosError(error)) {
+        message = error?.response?.data?.message || message;
+      }
+      toast.error(message, { id: context?.toastId });
     },
   });
 };
@@ -171,8 +188,12 @@ export const useUpdateLibraryLesson = () => {
       queryClient.invalidateQueries({ queryKey: lessonLibraryKeys.unassigned() });
       toast.success('Cập nhật bài giảng thành công!', { id: context?.toastId });
     },
-    onError: (error: any, __, context) => {
-      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi cập nhật bài giảng', { id: context?.toastId });
+    onError: (error: unknown, __, context) => {
+      let message = 'Có lỗi xảy ra khi cập nhật bài giảng';
+      if (axios.isAxiosError(error)) {
+        message = error?.response?.data?.message || message;
+      }
+      toast.error(message, { id: context?.toastId });
     },
   });
 };

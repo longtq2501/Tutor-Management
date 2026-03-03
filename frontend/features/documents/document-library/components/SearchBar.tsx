@@ -25,3 +25,4 @@ export const SearchBar = memo(({ value, onChange, disabled }: Props) => (
     </div>
   </div>
 ));
+SearchBar.displayName = 'SearchBar';

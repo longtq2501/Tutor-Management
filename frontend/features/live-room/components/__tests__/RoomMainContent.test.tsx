@@ -3,11 +3,22 @@ import { RoomMainContent } from '../RoomMainContent';
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 
+interface MockSwipeHandlers {
+    onSwipedLeft: () => void;
+    onSwipedRight: () => void;
+}
+
+declare global {
+    interface Window {
+        __swipeHandlers: MockSwipeHandlers;
+    }
+}
+
 // Mock react-swipeable to easily trigger swipe events
 vi.mock('react-swipeable', () => ({
-    useSwipeable: (config: any) => {
+    useSwipeable: (config: MockSwipeHandlers) => {
         // Store config globally to trigger handlers in test
-        (window as any).__swipeHandlers = config;
+        window.__swipeHandlers = config;
         return {};
     }
 }));
@@ -37,7 +48,7 @@ describe('RoomMainContent Swipe Gestures', () => {
         );
 
         // Simulate swipe left (next tab)
-        (window as any).__swipeHandlers.onSwipedLeft();
+        window.__swipeHandlers.onSwipedLeft();
         expect(onTabChange).toHaveBeenCalledWith('video');
     });
 
@@ -56,7 +67,7 @@ describe('RoomMainContent Swipe Gestures', () => {
         );
 
         // Simulate swipe right (prev tab)
-        (window as any).__swipeHandlers.onSwipedRight();
+        window.__swipeHandlers.onSwipedRight();
         expect(onTabChange).toHaveBeenCalledWith('board');
     });
 
@@ -74,7 +85,7 @@ describe('RoomMainContent Swipe Gestures', () => {
                 onTabChange={onTabChange}
             />
         );
-        (window as any).__swipeHandlers.onSwipedRight();
+        window.__swipeHandlers.onSwipedRight();
         expect(onTabChange).not.toHaveBeenCalled();
 
         // At the last tab, swipe left should do nothing
@@ -88,7 +99,7 @@ describe('RoomMainContent Swipe Gestures', () => {
                 onTabChange={onTabChange}
             />
         );
-        (window as any).__swipeHandlers.onSwipedLeft();
+        window.__swipeHandlers.onSwipedLeft();
         expect(onTabChange).not.toHaveBeenCalled();
     });
 });

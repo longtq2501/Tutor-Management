@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { RoomStateProvider, useRoomState } from '../../context/RoomStateContext';
 import { createElement } from 'react';
 
-const wrapper = ({ children }: any) => createElement(RoomStateProvider, null, children);
+const wrapper = ({ children }: { children: React.ReactNode }) => createElement(RoomStateProvider, null, children);
 
 describe('useRoomState', () => {
     it('should throw error when used outside provider', () => {

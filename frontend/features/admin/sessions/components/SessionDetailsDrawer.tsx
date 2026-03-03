@@ -11,7 +11,7 @@ import { adminSessionsApi } from '@/lib/services/admin-sessions';
 import { toast } from 'sonner';
 import type { SessionRecord } from '@/lib/types/finance';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, BookOpen, CreditCard, MessageSquare, History } from 'lucide-react';
+import { Calendar, User, BookOpen, CreditCard, MessageSquare, History } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 interface SessionDetailsDrawerProps {

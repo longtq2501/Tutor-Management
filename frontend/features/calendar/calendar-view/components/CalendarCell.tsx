@@ -166,3 +166,4 @@ export const CalendarCell = memo(({
         </motion.div>
     );
 });
+CalendarCell.displayName = 'CalendarCell';

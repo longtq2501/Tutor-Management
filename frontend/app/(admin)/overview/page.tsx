@@ -213,7 +213,7 @@ export default function OverviewPage() {
                                         ].map((filter) => (
                                             <button
                                                 key={filter.id}
-                                                onClick={() => handleFilterChange(filter.id as any)}
+                                                onClick={() => handleFilterChange(filter.id as typeof filterType)}
                                                 className={`w-full text-left px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${filterType === filter.id
                                                     ? 'bg-primary text-white'
                                                     : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'

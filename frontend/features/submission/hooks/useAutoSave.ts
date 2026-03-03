@@ -5,6 +5,7 @@ import { CreateSubmissionRequest } from '../types/submission.types';
 
 export const useAutoSave = (
     exerciseId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     answers: Map<string, any>,
     intervalMs: number = 30000 // 30 seconds default
 ) => {

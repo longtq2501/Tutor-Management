@@ -66,6 +66,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
         fetchData();
     }, [submissionId]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleGradeChange = (questionId: string, field: 'points' | 'feedback', value: any) => {
         const newGrades = new Map(essayGrades);
         const current = newGrades.get(questionId) || { points: 0, feedback: '' };

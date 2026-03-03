@@ -72,7 +72,7 @@ export function useLessonDetail(lessonId: number, isPreview = false, courseId?: 
   // Mutation for syncing video progress
   const { mutate: syncProgress } = useMutation({
     mutationFn: (progress: number) => lessonsApi.updateProgress(lessonId, progress),
-    onSuccess: (updatedProgress) => {
+    onSuccess: (updatedProgress: any) => {
       // Optimistically update the lesson cache if needed
       if (updatedProgress.isCompleted && lesson && !lesson.isCompleted) {
         queryClient.setQueryData<Lesson>(studentLessonKeys.detail(lessonId), (old) => {

@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (accessToken && storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
           try {
             setUser(JSON.parse(storedUser));
-          } catch (parseError) {
+          } catch {
             // Invalid JSON in localStorage, clear it
             console.warn('Invalid user data in localStorage, clearing...');
             localStorage.removeItem('user');
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Login error:', error);
-      const errorData = (error as any).response?.data;
+      const errorData = (error as { response?: { data?: { message?: string } } }).response?.data;
       const message = errorData?.message || 'Đăng nhập thất bại';
       throw new Error(message);
     }
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Update avatar error:', error);
-      const errorData = (error as any).response?.data;
+      const errorData = (error as { response?: { data?: { message?: string } } }).response?.data;
       const message = errorData?.message || 'Cập nhật ảnh đại diện thất bại';
       throw new Error(message);
     }
@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Update profile error:', error);
-      const errorData = (error as any).response?.data;
+      const errorData = (error as { response?: { data?: { message?: string; data?: Record<string, string> } } }).response?.data;
 
       let message = errorData?.message || 'Cập nhật thông tin thất bại';
 

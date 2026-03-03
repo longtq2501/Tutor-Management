@@ -10,7 +10,7 @@ import {
     TableRow
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
+
 import { toast } from 'sonner';
 import { adminAuthApi } from '@/lib/services/admin-auth';
 import type { Role } from '@/lib/types/admin';

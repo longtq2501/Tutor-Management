@@ -10,7 +10,8 @@ import {
     Tooltip,
     ResponsiveContainer,
     Area,
-    AreaChart
+    AreaChart,
+    type TooltipProps
 } from 'recharts';
 import { formatCurrency, getMonthName } from '../utils/formatters';
 import type { MonthlyChartData } from '../types/dashboard.types';
@@ -19,6 +20,7 @@ interface RevenueGrowthChartProps {
     data: MonthlyChartData[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (

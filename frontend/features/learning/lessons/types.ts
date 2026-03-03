@@ -169,6 +169,11 @@ export interface LessonLibraryDTO {
   updatedAt: string;
 }
 
+export interface AdminLessonDTO extends LessonDTO {
+  tutorName: string;
+  assignedStudentCount?: number;
+}
+
 // ============================================================================
 // UI-SPECIFIC TYPES (Frontend only)
 // ============================================================================

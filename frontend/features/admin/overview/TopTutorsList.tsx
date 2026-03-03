@@ -1,6 +1,6 @@
 'use client';
 
-import { Award, TrendingUp, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { Award, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
 import type { TopTutor } from '@/lib/types/admin';
 import { formatCurrency } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';

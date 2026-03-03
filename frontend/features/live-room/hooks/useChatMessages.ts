@@ -57,7 +57,7 @@ export const useChatMessages = (roomId: string) => {
 
     // Deduplicate by ID
     const allMessages = Array.from(
-        new Map(combined.map(msg => [msg.id || `temp-${msg.timestamp}-${Math.random()}`, msg])).values()
+        new Map(combined.map(msg => [msg.id || `temp-${msg.timestamp}-${msg.senderId || 'anon'}`, msg])).values()
     );
 
     return {

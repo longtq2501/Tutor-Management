@@ -3,16 +3,25 @@ import { useSessionRecorder } from '../useSessionRecorder';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 describe('useSessionRecorder', () => {
-    let mockMediaRecorder: any;
-    let mockStream: any;
+    let mockMediaRecorder: {
+        start: ReturnType<typeof vi.fn>;
+        stop: ReturnType<typeof vi.fn>;
+        state: string;
+        ondataavailable: ((e: { data: { size: number } }) => void) | null;
+        onstop: (() => void) | null;
+    };
+    let mockStream: MediaStream;
 
     beforeEach(() => {
         // Mock MediaStream
         mockStream = {
-            getVideoTracks: () => [{ enabled: true, getSettings: () => ({ width: 1280, height: 720 }) }],
+            getVideoTracks: () => [{
+                enabled: true,
+                getSettings: () => ({ width: 1280, height: 720 })
+            }],
             getAudioTracks: () => [],
             getTracks: () => [],
-        };
+        } as unknown as MediaStream;
 
         // Mock MediaRecorder
         mockMediaRecorder = {
@@ -35,7 +44,9 @@ describe('useSessionRecorder', () => {
             }
             static isTypeSupported = vi.fn().mockReturnValue(true);
         }
-        global.MediaRecorder = MockMediaRecorder as any;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (global as any).MediaRecorder = MockMediaRecorder;
 
         // Mock URL.createObjectURL
         global.URL.createObjectURL = vi.fn().mockReturnValue('blob:test');
@@ -73,7 +84,7 @@ describe('useSessionRecorder', () => {
         // Simulate data
         act(() => {
             if (mockMediaRecorder.ondataavailable) {
-                mockMediaRecorder.ondataavailable({ data: { size: 100 } } as any);
+                mockMediaRecorder.ondataavailable({ data: { size: 100 } });
             }
         });
 
@@ -91,7 +102,7 @@ describe('useSessionRecorder', () => {
 
         act(() => {
             result.current.startRecording();
-            if (mockMediaRecorder.ondataavailable) mockMediaRecorder.ondataavailable({ data: { size: 100 } } as any);
+            if (mockMediaRecorder.ondataavailable) mockMediaRecorder.ondataavailable({ data: { size: 100 } });
             result.current.stopRecording();
         });
 

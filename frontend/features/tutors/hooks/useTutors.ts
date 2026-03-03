@@ -38,8 +38,10 @@ export const useTutors = () => {
             queryClient.invalidateQueries({ queryKey: ['tutors'] });
             toast.success('Tutor created successfully');
         },
-        onError: (err: any) => {
-            toast.error('Failed to create tutor: ' + (err.response?.data?.message || err.message));
+        onError: (err: unknown) => {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            const axiosError = err as { response?: { data?: { message?: string } } };
+            toast.error('Failed to create tutor: ' + (axiosError.response?.data?.message || message));
         },
     });
 
@@ -51,8 +53,10 @@ export const useTutors = () => {
             queryClient.invalidateQueries({ queryKey: ['tutors'] });
             toast.success('Tutor updated successfully');
         },
-        onError: (err: any) => {
-            toast.error('Failed to update tutor: ' + (err.response?.data?.message || err.message));
+        onError: (err: unknown) => {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            const axiosError = err as { response?: { data?: { message?: string } } };
+            toast.error('Failed to update tutor: ' + (axiosError.response?.data?.message || message));
         },
     });
 
@@ -63,8 +67,10 @@ export const useTutors = () => {
             queryClient.invalidateQueries({ queryKey: ['tutors'] });
             toast.success('Tutor deleted successfully');
         },
-        onError: (err: any) => {
-            toast.error('Failed to delete tutor: ' + (err.response?.data?.message || err.message));
+        onError: (err: unknown) => {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            const axiosError = err as { response?: { data?: { message?: string } } };
+            toast.error('Failed to delete tutor: ' + (axiosError.response?.data?.message || message));
         },
     });
 

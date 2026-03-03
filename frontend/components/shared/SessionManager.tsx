@@ -24,7 +24,7 @@ const CHECK_INTERVAL = 60 * 1000;    // 1 minute
 
 export const SessionManager: React.FC<SessionManagerProps> = ({ children }) => {
     const router = useRouter();
-    const [lastActivity, setLastActivity] = useState<number>(Date.now());
+    const [lastActivity, setLastActivity] = useState<number>(() => Date.now());
     const [showWarning, setShowWarning] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 

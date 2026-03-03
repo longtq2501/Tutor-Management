@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from '@tanstack/react-query';
 import { lessonCategoryApi } from '@/lib/services/lesson-category';
+import type { LessonCategoryDTO } from '@/features/learning/lessons/types';
 import { Label } from '@/components/ui/label';
 
 interface ImportUploadStepProps {
@@ -89,7 +90,7 @@ export const ImportUploadStep: React.FC<ImportUploadStepProps> = ({ onParse, isL
                                         <li>Metadata section is required at the top.</li>
                                         <li>MCQ questions must have 4 options (A, B, C, D) and an ANSWER field.</li>
                                         <li>Points usually sum up to the Total Points defined in metadata.</li>
-                                        <li>Keywords like "=== PHẦN", "ANSWER:", "POINTS:" are case-sensitive helpers.</li>
+                                        <li>Keywords like &quot;=== PHẦN&quot;, &quot;ANSWER:&quot;, &quot;POINTS:&quot; are case-sensitive helpers.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -106,7 +107,7 @@ export const ImportUploadStep: React.FC<ImportUploadStepProps> = ({ onParse, isL
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="NONE">No Category</SelectItem>
-                            {categories.map((cat: any) => (
+                            {categories.map((cat: LessonCategoryDTO) => (
                                 <SelectItem key={cat.id} value={cat.id.toString()}>
                                     {cat.name}
                                 </SelectItem>

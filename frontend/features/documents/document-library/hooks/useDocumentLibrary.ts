@@ -21,10 +21,10 @@ export const useDocumentLibrary = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Reset page when category changes
-  useEffect(() => {
+  const handleCategorySelect = (category: DocumentCategory | null) => {
+    setSelectedCategory(category);
     setPage(0);
-  }, [selectedCategory]);
+  };
 
   // 1. Fetch Categories (Paginated)
   const {
@@ -102,7 +102,7 @@ export const useDocumentLibrary = () => {
     documents,
     categories,
     selectedCategory,
-    setSelectedCategory,
+    setSelectedCategory: handleCategorySelect,
     categoryDocs: documents,
     searchQuery,
     setSearchQuery,

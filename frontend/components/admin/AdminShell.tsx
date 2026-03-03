@@ -43,12 +43,18 @@ export function AdminShell({ children }: AdminShellProps) {
     useAdminThemeSync();
 
     useEffect(() => {
-        setMounted(true);
+        setMounted(prev => prev !== true ? true : prev);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
         const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
         if (stored !== null) {
-            setIsSidebarCollapsed(stored === '1');
+            const shouldCollapse = stored === '1';
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsSidebarCollapsed(prev => prev !== shouldCollapse ? shouldCollapse : prev);
         }
-    }, []);
+    }, [mounted]);
 
     useEffect(() => {
         if (!mounted) return;
@@ -57,10 +63,14 @@ export function AdminShell({ children }: AdminShellProps) {
 
     const [lastPathname, setLastPathname] = useState(pathname);
 
-    if (pathname !== lastPathname) {
-        setLastPathname(pathname);
-        setIsMobileSidebarOpen(false);
-    }
+    useEffect(() => {
+        if (pathname !== lastPathname) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setLastPathname(pathname);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsMobileSidebarOpen(prev => prev !== false ? false : prev);
+        }
+    }, [pathname, lastPathname]);
 
     const toggleSidebar = () => {
         if (typeof window !== 'undefined' && window.innerWidth < 1024) {

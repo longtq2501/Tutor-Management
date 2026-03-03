@@ -63,7 +63,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping, d
         }
     };
 
-    const handleEmojiClick = (emojiData: any) => {
+    const handleEmojiClick = (emojiData: { emoji: string }) => {
         setMessage((prev) => prev + emojiData.emoji);
         // Trigger typing if not already
         if (!isTypingRef.current) {

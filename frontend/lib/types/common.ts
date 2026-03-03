@@ -27,7 +27,7 @@ export interface WindowResponse<T> {
   content: T[];
   size: number;
   last: boolean;
-  position: any;
+  position: unknown;
 }
 
 export interface CursorPageResponse<T> {

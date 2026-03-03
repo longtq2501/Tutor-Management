@@ -30,8 +30,10 @@ const useRecordingTimer = (isRecording: boolean, onLimitReached: () => void) => 
     // Reset logic separated from the interval logic
     useEffect(() => {
         if (!isRecording) {
-            setDuration(0);
-            setWarning(null);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setDuration(prev => prev !== 0 ? 0 : prev);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setWarning(prev => prev !== null ? null : prev);
         }
     }, [isRecording]);
 

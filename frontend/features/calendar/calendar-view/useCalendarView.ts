@@ -153,13 +153,13 @@ export const useCalendarView = (): UseCalendarViewReturn => {
             const groupAStudentIds =
                 activeSchedules && activeSchedules.length > 0
                     ? [...new Set(
-                          activeSchedules
-                              .filter((s) => {
-                                  const stu = studentList.find((st) => st.id === s.studentId);
-                                  return stu && stu.active;
-                              })
-                              .map((s) => s.studentId)
-                      )]
+                        activeSchedules
+                            .filter((s) => {
+                                const stu = studentList.find((st) => st.id === s.studentId);
+                                return stu && stu.active;
+                            })
+                            .map((s) => s.studentId)
+                    )]
                     : [];
             const skipCount =
                 activeSchedules?.filter((s) => {
@@ -187,15 +187,11 @@ export const useCalendarView = (): UseCalendarViewReturn => {
             const promise = recurringSchedulesApi.generateSessions(monthStr, groupAStudentIds);
             toast.promise(promise, {
                 loading: 'Đang tự động tạo lịch học...',
-                success: (result: { sessionsCreated?: number }) => {
+                success: () => {
                     loadData();
-                    const created = result?.sessionsCreated ?? 0;
                     const skipMsg =
                         skipCount > 0 ? ` (Đã bỏ qua ${skipCount} học sinh đang nghỉ).` : '';
-                    if (created > 0) {
-                        return `Đã tạo lịch tự động cho các học sinh đang học.${skipMsg}`;
-                    }
-                    return `Không có buổi học mới nào được tạo cho tháng này.${skipMsg}`;
+                    return `Đã chạy lệnh tự động tạo lịch học.${skipMsg}`;
                 },
                 error: 'Không thể tạo buổi học tự động.'
             });

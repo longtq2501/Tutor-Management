@@ -15,21 +15,23 @@ interface InactivityWarningProps {
  * Now features visual urgency indicators.
  */
 export const InactivityWarning: React.FC<InactivityWarningProps> = ({ warning, secondsRemaining }) => {
+    // Determine visual urgency based on remaining time
+    const urgency = useMemo(() => {
+        if (secondsRemaining === null) return { variant: "default" as const, colorClass: "text-primary", Icon: Users };
+        if (secondsRemaining < 30) return { variant: "destructive" as const, colorClass: "text-destructive", Icon: AlertTriangle };
+        if (secondsRemaining < 60) return { variant: "default" as const, colorClass: "text-amber-500", Icon: Timer };
+        return { variant: "default" as const, colorClass: "text-primary", Icon: Timer };
+    }, [secondsRemaining]);
+
     if (!warning) return null;
+
+    const { variant, colorClass, Icon } = urgency;
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
-
-    // Determine visual urgency based on remaining time
-    const { variant, colorClass, Icon } = useMemo(() => {
-        if (secondsRemaining === null) return { variant: "default" as const, colorClass: "text-primary", Icon: Users };
-        if (secondsRemaining < 30) return { variant: "destructive" as const, colorClass: "text-destructive", Icon: AlertTriangle };
-        if (secondsRemaining < 60) return { variant: "default" as const, colorClass: "text-amber-500", Icon: Timer };
-        return { variant: "default" as const, colorClass: "text-primary", Icon: Timer };
-    }, [secondsRemaining]);
 
     return (
         <AnimatePresence>

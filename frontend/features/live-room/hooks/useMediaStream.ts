@@ -149,11 +149,11 @@ export const useMediaStream = (
             setStream(newStream);
             setError(null);
             await getDevices();
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Silence console error for common/expected hardware missing scenarios 
             // the error is still propagated to the UI via state.
-            const errName = err.name || '';
-            const errMessage = err.message || '';
+            const errName = err instanceof Error ? err.name : '';
+            const errMessage = err instanceof Error ? err.message : '';
 
             if (errName !== 'NotFoundError' && errName !== 'DevicesNotFoundError') {
                 console.warn('Media access error (handled):', { name: errName, message: errMessage });

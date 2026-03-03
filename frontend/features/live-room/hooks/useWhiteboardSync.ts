@@ -116,7 +116,7 @@ export const useWhiteboardSync = (
                 if (fetchedStrokes.length > 0) {
                     setState(prev => {
                         const merged = [...prev.strokes];
-                        fetchedStrokes.forEach(fs => {
+                        fetchedStrokes.forEach((fs: any) => {
                             if (!merged.find(s => s.id === fs.id)) {
                                 merged.push(fs);
                             }

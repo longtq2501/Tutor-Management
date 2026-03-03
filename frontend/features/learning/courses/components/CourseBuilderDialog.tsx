@@ -50,7 +50,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useLessonLibrary } from '../../lessons/hooks/useLessonLibrary';
 import { useCreateCourse, useUpdateCourse, useAdminCourseById } from '../hooks/useAdminCourses';
-import type { CourseDTO, CourseDetailDTO, CourseRequest } from '../types';
+import type { CourseDTO, CourseDetailDTO, CourseRequest, CourseLessonDTO } from '../types';
+import type { LessonLibraryDTO } from '../../lessons/types';
 import { motion, Reorder, AnimatePresence } from 'framer-motion';
 import React from 'react';
 
@@ -93,7 +94,7 @@ export function CourseBuilderDialog({
 
         if (targetCourse) {
             const lessonIds = 'lessons' in targetCourse
-                ? targetCourse.lessons.map((l: any) => l.lessonId)
+                ? (targetCourse.lessons as CourseLessonDTO[]).map((l) => l.lessonId)
                 : [];
 
             return {
@@ -130,10 +131,10 @@ export function CourseBuilderDialog({
     }, [libraryLessons]);
 
     const sortedSelectedLessons = useMemo(() => {
-        return selectedLessonIds.map(id => lessons.find(l => l.id === id)).filter(Boolean);
+        return selectedLessonIds.map(id => lessons.find(l => l.id === id)).filter((l): l is LessonLibraryDTO => !!l);
     }, [selectedLessonIds, lessons]);
 
-    const handleReorder = (newSortedLessons: any[]) => {
+    const handleReorder = (newSortedLessons: LessonLibraryDTO[]) => {
         const newIds = newSortedLessons.map(l => l.id);
         setValue('lessonIds', newIds, { shouldValidate: true, shouldDirty: true });
     };
@@ -405,7 +406,7 @@ export function CourseBuilderDialog({
                                                 onReorder={handleReorder}
                                                 className="space-y-3"
                                             >
-                                                {sortedSelectedLessons.map((lesson: any, index: number) => (
+                                                {sortedSelectedLessons.map((lesson, index: number) => (
                                                     <Reorder.Item
                                                         key={lesson.id}
                                                         value={lesson}
@@ -422,7 +423,7 @@ export function CourseBuilderDialog({
 
                                                             <div className="flex-1 min-w-0">
                                                                 <h5 className="font-bold text-sm truncate">{lesson.title}</h5>
-                                                                <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">{lesson.difficultyLevel || 'Cơ bản'}</p>
+                                                                <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-medium">{(lesson as any).difficultyLevel || 'Cơ bản'}</p>
                                                             </div>
 
                                                             {/* Manual movement buttons for long lists */}
@@ -522,7 +523,7 @@ export function CourseBuilderDialog({
 }
 
 interface LessonItemProps {
-    lesson: any;
+    lesson: LessonLibraryDTO;
     isSelected: boolean;
     onToggle: (id: number) => void;
 }

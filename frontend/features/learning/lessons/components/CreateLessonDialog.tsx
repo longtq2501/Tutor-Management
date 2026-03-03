@@ -114,7 +114,7 @@ export function CreateLessonDialog({
             Chọn học sinh
           </DialogTitle>
           <DialogDescription>
-            Chọn học sinh để giao bài giảng "{formData?.title}"
+            Chọn học sinh để giao bài giảng &quot;{formData?.title}&quot;
           </DialogDescription>
         </DialogHeader>
 

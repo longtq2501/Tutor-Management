@@ -44,12 +44,17 @@ export function AssignStudentsDialog({
   const assignMutation = useAssignLibraryLesson();
   const unassignMutation = useUnassignLibraryLesson();
 
-  // Initialize selected students when dialog opens
-  useEffect(() => {
-    if (open && assignedStudents.length > 0) {
+  const [prevOpen, setPrevOpen] = useState(open);
+
+  // Sync state when dialog opens
+  if (open && !prevOpen) {
+    setPrevOpen(true);
+    if (assignedStudents.length > 0) {
       setSelectedStudentIds(assignedStudents.map((s) => s.studentId));
     }
-  }, [open, assignedStudents]);
+  } else if (!open && prevOpen) {
+    setPrevOpen(false);
+  }
 
   const handleToggleStudent = (studentId: number) => {
     setSelectedStudentIds((prev) =>
@@ -115,7 +120,7 @@ export function AssignStudentsDialog({
             Giao bài giảng
           </DialogTitle>
           <DialogDescription>
-            Chọn học sinh để giao bài "{lesson.title}"
+            Chọn học sinh để giao bài &quot;{lesson.title}&quot;
           </DialogDescription>
         </DialogHeader>
 
@@ -204,7 +209,7 @@ export function AssignStudentsDialog({
               <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900">
                 <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-amber-800 dark:text-amber-300">
-                  Bạn có thay đổi chưa lưu. Nhấn "Lưu thay đổi" để áp dụng.
+                  Bạn có thay đổi chưa lưu. Nhấn &quot;Lưu thay đổi&quot; để áp dụng.
                 </p>
               </div>
             </>

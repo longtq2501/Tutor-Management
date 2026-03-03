@@ -285,3 +285,4 @@ export const Whiteboard = React.forwardRef<HTMLCanvasElement, WhiteboardProps>((
         </div>
     );
 });
+Whiteboard.displayName = 'Whiteboard';

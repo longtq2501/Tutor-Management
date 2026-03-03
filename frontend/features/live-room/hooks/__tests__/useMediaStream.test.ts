@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useMediaStream } from '../useMediaStream';
 
 // Create mutable track objects
-let mockAudioTrack: { stop: any; enabled: boolean; kind: string };
-let mockVideoTrack: { stop: any; enabled: boolean; kind: string };
-let mockStream: any;
+let mockAudioTrack: Partial<MediaStreamTrack>;
+let mockVideoTrack: Partial<MediaStreamTrack>;
+let mockStream: Partial<MediaStream>;
 
 beforeEach(() => {
     // Reset mutable tracks
@@ -21,9 +21,9 @@ beforeEach(() => {
     };
 
     mockStream = {
-        getTracks: vi.fn(() => [mockAudioTrack, mockVideoTrack]),
-        getAudioTracks: vi.fn(() => [mockAudioTrack]),
-        getVideoTracks: vi.fn(() => [mockVideoTrack]),
+        getTracks: vi.fn(() => [mockAudioTrack as MediaStreamTrack, mockVideoTrack as MediaStreamTrack]),
+        getAudioTracks: vi.fn(() => [mockAudioTrack as MediaStreamTrack]),
+        getVideoTracks: vi.fn(() => [mockVideoTrack as MediaStreamTrack]),
     };
 
     vi.stubGlobal('navigator', {

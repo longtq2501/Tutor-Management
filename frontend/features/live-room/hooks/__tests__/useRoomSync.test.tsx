@@ -13,7 +13,7 @@ vi.mock('../../context/WebSocketContext', async () => {
     return {
         ...actual,
         useWebSocket: () => ({ isConnected: true }),
-        WebSocketProvider: ({ children }: any) => <div>{ children } </div>
+        WebSocketProvider: ({ children }: { children: React.ReactNode }) => <div>{children} </div>
     };
 });
 
@@ -26,7 +26,7 @@ const mockActions = {
 
 vi.mock('../../context/RoomStateContext', async () => {
     return {
-        RoomStateProvider: ({ children }: any) => <div>{ children } </div>,
+        RoomStateProvider: ({ children }: { children: React.ReactNode }) => <div>{children} </div>,
         useRoomState: () => ({
             state: { roomId: null },
             actions: mockActions
@@ -38,12 +38,12 @@ describe('useRoomSync', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         // Setup default API response
-        (onlineSessionApi.getRoomStats as any).mockResolvedValue({
+        vi.mocked(onlineSessionApi.getRoomStats).mockResolvedValue({
             tutorName: 'Tutor Test',
             tutorPresent: true,
             studentName: 'Student Test',
             studentPresent: false,
-        });
+        } as unknown as Awaited<ReturnType<typeof onlineSessionApi.getRoomStats>>); // Still need any here if the type is complex, but let's try to find the type
     });
 
     it('should fetch room stats only ONCE when connected', async () => {

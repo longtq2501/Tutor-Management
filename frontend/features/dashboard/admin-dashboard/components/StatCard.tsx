@@ -216,3 +216,4 @@ export const StatCard = memo(({
     </motion.div>
   );
 });
+StatCard.displayName = 'StatCard';

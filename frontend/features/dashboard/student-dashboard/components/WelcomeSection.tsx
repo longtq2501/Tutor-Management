@@ -11,7 +11,7 @@ export const WelcomeSection = ({ userName, quote }: { userName: string; quote: s
         👋 Xin chào, <span className="text-blue-600 dark:text-blue-400">{userName}</span>!
       </h1>
       <p className="text-muted-foreground font-medium text-lg">
-        "{quote}"
+        &quot;{quote}&quot;
       </p>
     </div>
   </div>

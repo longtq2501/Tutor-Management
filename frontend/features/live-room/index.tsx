@@ -43,7 +43,7 @@ export const LiveRoomFeature = ({ roomId: propRoomId }: { roomId?: string }) => 
                 setToken(response.token);
             } catch (err: unknown) {
                 console.error("Failed to join room:", err);
-                const errorMessage = (err as any)?.response?.data?.message || "Không thể tham gia phòng học.";
+                const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể tham gia phòng học.";
                 setJoinError(errorMessage);
             } finally {
                 setIsJoining(false);

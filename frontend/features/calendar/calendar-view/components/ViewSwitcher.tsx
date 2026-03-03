@@ -1,4 +1,4 @@
-import { Calendar, Columns, LayoutList, List } from 'lucide-react';
+import { Calendar, Columns, LayoutList, List, type LucideIcon } from 'lucide-react';
 
 export type CalendarViewType = 'month' | 'week' | 'day' | 'list';
 
@@ -13,7 +13,7 @@ interface ViewSwitcherProps {
  * Allows users to toggle between different calendar layouts.
  */
 export function ViewSwitcher({ currentView, onViewChange }: ViewSwitcherProps) {
-    const views: { id: CalendarViewType; label: string; icon: any }[] = [
+    const views: { id: CalendarViewType; label: string; icon: LucideIcon }[] = [
         { id: 'month', label: 'Tháng', icon: Calendar },
         { id: 'week', label: 'Tuần', icon: Columns },
         { id: 'day', label: 'Ngày', icon: LayoutList },

@@ -100,7 +100,7 @@ export const onlineSessionApi = {
      * @param {string} roomId - Unique identifier for the room
      * @returns {Promise<any[]>} List of strokes
      */
-    getWhiteboardStrokes: async (roomId: string): Promise<any[]> => {
+    getWhiteboardStrokes: async (roomId: string): Promise<unknown[]> => {
         const response = await api.get(`/online-sessions/${roomId}/whiteboard`);
         return response.data.data;
     },

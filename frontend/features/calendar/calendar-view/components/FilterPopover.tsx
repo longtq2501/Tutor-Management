@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Filter, Search, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LESSON_STATUS_LABELS } from '@/lib/types/lesson-status';
+import { LESSON_STATUS_LABELS, type LessonStatus } from '@/lib/types/lesson-status';
 import { getStatusColors } from '../utils/statusColors';
 import { motion } from 'framer-motion';
 
@@ -72,7 +72,7 @@ export function FilterPopover({
                                 isActive={currentFilter === status}
                                 onClick={() => handleStatusSelect(status)}
                                 label={label}
-                                status={status as any}
+                                status={status as LessonStatus}
                             />
                         ))}
                     </div>
@@ -90,7 +90,7 @@ export function FilterPopover({
     );
 }
 
-function FilterButton({ isActive, onClick, label, status }: { isActive: boolean; onClick: () => void; label: string; status?: any }) {
+function FilterButton({ isActive, onClick, label, status }: { isActive: boolean; onClick: () => void; label: string; status?: LessonStatus }) {
     const colors = status ? getStatusColors(status) : null;
     return (
         <Button

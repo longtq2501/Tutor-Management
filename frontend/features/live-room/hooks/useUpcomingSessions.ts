@@ -24,7 +24,7 @@ export function useUpcomingSessions(size: number = 5) {
         getNextPageParam: (lastPage) => {
             if (lastPage.last) return undefined;
             // Ensure position is valid string or undefined
-            return lastPage.position?.value ? String(lastPage.position.value) : undefined;
+            return (lastPage.position as any)?.value ? String((lastPage.position as any).value) : undefined;
         },
         staleTime: 30 * 1000, // 30 seconds
         gcTime: 5 * 60 * 1000, // 5 minutes
