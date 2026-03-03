@@ -20,9 +20,25 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        if (videoRef.current && stream) {
-            videoRef.current.srcObject = stream;
-        }
+        const videoElement = videoRef.current;
+        if (!videoElement || !stream) return;
+
+        const updateSrc = () => {
+            if (videoElement.srcObject !== stream) {
+                videoElement.srcObject = stream;
+            }
+        };
+
+        updateSrc();
+
+        // React to track changes within the stream (important for replaceTrack)
+        stream.addEventListener('addtrack', updateSrc);
+        stream.addEventListener('removetrack', updateSrc);
+
+        return () => {
+            stream.removeEventListener('addtrack', updateSrc);
+            stream.removeEventListener('removetrack', updateSrc);
+        };
     }, [stream]);
 
     return (

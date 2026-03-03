@@ -118,6 +118,9 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
         replaceTracks();
     }, [media.screenStream, state.localStream, state.contentMode]);
 
+    // ICE Candidate Queue: Holds candidates that arrive before setRemoteDescription
+    const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
+
     // Handle incoming signals
     useEffect(() => {
         if (!isConnected || !roomId || !currentUserId) return;
@@ -131,6 +134,13 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
                 if (signal.type === 'offer') {
                     const pc = createPeerConnection();
                     await pc.setRemoteDescription(new RTCSessionDescription(signal.data));
+
+                    // Process queued candidates
+                    while (iceCandidateQueue.current.length > 0) {
+                        const candidate = iceCandidateQueue.current.shift();
+                        if (candidate) await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                    }
+
                     const answer = await pc.createAnswer();
                     await pc.setLocalDescription(answer);
 
@@ -143,12 +153,25 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
                 }
                 else if (signal.type === 'answer') {
                     if (pcRef.current) {
-                        await pcRef.current.setRemoteDescription(new RTCSessionDescription(signal.data));
+                        const pc = pcRef.current;
+                        if (pc.signalingState !== 'stable') {
+                            await pc.setRemoteDescription(new RTCSessionDescription(signal.data));
+
+                            // Process queued candidates
+                            while (iceCandidateQueue.current.length > 0) {
+                                const candidate = iceCandidateQueue.current.shift();
+                                if (candidate) await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                            }
+                        }
                     }
                 }
                 else if (signal.type === 'candidate') {
-                    if (pcRef.current) {
-                        await pcRef.current.addIceCandidate(new RTCIceCandidate(signal.data));
+                    const pc = pcRef.current;
+                    if (pc && pc.remoteDescription && pc.remoteDescription.type) {
+                        await pc.addIceCandidate(new RTCIceCandidate(signal.data));
+                    } else {
+                        console.log('[WebRTC] Queueing ICE candidate (remote description not set)');
+                        iceCandidateQueue.current.push(signal.data);
                     }
                 }
                 else if (signal.type === 'mode-change') {
@@ -160,7 +183,10 @@ export const useWebRTCSignaling = (roomId: string, currentUserId: number, media:
             }
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            iceCandidateQueue.current = [];
+        };
     }, [isConnected, roomId, currentUserId, subscribe, sendMessage, createPeerConnection, actions]);
 
     // Track synchronization: Ensure tracks are added to the PC if they become available after connection
