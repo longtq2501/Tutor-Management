@@ -8,22 +8,25 @@ import { useRoomState } from '../context/RoomStateContext';
  * === Fixes Applied ===
  *
  * Bug 1 (Race condition — Offer before Student subscribes):
- *   Added retry-with-backoff (waitForStudentReady) before sending the offer.
- *   Added cancellation token so overlapping async initiations never double-send.
+ *   retry-with-backoff + cancellation token.
  *
  * Bug 2 (Subscribe no-op / reconnect drops subscriptions):
- *   Added `connectionId` from WebSocketContext to the signal-subscription effect's
- *   dependency array. Each reconnect bumps connectionId, forcing a clean re-subscribe.
+ *   connectionId from WebSocketContext forces re-subscribe on every reconnect.
  *
  * Bug 3 (mode-change broadcast on every re-render):
- *   Added prevContentModeRef — only broadcasts when contentMode actually transitions.
+ *   REMOVED the standalone mode-change effect entirely.
+ *   mode-change is now broadcast only from inside replaceAndBroadcast (Bug 7 fix).
  *
  * Bug 5 (Async effect without cancellation — double offer):
- *   Cleanup function sets `cancelled = true`; every await checkpoint respects it.
+ *   cancelled flag checked at every async checkpoint.
  *
  * Bug 6 (Stale closure for contentMode inside signal handler):
- *   contentModeRef is kept in sync and used inside the STOMP callback instead of
- *   the captured state value.
+ *   contentModeRef kept in sync, used inside STOMP callback.
+ *
+ * Bug 7 ✅ NEW (mode-change broadcast BEFORE track is ready):
+ *   replaceTrack and mode-change broadcast are now a single atomic operation.
+ *   Student only receives mode-change AFTER the new track is live on the sender.
+ *   The old standalone mode-change useEffect has been deleted.
  */
 export const useWebRTCSignaling = (
     roomId: string,
@@ -38,15 +41,20 @@ export const useWebRTCSignaling = (
     // ---- Refs that mirror live state for use inside async callbacks / closures ----
     const participantsRef = useRef(state.participants);
     const localStreamRef = useRef(state.localStream);
-    // ✅ Bug 6 Fix: contentModeRef prevents stale closures in the STOMP callback
+    // Bug 6: contentModeRef prevents stale closures inside the STOMP callback
     const contentModeRef = useRef(state.contentMode);
+    // Bug 7: isTutorRef avoids re-reading state inside the replaceAndBroadcast effect
+    const isTutorRef = useRef(false);
 
     useEffect(() => { participantsRef.current = state.participants; }, [state.participants]);
     useEffect(() => { localStreamRef.current = state.localStream; }, [state.localStream]);
     useEffect(() => { contentModeRef.current = state.contentMode; }, [state.contentMode]);
+    useEffect(() => {
+        isTutorRef.current =
+            state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
+    }, [state.participants, currentUserId]);
 
     // ---- ICE Candidate Queue ----
-    // Holds candidates that arrive before setRemoteDescription is called.
     const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
 
     // ---- PeerConnection Configuration ----
@@ -119,12 +127,30 @@ export const useWebRTCSignaling = (
         return pc;
     }, [roomId, currentUserId, sendMessage, actions, cleanup, configuration]);
 
-    // ---- Track Replacement: Camera ↔ Screen ----
+    // ---- Track Replacement + mode-change Broadcast (Atomic) ----
+    //
+    // ✅ Bug 7 Fix: replaceTrack and mode-change signal are ONE atomic operation.
+    //
+    // OLD (broken) flow:
+    //   contentMode changes → mode-change broadcast immediately
+    //                       → replaceTrack starts (async, not done yet)
+    //   Student receives mode-change → switches UI → remoteStream has OLD track → black screen
+    //
+    // NEW (correct) flow:
+    //   contentMode changes → replaceTrack runs first
+    //                       → ONLY AFTER replaceTrack succeeds → broadcast mode-change
+    //   Student receives mode-change → switches UI → remoteStream already has NEW track ✅
+    //
+    // The old standalone mode-change useEffect has been DELETED.
+    // This effect re-runs when media.screenStream becomes available (deferred case).
     useEffect(() => {
-        const replaceTracks = async () => {
+        const replaceAndBroadcast = async () => {
             if (!pcRef.current) return;
+
+            // Guard: wait for screenStream before proceeding.
+            // This effect re-runs automatically once media.screenStream is populated.
             if (state.contentMode === 'screen' && !media.screenStream) {
-                console.log('[WebRTC] Deferring track replacement: screen stream not ready');
+                console.log('[WebRTC] Deferring: screen stream not ready yet');
                 return;
             }
 
@@ -132,20 +158,38 @@ export const useWebRTCSignaling = (
             const videoSender = pc.getSenders().find(s => s.track?.kind === 'video');
             if (!videoSender) return;
 
-            const targetStream = state.contentMode === 'screen' ? media.screenStream : state.localStream;
+            const targetStream =
+                state.contentMode === 'screen' ? media.screenStream : state.localStream;
             const newTrack = targetStream?.getVideoTracks()[0] ?? null;
 
             if (newTrack && videoSender.track !== newTrack) {
-                console.log('[WebRTC] Replacing video track →', state.contentMode === 'screen' ? 'screen' : 'camera');
+                console.log('[WebRTC] Replacing video track →', state.contentMode);
                 await videoSender.replaceTrack(newTrack);
+                console.log('[WebRTC] replaceTrack done for mode:', state.contentMode);
+
+                // ✅ Broadcast mode-change ONLY after track is live on the sender.
+                // Only Tutor broadcasts; Student just reacts when it receives the signal.
+                if (isTutorRef.current && isConnected) {
+                    const otherPlayer = participantsRef.current
+                        .find(p => Number(p.id) !== currentUserId);
+                    if (otherPlayer) {
+                        console.log('[WebRTC] Broadcasting mode-change AFTER track replaced →', state.contentMode);
+                        sendMessage(`/app/room/${roomId}/signal`, {
+                            type: 'mode-change',
+                            data: state.contentMode,
+                            senderId: currentUserId,
+                            receiverId: Number(otherPlayer.id),
+                        });
+                    }
+                }
             }
         };
 
-        replaceTracks();
-    }, [media.screenStream, state.localStream, state.contentMode]);
+        replaceAndBroadcast();
+    }, [media.screenStream, state.localStream, state.contentMode, isConnected, roomId, currentUserId, sendMessage]);
 
     // ---- Incoming Signal Handler ----
-    // ✅ Bug 2 Fix: connectionId in deps ensures re-subscribe after every reconnect
+    // Bug 2: connectionId in deps ensures re-subscribe after every WebSocket reconnect
     useEffect(() => {
         if (!isConnected || !roomId || !currentUserId) return;
 
@@ -159,6 +203,22 @@ export const useWebRTCSignaling = (
 
                 try {
                     if (signal.type === 'offer') {
+                        // Wait for local stream before creating PC so Student's tracks are included.
+                        // Without this, Student's PeerConnection has no video track → Tutor sees black.
+                        if (!localStreamRef.current) {
+                            console.warn('[WebRTC] Local stream not ready on offer receipt, waiting...');
+                            await new Promise<void>((resolve) => {
+                                const interval = setInterval(() => {
+                                    if (localStreamRef.current) {
+                                        clearInterval(interval);
+                                        resolve();
+                                    }
+                                }, 200);
+                                // Timeout after 5s to avoid hanging forever
+                                setTimeout(() => { clearInterval(interval); resolve(); }, 5000);
+                            });
+                        }
+
                         const pc = createPeerConnection();
                         await pc.setRemoteDescription(new RTCSessionDescription(signal.data));
 
@@ -202,14 +262,14 @@ export const useWebRTCSignaling = (
 
                     else if (signal.type === 'mode-change') {
                         console.log('[WebRTC] Received mode-change:', signal.data);
-                        // ✅ Bug 6 Fix: Use ref — not the captured state — to avoid stale closure
+                        // Bug 6: use ref (not captured state) to avoid stale closure
                         if (contentModeRef.current !== signal.data) {
                             actions.setContentMode(signal.data);
                         }
                     }
 
                 } catch (err) {
-                    console.error('[WebRTC] Error handling signal:', err, '| Signal type:', signal.type);
+                    console.error('[WebRTC] Error handling signal:', err, '| type:', signal.type);
                 }
             }
         );
@@ -219,11 +279,11 @@ export const useWebRTCSignaling = (
             unsubscribe();
             iceCandidateQueue.current = [];
         };
-        // ✅ Bug 2 Fix: connectionId added so this re-runs on every WebSocket reconnect
+        // Bug 2: connectionId forces re-subscribe on every reconnect
     }, [isConnected, connectionId, roomId, currentUserId, subscribe, sendMessage, createPeerConnection, actions]);
 
     // ---- Late Track Synchronization ----
-    // Adds tracks that became available after the PeerConnection was already created.
+    // Adds tracks that became available after PeerConnection was already created.
     useEffect(() => {
         if (!pcRef.current || !state.localStream) return;
 
@@ -240,8 +300,8 @@ export const useWebRTCSignaling = (
     }, [state.localStream]);
 
     // ---- Role-Based Connection Initiation (Tutor → Student) ----
-    // ✅ Bug 1 Fix: retry-with-backoff so offer is only sent once Student is subscribed
-    // ✅ Bug 5 Fix: cancellation token prevents double-offers from overlapping async runs
+    // Bug 1: retry-with-backoff so offer is only sent once Student is subscribed.
+    // Bug 5: cancellation token prevents double-offers from overlapping async runs.
     useEffect(() => {
         let cancelled = false;
 
@@ -249,18 +309,13 @@ export const useWebRTCSignaling = (
             const isTutor = state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
             if (!isTutor || !isConnected || pcRef.current || !state.localStream) return;
 
-            // Retry with backoff until Student appears in the participants list
             const waitForStudentReady = async (maxAttempts = 5) => {
                 for (let attempt = 0; attempt < maxAttempts; attempt++) {
                     if (cancelled) return null;
-
                     const student = participantsRef.current.find(p => p.role === 'STUDENT');
                     if (student) return student;
-
-                    const delay = 800 * (attempt + 1); // 800ms, 1600ms, 2400ms …
-                    console.log(
-                        `[WebRTC] Student not found — retrying in ${delay}ms (attempt ${attempt + 1}/${maxAttempts})`
-                    );
+                    const delay = 800 * (attempt + 1); // 800, 1600, 2400, 3200, 4000 ms
+                    console.log(`[WebRTC] Student not found — retrying in ${delay}ms (attempt ${attempt + 1}/${maxAttempts})`);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
                 return null;
@@ -268,7 +323,7 @@ export const useWebRTCSignaling = (
 
             const student = await waitForStudentReady();
 
-            // ✅ Bug 5 Fix: all three guards must pass after async wait
+            // Bug 5: all three guards must pass after the async wait
             if (cancelled || !student || pcRef.current) {
                 if (!student) console.warn('[WebRTC] Student not ready after max retries');
                 return;
@@ -293,34 +348,9 @@ export const useWebRTCSignaling = (
 
         initiateConnection();
 
-        // ✅ Bug 5 Fix: cancel any in-flight async operation when effect re-runs
+        // Bug 5: cancel in-flight async operation when effect re-runs
         return () => { cancelled = true; };
     }, [state.participants, state.localStream, currentUserId, roomId, isConnected, sendMessage, createPeerConnection]);
-
-    // ---- Content Mode Change Signaling (Tutor only) ----
-    // ✅ Bug 3 Fix: prevContentModeRef prevents broadcasting on unrelated re-renders
-    const prevContentModeRef = useRef(state.contentMode);
-
-    useEffect(() => {
-        if (!isConnected) return;
-
-        if (prevContentModeRef.current === state.contentMode) return;
-        prevContentModeRef.current = state.contentMode;
-
-        const isTutor = state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
-        if (!isTutor) return;
-
-        const otherPlayer = state.participants.find(p => Number(p.id) !== currentUserId);
-        if (!otherPlayer) return;
-
-        console.log('[WebRTC] Broadcasting mode change →', state.contentMode);
-        sendMessage(`/app/room/${roomId}/signal`, {
-            type: 'mode-change',
-            data: state.contentMode,
-            senderId: currentUserId,
-            receiverId: Number(otherPlayer.id),
-        });
-    }, [state.contentMode, roomId, currentUserId, state.participants, isConnected, sendMessage]);
 
     // ---- Cleanup on Unmount ----
     useEffect(() => {

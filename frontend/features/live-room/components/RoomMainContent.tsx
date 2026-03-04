@@ -12,7 +12,7 @@ import { useSwipeable } from 'react-swipeable';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useRoomState } from '../context/RoomStateContext';
-import { Monitor, Layout } from 'lucide-react';
+import { Monitor, Layout, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface RoomMainContentProps {
@@ -20,15 +20,29 @@ interface RoomMainContentProps {
     currentUserId: number;
     activeTab: RoomTab;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    media: any; // Using any for large combined hook result
+    media: any;
     sendMessage: (destination: string, body: unknown) => void;
     onTabChange: (tab: RoomTab) => void;
 }
 
 /**
+ * Maps a MediaErrorType to a short Vietnamese description.
+ */
+const getMediaErrorText = (error: string): string => {
+    switch (error) {
+        case 'NotReadableError':
+            return 'Camera đang bị chiếm bởi ứng dụng khác (Teams, Zoom, OBS...). Đóng các ứng dụng đó rồi thử lại.';
+        case 'NotAllowedError':
+            return 'Trình duyệt chưa được cấp quyền camera. Vui lòng cho phép truy cập camera.';
+        case 'NotFoundError':
+            return 'Không tìm thấy camera trên thiết bị này.';
+        default:
+            return 'Không thể truy cập camera. Vui lòng tải lại trang.';
+    }
+};
+
+/**
  * Main content area for the Live Room.
- * Handles the layout of Whiteboard, Video, and Chat based on the active tab and screen size.
- * Includes swipe gestures for mobile tab switching.
  */
 export const RoomMainContent: React.FC<RoomMainContentProps> = ({
     roomId,
@@ -46,15 +60,11 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
     const handlers = useSwipeable({
         onSwipedLeft: () => {
             const currentIndex = tabs.indexOf(activeTab);
-            if (currentIndex < tabs.length - 1) {
-                onTabChange(tabs[currentIndex + 1]);
-            }
+            if (currentIndex < tabs.length - 1) onTabChange(tabs[currentIndex + 1]);
         },
         onSwipedRight: () => {
             const currentIndex = tabs.indexOf(activeTab);
-            if (currentIndex > 0) {
-                onTabChange(tabs[currentIndex - 1]);
-            }
+            if (currentIndex > 0) onTabChange(tabs[currentIndex - 1]);
         },
         preventScrollOnSwipe: true,
         trackMouse: false,
@@ -70,7 +80,6 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
         if (state.contentMode === 'screen' && isTutor && !media.isScreenSharing) {
             media.startScreenShare().then((stream: MediaStream | null) => {
                 if (!stream) {
-                    // Fallback to whiteboard if screen share fails or is cancelled
                     actions.setContentMode('whiteboard');
                 }
             });
@@ -80,40 +89,35 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
     }, [state.contentMode, isTutor, media, actions]);
 
     React.useEffect(() => {
-        if (!isMobile) return; // Skip transition on desktop
-
-        if (transitionTimerRef.current) {
-            clearTimeout(transitionTimerRef.current);
-        }
-
+        if (!isMobile) return;
+        if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
         setIsTransitioning(true);
         transitionTimerRef.current = setTimeout(() => setIsTransitioning(false), 200);
-
-        return () => {
-            if (transitionTimerRef.current) {
-                clearTimeout(transitionTimerRef.current);
-            }
-        };
+        return () => { if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current); };
     }, [activeTab, isMobile]);
 
     const handleToggleRecording = async () => {
         if (media.isRecording) {
             media.stopRecording();
         } else {
-            // Quality is already set in the hook state from MediaControls
             let sourceStream: MediaStream | undefined = undefined;
-
             if (state.contentMode === 'screen' && media.screenStream) {
                 sourceStream = media.screenStream;
-                console.log('[Recording] Using active screen stream as source');
             } else if (state.contentMode === 'whiteboard' && whiteboardCanvasRef.current) {
                 sourceStream = whiteboardCanvasRef.current.captureStream(10);
-                console.log('[Recording] Using whiteboard canvas as source');
             }
-
             await media.startRecording(sourceStream);
         }
     };
+
+    // ---- Camera error banner: shown to BOTH sides ----
+    // Tutor sees their own error directly.
+    // Student sees a generic "giáo viên gặp sự cố" when connected but remoteStream is null.
+    const showTutorCameraError = isTutor && !!media.error;
+    const showRemoteCameraWarning =
+        !isTutor &&
+        state.connectionState === 'CONNECTED' &&
+        !state.remoteStream;
 
     return (
         <main
@@ -140,13 +144,13 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                 )}
             </AnimatePresence>
 
-            {/* Board Section */}
+            {/* ---- Board Section ---- */}
             <div className={cn(
                 "flex-1 relative flex flex-col min-h-0 min-w-0 transition-all duration-300 ease-in-out",
                 activeTab !== 'board' && "hidden md:flex",
                 activeTab === 'board' && "md:border-t-2 md:border-t-primary"
             )}>
-                {/* Header for Content Mode Toggle (Tutor Only) */}
+                {/* Content Mode Toggle (Tutor Only) */}
                 {isTutor && (
                     <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-20">
                         <div className="flex items-center gap-2">
@@ -189,8 +193,6 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                                     stream={isTutor ? media.screenStream : state.remoteStream}
                                     className="w-full h-full max-w-5xl mx-auto rounded-xl shadow-2xl overflow-hidden border border-white/5"
                                 />
-
-                                {/* Mirroring Warning for Tutors */}
                                 {isTutor && media.isScreenSharing && (
                                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-amber-500/90 backdrop-blur-md rounded-lg shadow-lg border border-amber-600 animate-in fade-in zoom-in duration-300">
                                         <div className="flex items-center gap-2">
@@ -202,7 +204,6 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                                     </div>
                                 )}
                             </div>
-
                             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-2 whitespace-nowrap z-20">
                                 <Monitor className="w-4 h-4 text-primary" />
                                 <span className="text-white text-[10px] font-bold uppercase tracking-tight">
@@ -224,13 +225,48 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                 />
             </div>
 
-            {/* Video Side Area */}
+            {/* ---- Video Side Area ---- */}
             <div className={cn(
                 "w-full md:w-80 p-3 flex-col gap-3 bg-background md:bg-card border-t md:border-t-0 md:border-l border-border",
                 activeTab === 'video' ? "flex flex-1 min-h-0" : "hidden md:flex min-h-0",
                 activeTab === 'video' && "md:border-t-2 md:border-t-primary"
             )}>
                 <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-hidden">
+
+                    {/* ✅ Banner: Tutor thấy lỗi camera của chính mình */}
+                    {showTutorCameraError && (
+                        <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 animate-in fade-in slide-in-from-top-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-amber-600 dark:text-amber-400 text-[10px] font-bold">
+                                    Camera không hoạt động
+                                </p>
+                                <p className="text-amber-600/70 dark:text-amber-400/70 text-[10px] mt-0.5 leading-relaxed">
+                                    {getMediaErrorText(media.error)}
+                                </p>
+                                {/* Retry button */}
+                                <button
+                                    onClick={() => media.retry()}
+                                    className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-500 hover:text-amber-400 font-semibold transition-colors"
+                                >
+                                    <RefreshCw className="w-3 h-3" />
+                                    Thử lại
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ✅ Banner: Student thấy cảnh báo khi Tutor không có camera */}
+                    {showRemoteCameraWarning && (
+                        <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-slate-500/10 border border-slate-500/20 animate-in fade-in slide-in-from-top-2">
+                            <AlertTriangle className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                            <p className="text-slate-400 text-[10px] leading-relaxed">
+                                Camera của giáo viên hiện không khả dụng.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Camera BAN (local) */}
                     <div className="space-y-1">
                         <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
                             {state.contentMode === 'screen' ? 'Camera (Bạn)' : 'Bạn (Local)'}
@@ -238,23 +274,35 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                         <VideoPlayer
                             stream={media.stream}
                             muted
+                            // ✅ Truyền mediaError để VideoPlayer hiện UI lỗi thay vì màn đen
+                            mediaError={media.error}
                             className="aspect-video w-full rounded-xl border border-border bg-slate-900 shadow-lg"
                         />
                     </div>
 
+                    {/* Camera ĐỐI PHƯƠNG (remote) */}
                     <div className="space-y-1">
                         <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
                             {state.contentMode === 'screen' ? 'Camera (Đối phương)' : 'Đối phương (Remote)'}
                         </span>
                         <VideoPlayer
                             stream={state.remoteStream}
+                            // ✅ Label thông minh: sau khi connected mà vẫn không có stream
+                            //    → khả năng cao đối phương không có camera
+                            emptyLabel={
+                                state.connectionState === 'CONNECTED'
+                                    ? 'Đối phương không có camera'
+                                    : 'Đang chờ tín hiệu video...'
+                            }
                             className="aspect-video w-full rounded-xl border border-border bg-slate-900 shadow-lg"
                         />
                     </div>
 
-                    {/* Chat Section integrated into sidebar */}
+                    {/* Chat */}
                     <div className="mt-2 flex-1 flex flex-col min-h-0 border-t border-border pt-3 overflow-hidden">
-                        <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1 mb-2">Trò chuyện</span>
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1 mb-2">
+                            Trò chuyện
+                        </span>
                         <div className="flex-1 min-h-0 h-full">
                             <ChatPanel roomId={roomId} currentUserId={currentUserId} />
                         </div>
@@ -267,7 +315,6 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                     </div>
                 )}
             </div>
-
         </main>
     );
 };
