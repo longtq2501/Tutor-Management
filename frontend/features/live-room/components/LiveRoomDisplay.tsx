@@ -126,6 +126,15 @@ export const LiveRoomDisplay: React.FC<LiveRoomDisplayProps> = ({ roomId, curren
         }
     }, [state.isConnected, isConnected, actions]);
 
+    // ✅ Sync Media Stream to Global State
+    // CRITICAL: This was missing, causing WebRTC signaling to fail (waiting on local stream)
+    useEffect(() => {
+        if (media.stream && state.localStream !== media.stream) {
+            console.log('[LiveRoom] Syncing local media stream to global state');
+            actions.setLocalStream(media.stream);
+        }
+    }, [media.stream, state.localStream, actions]);
+
     return (
         <RoomErrorBoundary>
             <div className="flex h-screen w-full bg-background overflow-hidden text-foreground selection:bg-primary/20">

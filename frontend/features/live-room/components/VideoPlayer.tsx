@@ -27,6 +27,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             if (videoElement.srcObject !== stream) {
                 videoElement.srcObject = stream;
             }
+            // ✅ BUG 4 FIX (PRO MAX): Force play after stream assignment
+            // Ensures playback continues after replaceTrack/track updates
+            videoElement.play().catch(err => {
+                // Ignore AbortError which is common if stream is replaced rapidly
+                if (err.name !== 'AbortError') {
+                    console.warn('[VideoPlayer] Playback failed:', err);
+                }
+            });
         };
 
         updateSrc();
