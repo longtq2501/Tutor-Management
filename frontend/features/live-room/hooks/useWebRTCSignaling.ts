@@ -42,13 +42,13 @@ export const useWebRTCSignaling = (
 
     // ---- Refs: mirror live state for use inside async callbacks / closures ----
     const participantsRef = useRef(state.participants);
-    const localStreamRef  = useRef(state.localStream);
-    const contentModeRef  = useRef(state.contentMode);  // Bug 6
-    const isTutorRef      = useRef(false);               // Bug 7
+    const localStreamRef = useRef(state.localStream);
+    const contentModeRef = useRef(state.contentMode);  // Bug 6
+    const isTutorRef = useRef(false);               // Bug 7
 
     useEffect(() => { participantsRef.current = state.participants; }, [state.participants]);
-    useEffect(() => { localStreamRef.current  = state.localStream;  }, [state.localStream]);
-    useEffect(() => { contentModeRef.current  = state.contentMode;  }, [state.contentMode]);
+    useEffect(() => { localStreamRef.current = state.localStream; }, [state.localStream]);
+    useEffect(() => { contentModeRef.current = state.contentMode; }, [state.contentMode]);
     useEffect(() => {
         isTutorRef.current =
             state.participants.find(p => Number(p.id) === currentUserId)?.role === 'TUTOR';
@@ -69,8 +69,8 @@ export const useWebRTCSignaling = (
     const cleanup = useCallback(() => {
         if (pcRef.current) {
             console.log('[WebRTC] Closing PeerConnection');
-            pcRef.current.onicecandidate      = null;
-            pcRef.current.ontrack             = null;
+            pcRef.current.onicecandidate = null;
+            pcRef.current.ontrack = null;
             pcRef.current.onconnectionstatechange = null;
             pcRef.current.close();
             pcRef.current = null;
@@ -139,12 +139,15 @@ export const useWebRTCSignaling = (
     // ---- Track Replacement + mode-change Broadcast (Atomic) ----
     // Bug 7: replaceTrack and mode-change signal are ONE atomic operation.
     // Bug 3: Standalone mode-change effect removed; broadcast only happens here.
+    // Fix 9: Screen share audio track is now handled:
+    //   - Switching TO screen   → replace video + add/replace screen audio track
+    //   - Switching FROM screen → replace video back to camera + remove screen audio sender
     //
     // Flow:
     //   contentMode changes (or screenStream arrives)
-    //   → replaceTrack on existing sender
-    //   → ONLY AFTER success: broadcast mode-change to remote
-    //   Student UI switches only after remote track is already updated ✅
+    //   → replaceTrack video sender
+    //   → add/replace/remove audio sender for screen audio
+    //   → ONLY AFTER all replacements succeed: broadcast mode-change to remote
     useEffect(() => {
         const replaceAndBroadcast = async () => {
             if (!pcRef.current) return;
@@ -156,30 +159,64 @@ export const useWebRTCSignaling = (
             }
 
             const pc = pcRef.current;
-            const videoSender = pc.getSenders().find(s => s.track?.kind === 'video');
-            if (!videoSender) return;
+            const senders = pc.getSenders();
 
+            // ---- 1. Replace VIDEO track ----
+            const videoSender = senders.find(s => s.track?.kind === 'video');
             const targetStream =
                 state.contentMode === 'screen' ? media.screenStream : state.localStream;
-            const newTrack = targetStream?.getVideoTracks()[0] ?? null;
+            const newVideoTrack = targetStream?.getVideoTracks()[0] ?? null;
 
-            if (newTrack && videoSender.track !== newTrack) {
+            if (videoSender && newVideoTrack && videoSender.track !== newVideoTrack) {
                 console.log('[WebRTC] Replacing video track →', state.contentMode);
-                await videoSender.replaceTrack(newTrack);
-                console.log('[WebRTC] replaceTrack complete');
+                await videoSender.replaceTrack(newVideoTrack);
+            }
 
-                // Broadcast mode-change only after track is live on sender (Tutor only)
-                if (isTutorRef.current && isConnected) {
-                    const other = participantsRef.current.find(p => Number(p.id) !== currentUserId);
-                    if (other) {
-                        console.log('[WebRTC] Broadcasting mode-change AFTER replaceTrack →', state.contentMode);
-                        sendMessage(`/app/room/${roomId}/signal`, {
-                            type: 'mode-change',
-                            data: state.contentMode,
-                            senderId: currentUserId,
-                            receiverId: Number(other.id),
-                        });
+            // ---- 2. Handle SCREEN AUDIO track ----
+            const screenAudioTrack = media.screenStream?.getAudioTracks()[0] ?? null;
+            const audioSender = senders.find(s => s.track?.kind === 'audio');
+
+            if (state.contentMode === 'screen') {
+                if (screenAudioTrack) {
+                    if (audioSender) {
+                        // Replace mic audio with screen audio
+                        if (audioSender.track !== screenAudioTrack) {
+                            console.log('[WebRTC] Replacing audio track → screen audio');
+                            await audioSender.replaceTrack(screenAudioTrack);
+                        }
+                    } else {
+                        // No audio sender yet (mic was unavailable) → add screen audio
+                        console.log('[WebRTC] Adding screen audio track (no existing audio sender)');
+                        pc.addTrack(screenAudioTrack, media.screenStream);
                     }
+                } else {
+                    // Browser didn't grant screen audio (user unchecked "Share audio")
+                    console.log('[WebRTC] Screen stream has no audio track — browser may not support it or user declined');
+                }
+            } else {
+                // Switching BACK to camera/whiteboard → restore mic audio
+                const micAudioTrack = state.localStream?.getAudioTracks()[0] ?? null;
+                if (audioSender && micAudioTrack && audioSender.track !== micAudioTrack) {
+                    console.log('[WebRTC] Restoring mic audio track');
+                    await audioSender.replaceTrack(micAudioTrack);
+                }
+            }
+
+            // ---- 3. Broadcast mode-change AFTER all tracks are updated (Tutor only) ----
+            if (isTutorRef.current && isConnected) {
+                // Only broadcast if we actually did something (video track changed or mode changed)
+                if (newVideoTrack && videoSender && videoSender.track !== newVideoTrack) {
+                    // already replaced above; newVideoTrack is the NEW track now
+                }
+                const other = participantsRef.current.find(p => Number(p.id) !== currentUserId);
+                if (other) {
+                    console.log('[WebRTC] Broadcasting mode-change AFTER all tracks replaced →', state.contentMode);
+                    sendMessage(`/app/room/${roomId}/signal`, {
+                        type: 'mode-change',
+                        data: state.contentMode,
+                        senderId: currentUserId,
+                        receiverId: Number(other.id),
+                    });
                 }
             }
         };
@@ -355,8 +392,8 @@ export const useWebRTCSignaling = (
         // Bug 5: cancel in-flight async on re-run
         return () => { cancelled = true; };
 
-    // Bug 2: connectionId re-initiates after WebSocket reconnect
-    // Bug 8: state.localStream REMOVED from deps — no longer a gate
+        // Bug 2: connectionId re-initiates after WebSocket reconnect
+        // Bug 8: state.localStream REMOVED from deps — no longer a gate
     }, [state.participants, isConnected, connectionId, currentUserId, roomId, sendMessage, createPeerConnection]);
 
     // ---- Cleanup on Unmount ----

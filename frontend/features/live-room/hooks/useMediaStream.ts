@@ -2,9 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-/**
- * Media extraction error types.
- */
 export type MediaErrorType =
     | 'NotAllowedError'
     | 'NotFoundError'
@@ -14,8 +11,13 @@ export type MediaErrorType =
     | 'UnknownError';
 
 /**
- * Result of the useMediaStream hook.
+ * Hint type for screen share audio limitations.
+ * - 'mac'      : macOS detected, system audio not capturable → suggest sharing a Chrome Tab
+ * - 'no-audio' : user unchecked "Share audio" or browser fallback without audio
+ * - null       : no hint needed (audio is working)
  */
+export type ScreenShareAudioHint = 'mac' | 'no-audio' | null;
+
 export interface UseMediaStreamResult {
     stream: MediaStream | null;
     error: MediaErrorType | null;
@@ -24,6 +26,7 @@ export interface UseMediaStreamResult {
     isCameraMuted: boolean;
     isScreenSharing: boolean;
     screenStream: MediaStream | null;
+    screenShareAudioHint: ScreenShareAudioHint;
     retry: (newConstraints?: MediaStreamConstraints) => void;
     toggleMic: () => void;
     toggleCamera: () => void;
@@ -33,10 +36,6 @@ export interface UseMediaStreamResult {
     switchDevice: (deviceId: string, kind: 'audio' | 'video') => void;
 }
 
-/**
- * Hook to manage media stream access (camera/microphone).
- * Features reliable cleanup via useRef, permission checks, and mute/unmute controls.
- */
 export const useMediaStream = (
     initialConstraints: MediaStreamConstraints = { video: true, audio: true }
 ): UseMediaStreamResult => {
@@ -50,10 +49,12 @@ export const useMediaStream = (
     const [isCameraMuted, setIsCameraMuted] = useState<boolean>(false);
     const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
     const [isScreenSharing, setIsScreenSharing] = useState<boolean>(false);
+    const [screenShareAudioHint, setScreenShareAudioHint] = useState<ScreenShareAudioHint>(null);
+
     const streamRef = useRef<MediaStream | null>(null);
+    const screenStreamRef = useRef<MediaStream | null>(null);
     const muteStateRef = useRef({ audio: false, video: false });
 
-    // Keep ref in sync for initial stream creation
     useEffect(() => {
         muteStateRef.current = { audio: isMicMuted, video: isCameraMuted };
     }, [isMicMuted, isCameraMuted]);
@@ -67,58 +68,94 @@ export const useMediaStream = (
 
     const toggleMic = useCallback(() => {
         setIsMicMuted(prev => {
-            const newMutedState = !prev;
-            if (streamRef.current) {
-                streamRef.current.getAudioTracks().forEach(track => {
-                    track.enabled = !newMutedState;
-                });
-            }
-            return newMutedState;
+            const newMuted = !prev;
+            streamRef.current?.getAudioTracks().forEach(t => { t.enabled = !newMuted; });
+            return newMuted;
         });
     }, []);
 
     const toggleCamera = useCallback(() => {
-        console.log('[MediaStream] Toggling camera. Current muted state:', isCameraMuted);
         setIsCameraMuted(prev => {
-            const newMutedState = !prev;
-            if (streamRef.current) {
-                console.log('[MediaStream] Setting video tracks enabled to:', !newMutedState);
-                streamRef.current.getVideoTracks().forEach(track => {
-                    track.enabled = !newMutedState;
-                });
-            }
-            return newMutedState;
+            const newMuted = !prev;
+            streamRef.current?.getVideoTracks().forEach(t => { t.enabled = !newMuted; });
+            return newMuted;
         });
-    }, [isCameraMuted]);
+    }, []);
+
+    // stopScreenShare dùng ref → không bị stale closure khi gọi từ onended
+    const stopScreenShare = useCallback(() => {
+        if (screenStreamRef.current) {
+            screenStreamRef.current.getTracks().forEach(t => t.stop());
+            screenStreamRef.current = null;
+        }
+        setScreenStream(null);
+        setIsScreenSharing(false);
+        setScreenShareAudioHint(null);
+    }, []);
 
     const startScreenShare = useCallback(async () => {
         try {
             console.log('[MediaStream] Requesting screen share');
-            const stream = await navigator.mediaDevices.getDisplayMedia({
-                video: true,
-                audio: false
-            });
-            setScreenStream(stream);
+
+            // macOS does not allow system audio capture via any browser API.
+            // The only workaround is to share a specific Chrome Tab
+            // (Chrome injects tab audio automatically in that mode).
+            const isMac = typeof navigator !== 'undefined' &&
+                (/Mac/.test(navigator.userAgent) && !/iPhone|iPad|iPod/.test(navigator.userAgent));
+
+            let newScreenStream: MediaStream;
+
+            try {
+                newScreenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { frameRate: { ideal: 30 } },
+                    // Works on Windows/ChromeOS Chrome & Edge.
+                    // macOS: silently ignored (no error, just no audio track).
+                    // Firefox: may throw TypeError → caught below.
+                    audio: true,
+                });
+            } catch (err: unknown) {
+                const name = err instanceof Error ? err.name : '';
+                // Firefox throws TypeError for audio:true. Retry without audio.
+                if (name === 'TypeError' || name === 'NotSupportedError') {
+                    console.warn('[MediaStream] audio:true not supported, retrying without audio');
+                    newScreenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { frameRate: { ideal: 30 } },
+                    });
+                } else {
+                    throw err; // user cancelled or other error → propagate
+                }
+            }
+
+            screenStreamRef.current = newScreenStream;
+            setScreenStream(newScreenStream);
             setIsScreenSharing(true);
 
-            stream.getVideoTracks()[0].onended = () => {
+            const hasAudio = newScreenStream.getAudioTracks().length > 0;
+            console.log(`[MediaStream] Screen share started — audio: ${hasAudio ? 'YES ✅' : 'NO'}`);
+
+            // Determine hint to show in UI:
+            // - macOS → always suggest Tab sharing regardless of audio result
+            // - Others with no audio → user unchecked "Share audio" in dialog
+            if (isMac) {
+                setScreenShareAudioHint('mac');
+            } else if (!hasAudio) {
+                setScreenShareAudioHint('no-audio');
+            } else {
+                setScreenShareAudioHint(null);
+            }
+
+            // Auto-stop when user clicks "Stop sharing" in browser chrome
+            newScreenStream.getVideoTracks()[0].onended = () => {
+                console.log('[MediaStream] Screen share ended by user');
                 stopScreenShare();
             };
 
-            return stream;
+            return newScreenStream;
         } catch (err) {
             console.error('[MediaStream] Failed to start screen share:', err);
             return null;
         }
-    }, []);
-
-    const stopScreenShare = useCallback(() => {
-        if (screenStream) {
-            screenStream.getTracks().forEach(track => track.stop());
-        }
-        setScreenStream(null);
-        setIsScreenSharing(false);
-    }, [screenStream]);
+    }, [stopScreenShare]);
 
     const getDevices = useCallback(async () => {
         try {
@@ -141,17 +178,12 @@ export const useMediaStream = (
             stopStream();
             const newStream = await navigator.mediaDevices.getUserMedia(constraints);
             streamRef.current = newStream;
-
-            // Sync current mute states to new stream tracks using Ref to avoid getMedia dependency
-            newStream.getAudioTracks().forEach(track => track.enabled = !muteStateRef.current.audio);
-            newStream.getVideoTracks().forEach(track => track.enabled = !muteStateRef.current.video);
-
+            newStream.getAudioTracks().forEach(t => { t.enabled = !muteStateRef.current.audio; });
+            newStream.getVideoTracks().forEach(t => { t.enabled = !muteStateRef.current.video; });
             setStream(newStream);
             setError(null);
             await getDevices();
         } catch (err: unknown) {
-            // Silence console error for common/expected hardware missing scenarios 
-            // the error is still propagated to the UI via state.
             const errName = err instanceof Error ? err.name : '';
             const errMessage = err instanceof Error ? err.message : '';
 
@@ -182,7 +214,7 @@ export const useMediaStream = (
         } finally {
             setIsLoading(false);
         }
-    }, [constraints, stopStream, getDevices]); // Removed isMicMuted, isCameraMuted
+    }, [constraints, stopStream, getDevices]);
 
     useEffect(() => {
         getMedia();
@@ -190,10 +222,8 @@ export const useMediaStream = (
     }, [getMedia, stopStream, retryCount]);
 
     const retry = useCallback((newConstraints?: MediaStreamConstraints) => {
-        if (newConstraints) {
-            setConstraints(newConstraints);
-        }
-        stopStream(); // Ensure old stream is stopped before retry
+        if (newConstraints) setConstraints(newConstraints);
+        stopStream();
         setRetryCount(prev => prev + 1);
     }, [stopStream]);
 
@@ -209,6 +239,7 @@ export const useMediaStream = (
     return {
         stream,
         screenStream,
+        screenShareAudioHint,
         error,
         isLoading,
         isMicMuted,
@@ -220,6 +251,6 @@ export const useMediaStream = (
         startScreenShare,
         stopScreenShare,
         devices,
-        switchDevice
+        switchDevice,
     };
 };

@@ -14,6 +14,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useRoomState } from '../context/RoomStateContext';
 import { Monitor, Layout, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScreenShareViewer } from './ScreenShareViewer';
 
 interface RoomMainContentProps {
     roomId: string;
@@ -187,30 +188,12 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                             className="h-full border-none rounded-none"
                         />
                     ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-slate-900 overflow-hidden">
-                            <div className="relative w-full h-full flex items-center justify-center">
-                                <VideoPlayer
-                                    stream={isTutor ? media.screenStream : state.remoteStream}
-                                    className="w-full h-full max-w-5xl mx-auto rounded-xl shadow-2xl overflow-hidden border border-white/5"
-                                />
-                                {isTutor && media.isScreenSharing && (
-                                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-amber-500/90 backdrop-blur-md rounded-lg shadow-lg border border-amber-600 animate-in fade-in zoom-in duration-300">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                                            <span className="text-white text-[11px] font-bold uppercase tracking-tight">
-                                                Cảnh báo: Đang chia sẻ màn hình hiện tại (Mirroring)
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-2 whitespace-nowrap z-20">
-                                <Monitor className="w-4 h-4 text-primary" />
-                                <span className="text-white text-[10px] font-bold uppercase tracking-tight">
-                                    Đang xem: Màn hình của {isTutor ? 'bạn' : 'Giáo viên'}
-                                </span>
-                            </div>
-                        </div>
+                        <ScreenShareViewer
+                            stream={isTutor ? media.screenStream : state.remoteStream}
+                            isTutor={isTutor}
+                            isScreenSharing={media.isScreenSharing}
+                            screenShareAudioHint={isTutor ? media.screenShareAudioHint : null}
+                        />
                     )}
                 </div>
 
