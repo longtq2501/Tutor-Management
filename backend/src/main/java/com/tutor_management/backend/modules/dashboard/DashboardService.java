@@ -165,19 +165,19 @@ public class DashboardService {
             totalSessions++;
             if (isCompleted(record.getStatus())) {
                 completedSessions++;
-            }
-            
-            if (record.getHours() != null) {
-                totalHours += record.getHours();
-            }
-            
-            if (record.getTotalAmount() != null) {
-                long amount = record.getTotalAmount();
-                totalAmount += amount;
-                if (Boolean.TRUE.equals(record.getPaid())) {
-                    totalPaid += amount;
-                } else {
-                    totalUnpaid += amount;
+                
+                if (record.getHours() != null) {
+                    totalHours += record.getHours();
+                }
+                
+                if (record.getTotalAmount() != null) {
+                    long amount = record.getTotalAmount();
+                    totalAmount += amount;
+                    if (Boolean.TRUE.equals(record.getPaid())) {
+                        totalPaid += amount;
+                    } else {
+                        totalUnpaid += amount;
+                    }
                 }
             }
         }

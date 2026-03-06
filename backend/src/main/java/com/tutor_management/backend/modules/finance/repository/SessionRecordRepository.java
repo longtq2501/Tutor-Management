@@ -81,9 +81,9 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
      */
     @Query("SELECT new com.tutor_management.backend.modules.finance.dto.response.MonthlyStats(" +
            "sr.month, " +
-           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "CAST(SUM(CASE WHEN (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.sessions ELSE 0 END) AS integer)) " +
+           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "CAST(SUM(CASE WHEN (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.sessions ELSE 0 END) AS integer)) " +
            "FROM SessionRecord sr " +
            "GROUP BY sr.month " +
            "ORDER BY sr.month DESC")
@@ -91,9 +91,9 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
 
     @Query("SELECT new com.tutor_management.backend.modules.finance.dto.response.MonthlyStats(" +
            "sr.month, " +
-           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "CAST(SUM(CASE WHEN (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.sessions ELSE 0 END) AS integer)) " +
+           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "CAST(SUM(CASE WHEN (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.sessions ELSE 0 END) AS integer)) " +
            "FROM SessionRecord sr " +
            "WHERE sr.tutorId = :tutorId " +
            "GROUP BY sr.month " +
@@ -105,19 +105,19 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
      */
     @Query("SELECT new com.tutor_management.backend.modules.dashboard.dto.response.DashboardStats(" +
            "CAST(COUNT(DISTINCT sr.student.id) AS integer), " +
-           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.month = :currentMonth AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.month = :currentMonth AND sr.paid = false AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END)) " +
+           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.month = :currentMonth AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.month = :currentMonth AND sr.paid = false AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END)) " +
            "FROM SessionRecord sr")
     DashboardStats getFinanceSummary(@Param("currentMonth") String currentMonth);
 
     @Query("SELECT new com.tutor_management.backend.modules.dashboard.dto.response.DashboardStats(" +
            "CAST(COUNT(DISTINCT sr.student.id) AS integer), " +
-           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.month = :currentMonth AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END), " +
-           "SUM(CASE WHEN sr.month = :currentMonth AND sr.paid = false AND (sr.status IS NULL OR sr.status NOT IN (com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_STUDENT, com.tutor_management.backend.modules.finance.LessonStatus.CANCELLED_BY_TUTOR)) THEN sr.totalAmount ELSE 0L END)) " +
+           "SUM(CASE WHEN sr.paid = true AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.paid = false AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.month = :currentMonth AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PAID, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END), " +
+           "SUM(CASE WHEN sr.month = :currentMonth AND sr.paid = false AND (sr.status IS NULL OR sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)) THEN sr.totalAmount ELSE 0L END)) " +
            "FROM SessionRecord sr WHERE sr.tutorId = :tutorId")
     DashboardStats getFinanceSummaryByTutorId(@Param("currentMonth") String currentMonth, @Param("tutorId") Long tutorId);
 
