@@ -19,6 +19,11 @@ interface AuthContextType {
     accountName?: string;
     bankCode?: string;
   }) => Promise<void>;
+  changePassword: (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => Promise<void>;
   isAuthenticated: boolean;
   hasRole: (role: 'ADMIN' | 'TUTOR' | 'STUDENT') => boolean;
   hasAnyRole: (roles: Array<'ADMIN' | 'TUTOR' | 'STUDENT'>) => boolean;
@@ -192,6 +197,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  const changePassword = useCallback(async (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    try {
+      await authService.changePassword(data);
+    } catch (error: unknown) {
+      console.error('Change password error:', error);
+      const errorData = (error as { response?: { data?: { message?: string } } }).response?.data;
+      const message = errorData?.message || 'Đổi mật khẩu thất bại';
+      throw new Error(message);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -229,6 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         updateAvatar,
         updateProfile,
+        changePassword,
         isAuthenticated: !!user,
         hasRole,
         hasAnyRole,

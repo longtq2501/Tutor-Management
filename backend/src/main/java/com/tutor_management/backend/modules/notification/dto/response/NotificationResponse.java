@@ -4,7 +4,7 @@ import com.tutor_management.backend.modules.notification.enums.NotificationType;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Data transfer object for notification information.
@@ -29,5 +29,5 @@ public class NotificationResponse {
     private NotificationType type;
     
     /** Timestamp of when the notification was generated */
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }
