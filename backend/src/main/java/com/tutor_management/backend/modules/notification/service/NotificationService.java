@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,7 +115,7 @@ public class NotificationService {
                 .content(notification.getContent())
                 .isRead(notification.isRead())
                 .type(notification.getType())
-                .createdAt(notification.getCreatedAt())
+                .createdAt(notification.getCreatedAt().toInstant(ZoneOffset.UTC))
                 .build();
     }
 }

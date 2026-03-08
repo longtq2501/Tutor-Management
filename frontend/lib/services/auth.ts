@@ -97,6 +97,19 @@ export const authService = {
     return response.data;
   },
 
+  /** * ĐỔI MẬT KHẨU
+   * @param {Object} data - Chứa currentPassword, newPassword, confirmPassword
+   * @returns {Promise<any>}
+   */
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<ApiResponse<void>> => {
+    const response = await api.put('/users/me/password', data);
+    return response.data;
+  },
+
   /** * ĐĂNG KÝ TÀI KHOẢN MỚI
    * @param {RegisterRequest} data - Chứa email, password, fullName, role
    * @returns {Promise<ApiResponse<AuthData>>}
