@@ -2,6 +2,7 @@ package com.tutor_management.backend.modules.auth;
 
 import com.tutor_management.backend.modules.shared.dto.response.ApiResponse;
 import com.tutor_management.backend.modules.shared.service.CloudinaryService;
+import com.tutor_management.backend.modules.auth.dto.request.ChangePasswordRequest;
 import com.tutor_management.backend.modules.auth.dto.request.UpdateUserRequest;
 import com.tutor_management.backend.modules.auth.dto.response.AuthResponse;
 import com.tutor_management.backend.modules.auth.service.UserService;
@@ -70,5 +71,16 @@ public class UserController {
         userRepository.save(persistentUser);
         
         return ResponseEntity.ok(ApiResponse.success("Avatar updated successfully", avatarUrl));
+    }
+
+    @PutMapping("/me/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication
+    ) {
+        User user = (User) authentication.getPrincipal();
+        userService.changePassword(user.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
     }
 }

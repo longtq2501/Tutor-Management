@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bell } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { notificationService } from '../services/notification';
 import { useSSE } from '../hooks/useSSE';
 import { toast } from 'sonner';
@@ -39,10 +39,15 @@ export const NotificationBell = () => {
         });
     }, [queryClient]);
 
-    useSSE(handleNotification);
+    const markAllAsReadMutation = useMutation({
+        mutationFn: notificationService.markAllAsRead,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        },
+    });
 
     return (
-        <Popover>
+        <Popover onOpenChange={(open) => open && markAllAsReadMutation.mutate()}>
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative h-9 w-9 lg:h-10 lg:w-10 rounded-full">
                     <Bell className="h-5 w-5" />

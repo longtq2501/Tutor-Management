@@ -41,6 +41,17 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+const passwordSchema = z.object({
+    currentPassword: z.string().min(1, 'Mật khẩu hiện tại là bắt buộc'),
+    newPassword: z.string().min(8, 'Mật khẩu mới phải có ít nhất 8 ký tự'),
+    confirmPassword: z.string().min(1, 'Xác nhận mật khẩu là bắt buộc'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path: ['confirmPassword'],
+});
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
 type SettingsSection = 'profile' | 'password' | 'notifications';
 
 const SIDEBAR_ITEMS: { id: SettingsSection; label: string; icon: LucideIcon }[] = [
@@ -49,10 +60,118 @@ const SIDEBAR_ITEMS: { id: SettingsSection; label: string; icon: LucideIcon }[] 
     { id: 'notifications', label: 'Thông báo', icon: Bell },
 ];
 
+function PasswordChangeForm({ onSubmit, isLoading }: { onSubmit: (data: PasswordFormValues) => Promise<void>; isLoading: boolean }) {
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm<PasswordFormValues>({
+        resolver: zodResolver(passwordSchema),
+    });
+
+    const handleFormSubmit = async (data: PasswordFormValues) => {
+        await onSubmit(data);
+        reset();
+    };
+
+    return (
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 max-w-md">
+            <div className="space-y-2">
+                <Label htmlFor="currentPassword" className="text-sm font-medium flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Mật khẩu hiện tại
+                </Label>
+                <Input
+                    id="currentPassword"
+                    type="password"
+                    {...register('currentPassword')}
+                    placeholder="Nhập mật khẩu hiện tại"
+                    className={cn(
+                        'h-11',
+                        errors.currentPassword && 'border-destructive focus-visible:ring-destructive'
+                    )}
+                    disabled={isLoading}
+                />
+                {errors.currentPassword && (
+                    <p className="text-xs font-medium text-destructive mt-1">
+                        {errors.currentPassword.message}
+                    </p>
+                )}
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="newPassword" className="text-sm font-medium flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Mật khẩu mới
+                </Label>
+                <Input
+                    id="newPassword"
+                    type="password"
+                    {...register('newPassword')}
+                    placeholder="Nhập mật khẩu mới"
+                    className={cn(
+                        'h-11',
+                        errors.newPassword && 'border-destructive focus-visible:ring-destructive'
+                    )}
+                    disabled={isLoading}
+                />
+                {errors.newPassword && (
+                    <p className="text-xs font-medium text-destructive mt-1">
+                        {errors.newPassword.message}
+                    </p>
+                )}
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm font-medium flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    Xác nhận mật khẩu mới
+                </Label>
+                <Input
+                    id="confirmPassword"
+                    type="password"
+                    {...register('confirmPassword')}
+                    placeholder="Nhập lại mật khẩu mới"
+                    className={cn(
+                        'h-11',
+                        errors.confirmPassword && 'border-destructive focus-visible:ring-destructive'
+                    )}
+                    disabled={isLoading}
+                />
+                {errors.confirmPassword && (
+                    <p className="text-xs font-medium text-destructive mt-1">
+                        {errors.confirmPassword.message}
+                    </p>
+                )}
+            </div>
+
+            <Button
+                type="submit"
+                className="h-11 px-8 font-medium"
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Đang đổi...
+                    </>
+                ) : (
+                    <>
+                        <Lock className="mr-2 h-4 w-4" />
+                        Đổi mật khẩu
+                    </>
+                )}
+            </Button>
+        </form>
+    );
+}
+
 export default function ProfilePage() {
-    const { user, loading, updateProfile } = useAuth();
+    const { user, loading, updateProfile, changePassword } = useAuth();
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [activeSection, setActiveSection] = useState<SettingsSection>('profile');
 
     useEffect(() => {
@@ -112,6 +231,19 @@ export default function ProfilePage() {
             toast.error(message);
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handlePasswordChange = async (data: PasswordFormValues) => {
+        try {
+            setIsChangingPassword(true);
+            await changePassword(data);
+            toast.success('Đổi mật khẩu thành công');
+        } catch (error: unknown) {
+            const message = (error as { message?: string })?.message || 'Có lỗi xảy ra khi đổi mật khẩu';
+            toast.error(message);
+        } finally {
+            setIsChangingPassword(false);
         }
     };
 
@@ -234,7 +366,8 @@ export default function ProfilePage() {
                                                 </div>
                                             </div>
 
-                                            {/* Payment Info Section */}
+                                            {/* Payment Info Section - Only for TUTOR and ADMIN */}
+                                            {user.role !== 'STUDENT' && (
                                             <div className="border-t border-border/60 pt-8 space-y-6">
                                                 <div>
                                                     <h4 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -336,6 +469,7 @@ export default function ProfilePage() {
                                                     </div>
                                                 </div>
                                             </div>
+                                            )}
 
                                             <div className="pt-4">
                                                 <Button
@@ -367,14 +501,17 @@ export default function ProfilePage() {
                         <div className="space-y-10">
                             <div>
                                 <h3 className="text-2xl font-bold tracking-tight text-foreground">
-                                    Mật khẩu
+                                    Đổi mật khẩu
                                 </h3>
                                 <p className="text-muted-foreground mt-1">
-                                    Đổi mật khẩu đăng nhập (tính năng đang phát triển)
+                                    Cập nhật mật khẩu đăng nhập của bạn
                                 </p>
                             </div>
                             <div className="border-t border-border/60 pt-8">
-                                <p className="text-sm text-muted-foreground">Bạn có thể đổi mật khẩu qua email xác thực trong phiên bản sau.</p>
+                                <PasswordChangeForm
+                                    onSubmit={handlePasswordChange}
+                                    isLoading={isChangingPassword}
+                                />
                             </div>
                         </div>
                     )}
