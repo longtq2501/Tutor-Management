@@ -4,6 +4,7 @@ import com.tutor_management.backend.modules.exercise.domain.Question;
 import com.tutor_management.backend.modules.exercise.domain.QuestionType;
 import com.tutor_management.backend.modules.exercise.repository.ExerciseRepository;
 import com.tutor_management.backend.modules.exercise.repository.QuestionRepository;
+import com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository;
 import com.tutor_management.backend.modules.submission.dto.request.CreateSubmissionRequest;
 import com.tutor_management.backend.modules.submission.dto.request.AnswerRequest;
 import com.tutor_management.backend.modules.submission.entity.Submission;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,7 +43,13 @@ class SubmissionServiceTest {
     private ExerciseRepository exerciseRepository;
 
     @Mock
+    private ExerciseAssignmentRepository assignmentRepository;
+
+    @Mock
     private com.tutor_management.backend.modules.auth.UserRepository userRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private SubmissionServiceImpl submissionService;
@@ -57,7 +65,10 @@ class SubmissionServiceTest {
         when(submissionRepository.save(any(Submission.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
         when(exerciseRepository.findById(eq(exerciseId)))
-                .thenReturn(Optional.of(new com.tutor_management.backend.modules.exercise.entity.Exercise()));
+                .thenReturn(Optional.of(new com.tutor_management.backend.modules.exercise.domain.Exercise()));
+        // mock assignment repository to avoid null pointer
+        when(assignmentRepository.findByExerciseIdAndStudentId(any(), any()))
+                .thenReturn(Optional.empty());
     }
 
     @Test
