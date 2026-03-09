@@ -67,9 +67,22 @@ public class SubmissionServiceImpl implements SubmissionService {
         // coordinated auto-grading phase
         autoGradingService.gradeSubmission(submission);
         
+        // if the exercise contained no essay questions we can finalize grading immediately
+        List<Question> questions = questionRepository.findByExerciseIdOrderByOrderIndex(submission.getExerciseId());
+        boolean hasEssay = questions.stream().anyMatch(q -> q.getType() == QuestionType.ESSAY);
+        if (!hasEssay) {
+            submission.setStatus(SubmissionStatus.GRADED);
+            submission.setGradedAt(LocalDateTime.now());
+        }
+        
         Submission saved = submissionRepository.save(submission);
         syncAssignmentStatus(saved);
         publishSubmissionEvent(saved, studentId);
+
+        // if we auto-graded completely, also fire grading event so student/tutor get notified right away
+        if (!hasEssay) {
+            publishGradingEvent(saved);
+        }
         
         return mapToSubmissionResponse(saved);
     }

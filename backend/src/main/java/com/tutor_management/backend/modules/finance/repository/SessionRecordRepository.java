@@ -260,6 +260,23 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
            "GROUP BY sr.student.id")
     List<Object[]> sumTotalUnpaidTaughtByStudentIdIn(@Param("studentIds") List<Long> studentIds);
 
+    // ------------------------------------------------------------------
+    // Paging support for unpaid sessions that have actually been taught
+    // ------------------------------------------------------------------
+
+    @Query("SELECT sr FROM SessionRecord sr " +
+           "WHERE sr.paid = false AND sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT) " +
+           "AND sr.tutorId = :tutorId " +
+           "ORDER BY sr.sessionDate DESC")
+    Page<SessionRecord> findByPaidFalseAndTutorIdAndStatusInOrderBySessionDateDesc(
+            @Param("tutorId") Long tutorId,
+            org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT sr FROM SessionRecord sr " +
+           "WHERE sr.paid = false AND sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT) " +
+           "ORDER BY sr.sessionDate DESC")
+    Page<SessionRecord> findByPaidFalseAndStatusInOrderBySessionDateDesc(org.springframework.data.domain.Pageable pageable);
+
     /**
      * Checks if a student has access to a lesson via any session record.
      */

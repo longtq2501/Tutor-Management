@@ -1,7 +1,7 @@
 "use client";
 
 import { formatCurrency } from '@/lib/utils';
-import { AlertCircle, DollarSign } from 'lucide-react';
+import { AlertCircle, Banknote } from 'lucide-react';
 
 interface FinancialSummaryProps {
     totalUnpaid: number;
@@ -23,7 +23,7 @@ export function FinancialSummary({ totalUnpaid, totalPaid }: FinancialSummaryPro
 
             <div className="bg-emerald-50/50 dark:bg-emerald-950/20 border-2 border-emerald-100 dark:border-emerald-900/30 p-5 rounded-2xl flex flex-col justify-between shadow-sm">
                 <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 mb-2">
-                    <DollarSign className="w-5 h-5" />
+                    <Banknote className="w-5 h-5" />
                     <span className="font-bold text-sm uppercase tracking-wider">Tổng đã đóng</span>
                 </div>
                 <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">

@@ -93,8 +93,11 @@ public class SessionRecordController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @GetMapping("/unpaid")
-    public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getAllUnpaidSessions(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getAllUnpaidSessions(pageable)));
+    public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getAllUnpaidSessions(
+            @RequestParam(required = false) Boolean taughtOnly,
+            Pageable pageable) {
+        log.info("Fetching unpaid sessions (taughtOnly={})", taughtOnly);
+        return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getAllUnpaidSessions(pageable, taughtOnly)));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")

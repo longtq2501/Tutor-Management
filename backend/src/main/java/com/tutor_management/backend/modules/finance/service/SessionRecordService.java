@@ -302,10 +302,23 @@ public class SessionRecordService {
      * @return List of unpaid session records.
      */
     @Transactional(readOnly = true)
-    public Page<SessionRecordResponse> getAllUnpaidSessions(Pageable pageable) {
+    public Page<SessionRecordResponse> getAllUnpaidSessions(Pageable pageable, Boolean taughtOnly) {
         Long tutorId = getCurrentTutorId();
+        boolean onlyTaught = Boolean.TRUE.equals(taughtOnly);
+
         if (tutorId != null) {
+            if (onlyTaught) {
+                return sessionRecordRepository
+                        .findByPaidFalseAndTutorIdAndStatusInOrderBySessionDateDesc(tutorId, pageable)
+                        .map(this::mapToListResponse);
+            }
             return sessionRecordRepository.findByPaidFalseAndTutorIdOrderBySessionDateDesc(tutorId, pageable)
+                    .map(this::mapToListResponse);
+        }
+
+        if (onlyTaught) {
+            return sessionRecordRepository
+                    .findByPaidFalseAndStatusInOrderBySessionDateDesc(pageable)
                     .map(this::mapToListResponse);
         }
         return sessionRecordRepository.findByPaidFalseOrderBySessionDateDesc(pageable)

@@ -70,8 +70,10 @@ export const sessionsApi = {
   /** * LẤY DANH SÁCH CÁC BUỔI HỌC CHƯA ĐƯỢC THANH TOÁN
    * @returns {Promise<PageResponse<SessionRecord>>}
    */
-  getUnpaid: async (page = 0, size = 100): Promise<PageResponse<SessionRecord>> => {
-    const response = await api.get(`/sessions/unpaid?page=${page}&size=${size}`);
+  getUnpaid: async (page = 0, size = 100, taughtOnly?: boolean): Promise<PageResponse<SessionRecord>> => {
+    const params: any = { page, size };
+    if (taughtOnly !== undefined) params.taughtOnly = taughtOnly;
+    const response = await api.get('/sessions/unpaid', { params });
     return response.data.data;
   },
 

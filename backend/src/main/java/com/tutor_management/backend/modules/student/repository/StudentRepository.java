@@ -108,7 +108,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             countQuery = "SELECT COUNT(s) FROM Student s WHERE (:search IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :search, '%'))) AND (:tutorId IS NULL OR s.tutorId = :tutorId) AND (:active IS NULL OR s.active = :active)")
     Page<Student> findAdminStudents(@Param("search") String search, @Param("tutorId") Long tutorId, @Param("active") Boolean active, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(CASE WHEN sr.paid = false THEN sr.totalAmount ELSE 0 END), 0) FROM SessionRecord sr WHERE sr.student.id = :studentId")
+    @Query("SELECT COALESCE(SUM(CASE WHEN sr.paid = false THEN sr.totalAmount ELSE 0 END), 0) " +
+           "FROM SessionRecord sr " +
+           "WHERE sr.student.id = :studentId " +
+           "AND sr.status IN (com.tutor_management.backend.modules.finance.LessonStatus.COMPLETED, com.tutor_management.backend.modules.finance.LessonStatus.PENDING_PAYMENT)")
     Long calculateTotalDebt(@Param("studentId") Long studentId);
 
     long countByTutorIdAndActiveTrue(Long tutorId);

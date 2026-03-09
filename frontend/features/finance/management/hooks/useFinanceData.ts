@@ -21,8 +21,8 @@ export function useFinanceData() {
     if (viewMode === 'MONTHLY') {
       response = await sessionsApi.getByMonth(formattedMonth);
     } else {
-      // DEBT view
-      response = await sessionsApi.getUnpaid();
+      // DEBT view - we only care about sessions that have been taught
+      response = await sessionsApi.getUnpaid(0, 100, true);
     }
 
     // Maintain existing filtering logic but handle paginated response

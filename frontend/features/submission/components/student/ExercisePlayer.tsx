@@ -153,7 +153,9 @@ export const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exerciseId, stud
             const result = await submissionService.submit(request);
             setSubmissionResult(result);
             toast.success("Nộp bài thành công!", {
-                description: `Bạn đạt ${result.mcqScore} điểm trắc nghiệm.`
+                description: result.status === 'GRADED'
+                    ? `Bạn đạt ${result.totalScore} điểm.`
+                    : `Bạn đạt ${result.mcqScore} điểm trắc nghiệm.`
             });
         } catch (e) {
             toast.error("Lỗi", {
@@ -324,8 +326,8 @@ export const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exerciseId, stud
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 h-full md:pt-0 pt-16 relative z-10">
-                <div className="flex-1 overflow-y-auto px-4 py-8 md:px-12 md:py-16 custom-scrollbar">
-                    <div className="max-w-4xl mx-auto min-h-full flex flex-col">
+                <div data-testid="scroll-container" className="flex-1 min-h-0 overflow-y-auto px-4 py-8 md:px-12 md:py-16 custom-scrollbar">
+                    <div className="max-w-4xl mx-auto flex flex-col min-h-0">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentQuestionIndex}
@@ -333,7 +335,7 @@ export const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exerciseId, stud
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.98, x: -20 }}
                                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                                className="flex-1 flex flex-col"
+                                className="flex-1 flex flex-col min-h-0"
                             >
                                 {/* Question Header Overlay (Desktop) */}
                                 <div className="hidden md:flex items-center justify-between mb-8">
