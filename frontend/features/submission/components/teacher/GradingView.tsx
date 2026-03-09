@@ -157,7 +157,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
     }
 
     return (
-        <div className="max-w-5xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+        <div className="max-w-5xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
             {/* Sticky Header with Title and Scores */}
             <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b -mx-1 px-1 pb-3 mb-6">
                 <Card className="border-l-4 border-l-primary shadow-sm bg-card mt-2">
@@ -210,6 +210,8 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
 
                             // Derive the correct answer label properly from options
                             const correctOption = q.options?.find(o => o.isCorrect)?.label;
+                            const correctOptionText = q.options?.find(o => o.isCorrect)?.optionText;
+                            const selectedOptionText = q.options?.find(o => o.label === answer?.selectedOption)?.optionText;
 
                             // Determine status
                             // Fallback: Check correctness by comparing strings directly (ignoring Backend isCorrect flag if needed)
@@ -225,13 +227,13 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                     !hasAnswer ? "opacity-90 bg-muted/30" : "bg-card shadow-sm hover:shadow-md"
                                 )}>
                                     <CardHeader className="bg-muted/30 border-b pb-3 pt-3">
-                                        <div className="flex justify-between items-start gap-4">
-                                            <div className="flex gap-3">
+                                        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                                            <div className="flex gap-3 min-w-0">
                                                 <Badge variant="outline" className="h-6 w-6 rounded-full flex items-center justify-center p-0 shrink-0 bg-background">
                                                     {idx + 1}
                                                 </Badge>
-                                                <div>
-                                                    <div className="font-medium leading-normal text-base text-foreground">
+                                                <div className="min-w-0">
+                                                    <div className="font-medium leading-normal text-base text-foreground break-words">
                                                         {q.questionText}
                                                     </div>
                                                     <div className="flex flex-wrap gap-2 mt-2">
@@ -250,25 +252,47 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                         {q.type === QuestionType.MCQ ? (
                                             <div className="space-y-3">
                                                 <div className={cn(
-                                                    "p-4 rounded-lg border flex items-center justify-between",
+                                                    "p-4 rounded-lg border flex flex-col gap-3 transition-colors",
                                                     isCorrect === true ? "bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400" :
                                                         (hasAnswer ? "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400" : "bg-muted border-dashed")
                                                 )}>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-semibold text-sm uppercase opacity-70">Câu trả lời:</span>
-                                                        <span className="text-lg font-bold">{answer?.selectedOption || '(Chưa làm)'}</span>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                                        <div className="flex items-start gap-2">
+                                                            <span className="font-semibold text-sm uppercase opacity-70 shrink-0">Câu trả lời:</span>
+                                                            <div className="flex flex-col gap-1 min-w-0">
+                                                                <span className="text-lg font-bold">{answer?.selectedOption || '(Chưa làm)'}</span>
+                                                                {selectedOptionText && (
+                                                                    <span className="text-sm opacity-90 break-words">{selectedOptionText}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        {hasAnswer && (
+                                                            <div className="flex items-center gap-1 font-bold shrink-0">
+                                                                {isCorrect ? (
+                                                                    <>
+                                                                        <CheckCircle2 className="h-5 w-5 shrink-0" /> Chính xác
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <XCircle className="h-5 w-5 shrink-0" /> Sai
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {hasAnswer && (
-                                                        isCorrect
-                                                            ? <div className="flex items-center gap-1 font-bold"><CheckCircle2 className="h-5 w-5" /> Chính xác</div>
-                                                            : <div className="flex items-center gap-1 font-bold"><XCircle className="h-5 w-5" /> Sai</div>
-                                                    )}
                                                 </div>
 
                                                 {/* Always show correct answer for teacher */}
-                                                <div className="text-sm bg-muted/50 p-3 rounded-md border border-border">
-                                                    <span className="text-muted-foreground mr-2">Đáp án đúng:</span>
-                                                    <span className="font-bold text-foreground">{correctOption || 'N/A'}</span>
+                                                <div className="text-sm bg-muted/50 p-3 rounded-md border border-border space-y-1">
+                                                    <div className="flex flex-col sm:flex-row sm:items-start gap-1">
+                                                        <span className="text-muted-foreground font-semibold">Đáp án đúng:</span>
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span className="font-bold text-foreground">{correctOption || 'N/A'}</span>
+                                                            {correctOptionText && (
+                                                                <span className="text-xs opacity-90">{correctOptionText}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ) : (
@@ -337,7 +361,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                             </CardHeader>
                             <CardContent>
                                 {isReviewMode ? (
-                                    <div className="p-4 bg-background border rounded-lg italic text-muted-foreground whitespace-pre-wrap">
+                                    <div className="p-4 bg-background border rounded-lg italic text-muted-foreground whitespace-pre-wrap max-h-48 overflow-y-auto">
                                         {teacherComment || 'Giáo viên chưa để lại nhận xét chung.'}
                                     </div>
                                 ) : (
@@ -345,8 +369,8 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                         placeholder="Nhập nhận xét chung cho toàn bộ bài làm..."
                                         value={teacherComment}
                                         onChange={(e) => setTeacherComment(e.target.value)}
-                                        rows={4}
-                                        className="bg-background"
+                                        rows={6}
+                                        className="bg-background border-2 border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                                     />
                                 )}
                             </CardContent>

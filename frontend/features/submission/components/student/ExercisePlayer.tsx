@@ -192,14 +192,14 @@ export const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exerciseId, stud
         }
 
         return (
-            <div className="flex justify-center items-center min-h-screen relative overflow-hidden bg-background">
+            <div className="flex flex-col justify-center items-center min-h-screen relative bg-background overflow-y-auto py-8 px-4">
                 {/* Background orbs */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
                     <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-green-500/10 blur-[120px]" />
                     <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-green-500/10 blur-[120px]" />
                 </div>
 
-                <Card className="max-w-2xl w-full mx-4 shadow-2xl border-2 border-primary/20 bg-card/80 backdrop-blur-xl relative z-10 transition-all duration-700 animate-in zoom-in-95">
+                <Card className="max-w-2xl w-full shadow-2xl border-2 border-primary/20 bg-card/80 backdrop-blur-xl relative z-10 transition-all duration-700 animate-in zoom-in-95">
                     <CardContent className="pt-12 pb-10 text-center space-y-8">
                         <div className="relative inline-block">
                             <div className="absolute inset-0 bg-green-500/30 rounded-full blur-2xl animate-pulse" />

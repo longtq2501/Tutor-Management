@@ -2,7 +2,7 @@
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
-import { ArrowUpRight, Ban, CheckCircle2, DollarSign } from 'lucide-react';
+import { ArrowUpRight, Ban, CheckCircle2, Banknote } from 'lucide-react';
 import { useFinanceData } from '../hooks/useFinanceData';
 import { StatCard } from './StatCard';
 import { FinanceGroupedRecord } from '../types';
@@ -45,7 +45,7 @@ export function FinanceStats() {
             <StatCard
                 title="Tổng Doanh Thu / Nợ"
                 value={formatCurrency(stats.totalAmount)}
-                icon={DollarSign}
+                icon={Banknote}
                 trend="+12%"
                 trendLabel="so với tháng trước"
                 color="text-emerald-600"
