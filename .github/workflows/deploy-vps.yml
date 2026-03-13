@@ -1,0 +1,70 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Cho phép trigger manual từ giao diện GitHub
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tutor-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/tutor-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/tutor-backend:buildcache,mode=max
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tutor-frontend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/tutor-frontend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/tutor-frontend:buildcache,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }} # Thường là 22
+          script: |
+            # Di chuyển vào thư mục chứa project trên VPS (cần cấu hình trước trên VPS)
+            cd /opt/tutor-management || exit 1
+            
+            # Cập nhật mã nguồn mới (dành cho các file như docker-compose.prod.yml và .env) nếu dùng git trên VPS
+            # (Bước này tuỳ chọn nếu bạn chỉ push docker-compose.prod.yml lên qua scp, 
+            # nhưng giả sử bạn clone git repo trên VPS)
+            git pull origin main || echo "Git pull failed or not initialized, skipping."
+            
+            # Kéo (pull) image mới nhất về VPS
+            docker compose -f docker-compose.prod.yml pull
+            
+            # Restart các container chạy ẩn
+            docker compose -f docker-compose.prod.yml up -d
+            
+            # Dọn dẹp image cũ / lơ lửng để làm sạch ổ cứng VPS
+            docker image prune -f

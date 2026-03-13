@@ -47,8 +47,6 @@ uploads/*
 # Sensitive Config
 backend/src/main/resources/application.yaml
 
-# Docker
-docker-compose.yml
 
 # IDE
 .idea/
