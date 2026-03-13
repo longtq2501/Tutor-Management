@@ -150,6 +150,79 @@ Infrastructure    Docker Compose · Railway · Cloudinary
 
 ---
 
+## System Architecture
+
+```mermaid
+graph TD
+    User((User / Student / Tutor)) --> Frontend[Next.js 15 Frontend]
+
+    subgraph "Tutor-Pro Backend (Modular Monolith)"
+        Frontend --> API[REST API / JWT Auth]
+        API --> Modules[Core Modules: Auth · Lesson · Schedule · Exercise · Finance · Notification]
+        Modules --> Events[Spring Application Events]
+        Events --> Async[Async Notification / SSE]
+    end
+
+    subgraph "Data Storage & Cache"
+        Modules --> MySQL[(MySQL 8.0 Database)]
+        Modules --> Cache[(Caffeine In-Memory Cache)]
+    end
+
+    subgraph "External Integrations"
+        Modules --> Groq[Groq AI — Llama 3.3 70B]
+        Modules --> Cloudinary[Cloudinary — Media CDN]
+        Modules --> VietQR[VietQR — Payment Invoicing]
+    end
+
+    subgraph "Real-Time Layer"
+        Frontend <--> WS[WebSocket / STOMP Signaling]
+        Frontend <--> WebRTC[Full-Mesh WebRTC P2P Media]
+        API -.-> SSE((SSE: Real-time Updates)) -.-> Frontend
+    end
+```
+
+---
+
+## Operational Flow
+
+### Real-Time Notification Lifecycle
+How an action in any module results in an instant UI update — without polling.
+
+```mermaid
+sequenceDiagram
+    participant M as Logic Module (e.g. Finance)
+    participant E as Spring Event Bus
+    participant N as Notification Service
+    participant S as SSE Emitters Manager
+    participant C as Client (Frontend)
+
+    M->>E: Publish NotificationEvent
+    E->>N: onApplicationEvent(event)
+    N->>N: Persist to MySQL
+    N->>S: send(userId, payload)
+    S->>C: Push Event via HTTP Stream
+```
+
+### AI Feedback Generation Flow
+How student session data becomes context-aware Vietnamese feedback in < 300ms.
+
+```mermaid
+sequenceDiagram
+    participant C as Frontend
+    participant S as Feedback Service
+    participant G as Groq AI API
+    participant D as MySQL
+
+    C->>S: Request AI Feedback (student_id, session_data)
+    S->>S: Construct Prompt (Context + Culture Injection)
+    S->>G: POST Prompt (Llama 3.3 70B)
+    G-->>S: Return Generated Vietnamese Text
+    S->>D: Store Feedback Record
+    S-->>C: Return JSON Response
+```
+
+---
+
 ## Performance Benchmarks
 
 | Module | Metric | Before | After |
@@ -227,7 +300,7 @@ docker-compose up -d
 **Tôn Quỳnh Long** — Third-year IT student. Built this to solve my own problems as a part-time tutor. Currently maintaining this alongside a second project as Tech Lead (6-member team, flood rescue coordination system).
 
 📧 tonquynhlong05@gmail.com  
-🔗 [GitHub](https://github.com/longtq2501) · [LinkedIn](https://www.linkedin.com/in/ton-quynh-long-dev) 
+🔗 [GitHub](https://github.com/longtq2501) · [LinkedIn](https://www.linkedin.com/in/ton-quynh-long-dev)
 
 ---
 
