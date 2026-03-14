@@ -15,7 +15,7 @@ services:
     build: ./backend
     container_name: spring_backend
     restart: always
-    mem_limit: 512m
+    mem_limit: 1024m # Thoải mái xài tối đa 1GB RAM trên local để dev mượt mà
     ports:
       - "8080:8080"
     depends_on:
@@ -26,7 +26,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       APP_INIT-DATA_ENABLED: "true"
       SPRING_PROFILES_ACTIVE: prod
-      JAVA_OPTS: ${JAVA_OPTS:-"-Xms256m -Xmx448m"}
+      # Cấu hình mở rộng RAM: Max 768MB, dùng thuật toán dọn rác nhàn rỗi (G1GC) dành cho đa lõi
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
 

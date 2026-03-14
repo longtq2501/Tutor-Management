@@ -18,7 +18,7 @@ services:
     image: ${DOCKERHUB_USERNAME}/tutor-backend:latest
     container_name: spring_backend_prod
     restart: always
-    mem_limit: 512m
+    mem_limit: 1024m # Container Backend được cấp trần 1GB RAM
     ports:
       - "8080:8080"
     depends_on:
@@ -29,8 +29,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Sắp tới nếu dùng user riêng, nên là MYSQL_PASSWORD
       APP_INIT-DATA_ENABLED: "true"
       SPRING_PROFILES_ACTIVE: prod
-      # Giới hạn RAM cho JVM để chạy ổn trên VPS 1GB RAM
-      JAVA_OPTS: ${JAVA_OPTS:-"-Xms180m -Xmx256m"}
+      # Cấu hình bung lụa trên VPS 4GB RAM: Cache cực lớn, CPU rảnh rang 
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
