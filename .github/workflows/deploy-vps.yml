@@ -69,6 +69,20 @@ jobs:
           script: |
             cd /opt/tutor-management || exit 1
             
+            # Tạo file .env từ các secrets để docker-compose có thể sử dụng
+            cat <<EOF > .env
+            DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            JAVA_OPTS="-Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m"
+            EOF
+
             # Kéo (pull) image mới nhất về VPS
             docker compose -f docker-compose.prod.yml pull
             
