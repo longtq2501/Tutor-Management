@@ -76,10 +76,12 @@ jobs:
             MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
             MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
             MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            APP_JWT_SECRET=${{ secrets.JWT_SECRET }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            INIT_DATA_ENABLED=true
             JAVA_OPTS="-Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m"
             EOF
 

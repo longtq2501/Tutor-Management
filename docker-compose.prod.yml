@@ -13,6 +13,8 @@ services:
     ports:
       - "3306:3306"
     command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - tutor-network
 
   backend:
     image: ${DOCKERHUB_USERNAME}/tutor-backend:latest
@@ -27,13 +29,16 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?rewriteBatchedStatements=true
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Sắp tới nếu dùng user riêng, nên là MYSQL_PASSWORD
-      APP_INIT-DATA_ENABLED: "true"
+      APP_INIT_DATA_ENABLED: ${INIT_DATA_ENABLED:-true}
       SPRING_PROFILES_ACTIVE: prod
       # Cấu hình bung lụa trên VPS 4GB RAM: Cache cực lớn, CPU rảnh rang 
       JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
+      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+    networks:
+      - tutor-network
 
   frontend:
     image: ${DOCKERHUB_USERNAME}/tutor-frontend:latest
@@ -46,6 +51,12 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     depends_on:
       - backend
+    networks:
+      - tutor-network
+
+networks:
+  tutor-network:
+    driver: bridge
 
 volumes:
   db_data_prod:
