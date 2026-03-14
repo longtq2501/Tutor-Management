@@ -77,11 +77,26 @@ jobs:
             MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
             MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
             APP_JWT_SECRET=${{ secrets.JWT_SECRET }}
+            APP_JWT_EXPIRATION=${{ secrets.APP_JWT_EXPIRATION }}
+            APP_JWT_REFRESH_EXPIRATION=${{ secrets.APP_JWT_REFRESH_EXPIRATION }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-            INIT_DATA_ENABLED=true
+            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+            CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            SPRING_MAIL_HOST=${{ secrets.SPRING_MAIL_HOST }}
+            SPRING_MAIL_PORT=${{ secrets.SPRING_MAIL_PORT }}
+            SPRING_MAIL_USERNAME=${{ secrets.SPRING_MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+            APP_MAIL_FROM=${{ secrets.APP_MAIL_FROM }}
+            APP_MAIL_FROM_NAME="${{ secrets.APP_MAIL_FROM_NAME }}"
+            SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=${{ secrets.SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH }}
+            SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=${{ secrets.SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE }}
+            ONLINE_SESSION_JWT_SECRET=${{ secrets.ONLINE_SESSION_JWT_SECRET }}
+            INIT_DATA_ENABLED=false
             JAVA_OPTS="-Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m"
             EOF
 
