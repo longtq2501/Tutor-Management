@@ -20,4 +20,5 @@ public class AdminStudentResponse {
     private Boolean active;
     private Long totalDebt;
     private String createdAt;
+    private String avatarUrl;
 }

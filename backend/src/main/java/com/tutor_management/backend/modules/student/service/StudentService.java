@@ -405,6 +405,7 @@ public class StudentService {
         if (user != null) {
             response.setAccountEmail(user.getEmail());
             response.setAccountId(user.getId().toString());
+            response.setAvatarUrl(user.getAvatarUrl());
         }
 
         return response;
@@ -428,6 +429,7 @@ public class StudentService {
                 .learningDuration(buildLearningDuration(student.getStartMonth(), monthsLearned))
                 .accountId(user != null ? user.getId().toString() : null)
                 .accountEmail(user != null ? user.getEmail() : null)
+                .avatarUrl(user != null ? user.getAvatarUrl() : null)
                 .parentId(student.getParent() != null ? student.getParent().getId() : null)
                 .parentName(student.getParent() != null ? student.getParent().getName() : null)
                 .parentEmail(student.getParent() != null ? student.getParent().getEmail() : null)
