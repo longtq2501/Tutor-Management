@@ -25,7 +25,7 @@ export default function TakeExercisePage({ params }: PageProps) {
 
     return (
         <ProtectedRoute requiredRoles={['STUDENT', 'ADMIN', 'TUTOR']}>
-            <main className="w-full h-screen overflow-hidden bg-background">
+            <main className="w-full min-h-screen bg-background">
                 <ExercisePlayer
                     exerciseId={exerciseId}
                     studentId={user?.id ? String(user.id) : undefined}

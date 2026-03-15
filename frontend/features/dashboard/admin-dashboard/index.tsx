@@ -12,6 +12,8 @@ import { useMonthlyChartData } from './hooks/useMonthlyChartData';
 import { DashboardHeader } from '@/contexts/UIContext';
 import { DashboardStats } from './types/dashboard.types';
 
+import { useAuth } from '@/contexts/AuthContext';
+
 // 2. Thành phần nặng (Biểu đồ) thì import động
 const AnalyticsView = dynamic(
   () => import('./components/AnalyticsView').then(mod => mod.AnalyticsView),
@@ -30,6 +32,8 @@ const EnhancedRevenueChart = dynamic(
 export default function AdminDashboard() {
   const { stats, monthlyStats, loadingStats, loadingMonthly } = useDashboardData();
   const chartData = useMonthlyChartData(monthlyStats);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   // Đồng bộ Loading: Chỉ hiện dữ liệu khi CẢ HAI nguồn đã sẵn sàng
   const isGlobalLoading = loadingStats || loadingMonthly;
@@ -155,10 +159,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Analytics Insights Section */}
-      <AnalyticsView
-        stats={stats}
-        isLoading={isGlobalLoading}
-      />
+      {isAdmin && (
+        <AnalyticsView
+          stats={stats}
+          isLoading={isGlobalLoading}
+        />
+      )}
 
       {/* Enhanced Revenue Chart */}
       <EnhancedRevenueChart

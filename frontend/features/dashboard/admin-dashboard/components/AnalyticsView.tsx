@@ -91,10 +91,10 @@ export function AnalyticsView({ stats, isLoading = false }: AnalyticsViewProps) 
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
               />
-              <Legend verticalAlign="bottom" height={36}/>
+              <Legend verticalAlign="bottom" height={36} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -127,10 +127,10 @@ export function AnalyticsView({ stats, isLoading = false }: AnalyticsViewProps) 
                   <Cell key={`cell-${index}`} fill={COLORS[(index + 3) % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
               />
-              <Legend verticalAlign="bottom" height={36}/>
+              <Legend verticalAlign="bottom" height={36} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -152,13 +152,13 @@ export function AnalyticsView({ stats, isLoading = false }: AnalyticsViewProps) 
             <BarChart data={financialData} layout="vertical" margin={{ left: -20, right: 20 }}>
               <XAxis type="number" hide />
               <YAxis type="category" dataKey="name" hide />
-              <Tooltip 
+              <Tooltip
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
               />
               <Legend />
-              <Bar dataKey="Đã_thu" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="Chưa_thu" stackId="a" fill="#ef4444" radius={[0, 10, 10, 0]} />
+              <Bar dataKey="Đã thu" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="Chưa thu" stackId="a" fill="#ef4444" radius={[0, 10, 10, 0]} />
             </BarChart>
           </ResponsiveContainer>
           <div className="text-center mt-2">

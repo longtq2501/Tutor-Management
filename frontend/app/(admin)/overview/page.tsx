@@ -12,6 +12,8 @@ import { StudentGrowthChart } from '@/features/admin/overview/StudentGrowthChart
 import { TopTutorsList } from '@/features/admin/overview/TopTutorsList';
 import { adminStatsApi } from '@/lib/services/admin-stats';
 import { dashboardApi } from '@/lib/services/dashboard';
+import { useDashboardData } from '@/features/dashboard/admin-dashboard/hooks/useDashboardData';
+import { AnalyticsView } from '@/features/dashboard/admin-dashboard/components/AnalyticsView';
 import type { OverviewStats, MonthlyRevenue, StudentGrowth, TopTutor } from '@/lib/types/admin';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,6 +30,9 @@ export default function OverviewPage() {
     const [filterType, setFilterType] = useState<'all' | 'month' | 'quarter' | 'year' | 'custom'>('all');
     const [customStartDate, setCustomStartDate] = useState<string>('');
     const [customEndDate, setCustomEndDate] = useState<string>('');
+    
+    // Add old dashboard data hook to supply AnalyticsView
+    const { stats: legacyStats, loadingStats: legacyLoading } = useDashboardData();
 
     const handleExportReport = async () => {
         setExportLoading(true);
@@ -257,6 +262,12 @@ export default function OverviewPage() {
                     <StatCard key={stat.label} {...stat} index={idx} />
                 ))}
             </div>
+
+            {/* Legacy Analytics View */}
+            <AnalyticsView
+                stats={legacyStats}
+                isLoading={legacyLoading}
+            />
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
