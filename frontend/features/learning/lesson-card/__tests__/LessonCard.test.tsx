@@ -30,8 +30,7 @@ describe('LessonCard', () => {
         const onClick = vi.fn();
         render(<LessonCard lesson={mockLesson} onClick={onClick} />);
 
-        fireEvent.click(screen.getByRole('button', { hidden: true })); // The Card is the clickable element
-        // Note: Depends on how Card is rendered, might need to click by text or use a different selector
+        // The component uses a clickable div based on current logic, so we click the text
         fireEvent.click(screen.getByText('Test Lesson'));
         expect(onClick).toHaveBeenCalled();
     });

@@ -16,8 +16,8 @@ describe('Hero Component', () => {
 
     it('renders the call to action buttons', () => {
         render(<Hero />);
-        expect(screen.getByText('KHÁM PHÁ NGAY')).toBeDefined();
-        expect(screen.getByText('XEM DEMO 3D')).toBeDefined();
+        expect(screen.getByText('BẮT ĐẦU NGAY')).toBeDefined();
+        expect(screen.getByText('KHÁM PHÁ')).toBeDefined();
     });
 
     it('renders the SplineVisual component', () => {

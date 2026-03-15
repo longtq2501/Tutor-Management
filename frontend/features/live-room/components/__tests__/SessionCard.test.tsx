@@ -78,7 +78,7 @@ describe('SessionCard', () => {
     });
 
     it('calls onJoin with roomId when button is clicked', () => {
-        render(<SessionCard session={mockSession} onJoin={mockOnJoin} currentUserId={100} />);
+        render(<SessionCard session={mockSession} onJoin={mockOnJoin} currentUserId={200} />);
 
         const button = screen.getByRole('button');
         fireEvent.click(button);

@@ -49,12 +49,17 @@ export const useBillableTimer = (roomId: string): UseBillableTimerResult => {
             try {
                 const stats = await onlineSessionApi.getRoomStats(roomId, { signal: controller.signal });
 
-                setTimerState(prev => ({
-                    ...prev,
-                    baseDurationSeconds: stats.durationSeconds ?? (stats.durationMinutes * 60),
-                    // Reset local accumulation on sync to prevent double counting
-                    accumulatedSeconds: 0
-                }));
+                setTimerState(prev => {
+                    const newBase = stats.durationSeconds ?? (stats.durationMinutes * 60);
+                    if (newBase > prev.baseDurationSeconds) {
+                        return {
+                            ...prev,
+                            baseDurationSeconds: newBase,
+                            accumulatedSeconds: 0
+                        };
+                    }
+                    return prev;
+                });
             } catch (error: unknown) {
                 if (!axios.isCancel(error) && (error as Error).name !== 'AbortError') {
                     console.error('Failed to fetch room stats:', error);

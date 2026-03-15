@@ -2,34 +2,44 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock MediaStream
-global.MediaStream = vi.fn().mockImplementation(() => ({
-    getTracks: vi.fn().mockReturnValue([]),
-    getVideoTracks: vi.fn().mockReturnValue([]),
-    getAudioTracks: vi.fn().mockReturnValue([]),
-    addTrack: vi.fn(),
-    removeTrack: vi.fn(),
-}));
+global.MediaStream = class {
+    getTracks = vi.fn().mockReturnValue([]);
+    getVideoTracks = vi.fn().mockReturnValue([]);
+    getAudioTracks = vi.fn().mockReturnValue([]);
+    addTrack = vi.fn();
+    removeTrack = vi.fn();
+} as unknown as typeof MediaStream;
 
 // Mock MediaRecorder
-global.MediaRecorder = vi.fn().mockImplementation(() => ({
-    start: vi.fn(),
-    stop: vi.fn(),
-    pause: vi.fn(),
-    resume: vi.fn(),
-    ondataavailable: vi.fn(),
-    onstop: vi.fn(),
-    onerror: vi.fn(),
-    state: 'inactive',
-})) as any;
-
+global.MediaRecorder = class {
+    start = vi.fn();
+    stop = vi.fn();
+    pause = vi.fn();
+    resume = vi.fn();
+    ondataavailable = vi.fn();
+    onstop = vi.fn();
+    onerror = vi.fn();
+    state = 'inactive';
+} as unknown as typeof MediaRecorder;
 (global.MediaRecorder as any).isTypeSupported = vi.fn().mockReturnValue(true);
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-}));
+global.ResizeObserver = class {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+} as unknown as typeof ResizeObserver;
+
+// Mock IntersectionObserver for Framer Motion
+global.IntersectionObserver = class {
+    root = null;
+    rootMargin = '';
+    thresholds = [];
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+    takeRecords = () => [];
+} as unknown as typeof IntersectionObserver;
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
 global.URL.createObjectURL = vi.fn().mockReturnValue('blob:test');

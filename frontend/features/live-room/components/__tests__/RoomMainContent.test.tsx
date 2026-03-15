@@ -32,6 +32,13 @@ vi.mock('../../hooks/useMediaQuery', () => ({
     useMediaQuery: () => true // Mock as mobile
 }));
 
+vi.mock('../../context/RoomStateContext', () => ({
+    useRoomState: () => ({
+        state: { participants: [] },
+        dispatch: vi.fn()
+    })
+}));
+
 describe('RoomMainContent Swipe Gestures', () => {
     it('navigates to the next tab on swipe left', () => {
         const onTabChange = vi.fn();

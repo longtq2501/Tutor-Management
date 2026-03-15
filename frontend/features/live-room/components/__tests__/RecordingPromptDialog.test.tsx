@@ -59,8 +59,8 @@ describe('RecordingPromptDialog', () => {
             />
         );
 
-        expect(screen.getByText(/Lưu ý quan trọng/i)).toBeInTheDocument();
-        expect(screen.getByText(/bật\/tắt ghi hình bất cứ lúc nào/i)).toBeInTheDocument();
+        expect(screen.getByText(/Nội dung được ghi lại/i)).toBeInTheDocument();
+        expect(screen.getByText(/Video từ camera của bạn và học viên/i)).toBeInTheDocument();
     });
 
     it('calls onConfirm when "Ghi hình" button is clicked', () => {

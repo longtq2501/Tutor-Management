@@ -37,14 +37,23 @@ vi.mock('../../hooks/useRoomStatus', () => ({
     useRoomStatus: () => ({ warning: null, secondsRemaining: null })
 }));
 
+vi.mock('../../hooks/useWebRTCSignaling', () => ({
+    useWebRTCSignaling: () => ({
+        peers: [], // Mock empty peers array so .find doesn't crash
+        sendMessage: vi.fn(),
+        rtcManagerRef: { current: null }
+    })
+}));
+
 // Mock child components
 vi.mock('../RoomHeader', () => ({ RoomHeader: () => <div>Header</div> }));
 vi.mock('../InactivityWarning', () => ({ InactivityWarning: () => null }));
 vi.mock('../RoomErrorBoundary', () => ({ RoomErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('../RecordingPreviewDialog', () => ({ RecordingPreviewDialog: () => null }));
 vi.mock('../RoomMainContent', () => ({
-    RoomMainContent: ({ onTabChange }: { onTabChange: (tab: string) => void }) => (
+    RoomMainContent: ({ activeTab, onTabChange }: { activeTab: string, onTabChange: (tab: string) => void }) => (
         <div>
+            <div data-testid="desktop-active-tab">{activeTab}</div>
             <button onClick={() => onTabChange('chat')}>Switch to Chat</button>
         </div>
     )
@@ -53,6 +62,12 @@ vi.mock('../MobileNavigation', () => ({
     MobileNavigation: ({ activeTab }: { activeTab: string }) => (
         <div data-testid="active-tab">{activeTab}</div>
     )
+}));
+
+// Provide a manual mock for useIsMobile so we can control it synchronously
+let mockIsMobile = true;
+vi.mock('../../hooks/useIsMobile', () => ({
+    useIsMobile: () => mockIsMobile
 }));
 
 describe('LiveRoomDisplay State Logic', () => {
@@ -72,10 +87,9 @@ describe('LiveRoomDisplay State Logic', () => {
     });
 
     it('persists tab selection in sessionStorage', () => {
+        mockIsMobile = true;
         render(<LiveRoomDisplay roomId="test-room" currentUserId={1} />);
 
-        // Initial mobile tab should be 'video' based on our logic
-        // But wait, our mock for RoomMainContent has a button to switch to Chat
         fireEvent.click(screen.getByText('Switch to Chat'));
 
         expect(sessionStorage.getItem('room-test-room-active-tab')).toBe('chat');
@@ -83,23 +97,14 @@ describe('LiveRoomDisplay State Logic', () => {
     });
 
     it('switches tabs using keyboard shortcuts on desktop', () => {
-        // Mock as desktop
-        Object.defineProperty(window, 'matchMedia', {
-            writable: true,
-            value: vi.fn().mockImplementation(query => ({
-                matches: false, // isMobile = false
-                media: query,
-                addEventListener: vi.fn(),
-                removeEventListener: vi.fn(),
-            })),
-        });
+        mockIsMobile = false;
 
         render(<LiveRoomDisplay roomId="test-room" currentUserId={1} />);
 
         fireEvent.keyDown(window, { key: '1', altKey: true });
-        expect(screen.getByTestId('active-tab')).toHaveTextContent('board');
+        expect(screen.getByTestId('desktop-active-tab')).toHaveTextContent('board');
 
         fireEvent.keyDown(window, { key: '3', altKey: true });
-        expect(screen.getByTestId('active-tab')).toHaveTextContent('chat');
+        expect(screen.getByTestId('desktop-active-tab')).toHaveTextContent('chat');
     });
 });

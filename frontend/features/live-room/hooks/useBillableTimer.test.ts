@@ -73,6 +73,7 @@ describe('useBillableTimer', () => {
 
         // Advance 5 seconds
         await act(async () => {
+             await Promise.resolve();
             vi.advanceTimersByTime(5000);
         });
 
@@ -130,6 +131,7 @@ describe('useBillableTimer', () => {
 
         // Advance 30 seconds
         await act(async () => {
+            await Promise.resolve();
             vi.advanceTimersByTime(30000);
         });
 
@@ -194,6 +196,10 @@ describe('useBillableTimer', () => {
 
         const { result, rerender } = renderHook(() => useBillableTimer(mockRoomId));
 
+        await act(async () => {
+            await Promise.resolve();
+        });
+
         // Advance 5 minutes
         await act(async () => {
             vi.advanceTimersByTime(300000);
@@ -208,6 +214,7 @@ describe('useBillableTimer', () => {
         rerender();
 
         await act(async () => {
+            await Promise.resolve();
             vi.advanceTimersByTime(1000);
         });
         expect(result.current.isBillable).toBe(false);
@@ -234,6 +241,7 @@ describe('useBillableTimer', () => {
 
         // Polling happens
         await act(async () => {
+            await Promise.resolve();
             vi.advanceTimersByTime(30000);
         });
 
@@ -291,8 +299,10 @@ describe('useBillableTimer', () => {
         // Polling happens (30s interval)
         // Since backend mock still returns 0, Base remains 0. Timer remains 5:00.
         await act(async () => {
+            await Promise.resolve();
             vi.advanceTimersByTime(30000);
         });
+        
         expect(result.current.formattedTime).toBe('05:30');
     });
 });

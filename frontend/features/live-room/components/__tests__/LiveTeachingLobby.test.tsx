@@ -55,6 +55,21 @@ vi.mock('@/components/ui/skeleton', () => ({
     Skeleton: () => <div data-testid="skeleton" />
 }));
 
+vi.mock('@/contexts/UIContext', () => ({
+    useUI: () => ({
+        headerPortalNode: null,
+        setFooterPortalNode: vi.fn(),
+        setHeaderPortalNode: vi.fn()
+    }),
+    DashboardHeader: ({ title, subtitle, actions }: { title: string, subtitle: string, actions?: React.ReactNode }) => (
+        <div data-testid="dashboard-header">
+            <h1>{title}</h1>
+            <p>{subtitle}</p>
+            {actions}
+        </div>
+    )
+}));
+
 describe('LiveTeachingLobby', () => {
     const mockOnJoin = vi.fn();
     const mockOnCreateTestRoom = vi.fn();
