@@ -16,6 +16,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Run Backend Tests
+        run: cd backend && ./mvnw test
+
+      - name: Run Frontend Tests
+        run: cd frontend && npm run test
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -49,14 +55,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy docker-compose file via SCP
+      - name: Copy docker-compose and scripts via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
-          source: "docker-compose.prod.yml"
+          source: "docker-compose.prod.yml,scripts/backup-db.sh"
           target: "/opt/tutor-management"
 
       - name: Deploy to VPS via SSH
@@ -106,5 +112,11 @@ jobs:
             # Restart các container chạy ẩn
             docker compose -f docker-compose.prod.yml up -d
             
+            # Cấp quyền thực thi cho backup script
+            chmod +x /opt/tutor-management/scripts/backup-db.sh
+            
+            # Thiết lập cron job cho backup (chạy lúc 2h sáng hàng ngày)
+            (crontab -l 2>/dev/null | grep -v "backup-db.sh"; echo "0 2 * * * /opt/tutor-management/scripts/backup-db.sh >> /opt/tutor-management/backups/backup.log 2>&1") | crontab -
+
             # Dọn dẹp image cũ / lơ lửng để làm sạch ổ cứng VPS
             docker image prune -f
