@@ -55,6 +55,8 @@ class DocumentServiceTest {
     private SessionRecordRepository sessionRecordRepository;
     @Mock
     private CloudinaryService cloudinaryService;
+    @Mock
+    private com.tutor_management.backend.modules.admin.service.AdminStatsService adminStatsService;
 
     @InjectMocks
     private DocumentService documentService;

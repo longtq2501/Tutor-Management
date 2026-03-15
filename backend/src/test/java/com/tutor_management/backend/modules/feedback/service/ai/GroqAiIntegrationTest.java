@@ -9,9 +9,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.tutor_management.backend.modules.feedback.dto.request.GenerateCommentRequest;
 
-@SpringBootTest
-@ActiveProfiles("dev")
-public class GroqAiIntegrationTest {
+import com.tutor_management.backend.AbstractIntegrationTest;
+
+public class GroqAiIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private AiGeneratorService aiGeneratorService;
