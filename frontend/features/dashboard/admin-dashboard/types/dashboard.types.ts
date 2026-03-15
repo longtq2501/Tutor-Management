@@ -9,18 +9,33 @@ export interface MonthlyChartData {
   totalUnpaid: number;
 }
 
-// Trong file định nghĩa types (ví dụ: @/types/dashboard.ts)
 export interface DashboardStats {
   totalStudents: number;
-  totalPaidAllTime: string;   // Dùng để hiển thị
-  totalUnpaidAllTime: string; // Dùng để hiển thị
-  currentMonthTotal: string;  // Dùng để hiển thị
+  activeStudents: number;
+  totalTutors: number;
+  activeTutors: number;
+  inactiveTutors: number;
+  
+  totalPaidAllTime: string;
+  totalUnpaidAllTime: string;
+  totalRevenueThisMonth: string;
+  totalRevenueAllTime: string;
+  totalDebtThisMonth: string;
+  totalDebtAllTime: string;
+  
+  currentMonthTotal: string;
 
-  // THÊM 2 DÒNG NÀY ĐỂ TÍNH TOÁN PROGRESS BAR
   totalPaidRaw: number;
   totalUnpaidRaw: number;
+  totalRevenue: number;
+  totalDebt: number;
 
   revenueTrendValue: number;
-  revenueTrendDirection: 'up' | 'down';
+  revenueTrendDirection: 'up' | 'down' | 'neutral';
   newStudentsCurrentMonth?: number;
+  
+  totalSessions: number;
+  proAccounts: number;
+  freeAccounts: number;
+  pendingIssues: number;
 }
