@@ -10,7 +10,7 @@ import { Exercise, QuestionType } from '@/features/exercise-import/types/exercis
 
 // mocks of services
 vi.mock('@/features/exercise-import/services/exerciseService');
-vi.mock('../../services/submissionService');
+vi.mock('@/features/submission/services/submissionService');
 
 const fakeExercise = {
   id: 'ex1',

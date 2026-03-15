@@ -9,10 +9,12 @@ import { onlineSessionApi } from '@/lib/services/onlineSession';
 // Mock dependencies
 vi.mock('@/lib/services/onlineSession');
 vi.mock('../../context/WebSocketContext', async () => {
-    const actual = await vi.importActual('../../context/WebSocketContext');
     return {
-        ...actual,
-        useWebSocket: () => ({ isConnected: true }),
+        useWebSocket: () => ({ 
+            isConnected: true,
+            subscribe: vi.fn().mockReturnValue(() => {}),
+            sendMessage: vi.fn(),
+        }),
         WebSocketProvider: ({ children }: { children: React.ReactNode }) => <div>{children} </div>
     };
 });
@@ -24,11 +26,12 @@ const mockActions = {
     addParticipant: vi.fn(),
 };
 
+const mockState = { roomId: null };
 vi.mock('../../context/RoomStateContext', async () => {
     return {
         RoomStateProvider: ({ children }: { children: React.ReactNode }) => <div>{children} </div>,
         useRoomState: () => ({
-            state: { roomId: null },
+            state: mockState,
             actions: mockActions
         })
     };

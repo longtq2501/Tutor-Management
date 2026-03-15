@@ -290,7 +290,10 @@ describe('useWhiteboardSync - Delta Protocol', () => {
         expect(result.current.strokes).toHaveLength(0);
         expect(mockSendMessage).toHaveBeenCalledWith(
             '/app/room/room-123/whiteboard/clear',
-            {}
+            {
+                type: 'CLEAR',
+                userId: 'user-1',
+            }
         );
     });
 
@@ -315,7 +318,11 @@ describe('useWhiteboardSync - Delta Protocol', () => {
             expect(result.current.redoStack).toHaveLength(1);
             expect(mockSendMessage).toHaveBeenCalledWith(
                 '/app/room/room-123/whiteboard/undo',
-                { id: expect.any(String) }
+                { 
+                    type: 'UNDO',
+                    id: expect.any(String),
+                    userId: 'user-1',
+                }
             );
         });
 

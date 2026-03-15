@@ -72,7 +72,7 @@ describe('WhiteboardToolbar', () => {
     it('should call onClear when clear button is clicked', () => {
         render(<WhiteboardToolbar {...defaultProps} />);
 
-        const clearButton = screen.getByLabelText(/clear whiteboard/i);
+        const clearButton = screen.getByLabelText(/clear my drawings/i);
         fireEvent.click(clearButton);
         expect(defaultProps.onClear).toHaveBeenCalled();
     });

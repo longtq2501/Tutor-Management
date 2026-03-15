@@ -63,28 +63,28 @@ describe('useSessionRecorder', () => {
         expect(result.current.isRecording).toBe(false);
     });
 
-    it('should start recording', () => {
+    it('should start recording', async () => {
         const { result } = renderHook(() => useSessionRecorder(mockStream));
 
-        act(() => {
-            result.current.startRecording();
+        await act(async () => {
+            await result.current.startRecording();
         });
 
         expect(result.current.isRecording).toBe(true);
         expect(mockMediaRecorder.start).toHaveBeenCalled();
     });
 
-    it('should stop recording and set preview url', () => {
+    it('should stop recording and set preview url', async () => {
         const { result } = renderHook(() => useSessionRecorder(mockStream));
 
-        act(() => {
-            result.current.startRecording();
+        await act(async () => {
+            await result.current.startRecording();
         });
 
         // Simulate data
         act(() => {
             if (mockMediaRecorder.ondataavailable) {
-                mockMediaRecorder.ondataavailable({ data: { size: 100 } });
+                mockMediaRecorder.ondataavailable({ data: { size: 100 } } as any);
             }
         });
 
@@ -97,12 +97,14 @@ describe('useSessionRecorder', () => {
         expect(result.current.previewUrl).toBe('blob:test');
     });
 
-    it('should discard recording', () => {
+    it('should discard recording', async () => {
         const { result } = renderHook(() => useSessionRecorder(mockStream));
 
-        act(() => {
-            result.current.startRecording();
-            if (mockMediaRecorder.ondataavailable) mockMediaRecorder.ondataavailable({ data: { size: 100 } });
+        await act(async () => {
+            await result.current.startRecording();
+            if (mockMediaRecorder.ondataavailable) {
+                mockMediaRecorder.ondataavailable({ data: { size: 100 } } as any);
+            }
             result.current.stopRecording();
         });
 
