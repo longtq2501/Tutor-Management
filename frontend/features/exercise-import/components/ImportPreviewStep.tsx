@@ -109,14 +109,15 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
     };
 
     return (
-        <div className="space-y-6">
-            {/* Metadata Section */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full min-h-0 overflow-hidden">
+            {/* Left Column: Metadata & Actions */}
+            <div className="md:col-span-4 flex flex-col gap-6 h-full overflow-y-auto pr-2 custom-scrollbar">
             <Card>
                 <CardHeader>
                     <CardTitle>Exercise Details</CardTitle>
                 </CardHeader>
-                <CardContent className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2 md:col-span-2">
+                <CardContent className="flex flex-col gap-4">
+                    <div className="space-y-2">
                         <Label>Category</Label>
                         <CategorySelect
                             value={metadata.classId || ''}
@@ -131,49 +132,65 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                             placeholder="Exercise Title"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label>Time Limit (minutes)</Label>
-                        <Input
-                            type="number"
-                            value={metadata.timeLimit || ''}
-                            onChange={e => setMetadata(prev => ({ ...prev, timeLimit: parseInt(e.target.value) || 0 }))}
-                        />
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="space-y-2 flex-1">
+                            <Label>Time Limit (minutes)</Label>
+                            <Input
+                                type="number"
+                                value={metadata.timeLimit || ''}
+                                onChange={e => setMetadata(prev => ({ ...prev, timeLimit: parseInt(e.target.value) || 0 }))}
+                            />
+                        </div>
+                        <div className="space-y-2 flex-1 relative">
+                            <Label>Total Points (Metadata)</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="number"
+                                    step="any"
+                                    value={metadata.totalPoints || 0}
+                                    onChange={e => setMetadata(prev => ({ ...prev, totalPoints: parseFloat(e.target.value) || 0 }))}
+                                    className={cn(hasPointsMismatch && "border-yellow-500 focus-visible:ring-yellow-500")}
+                                />
+                                {hasPointsMismatch && (
+                                    <Badge variant="outline" className="text-yellow-600 border-yellow-500 bg-yellow-50 shrink-0 absolute right-2 top-8">
+                                        <AlertTriangle className="h-3 w-3 mr-1" /> Mismatch
+                                    </Badge>
+                                )}
+                            </div>
+                            {hasPointsMismatch && (
+                                <p className="text-[10px] text-yellow-600 mt-1 absolute -bottom-4">
+                                    Metadata: {metadata.totalPoints} vs Questions: {calculatedTotal}
+                                </p>
+                            )}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Description</Label>
                         <Textarea
                             value={metadata.description || ''}
                             onChange={e => setMetadata(prev => ({ ...prev, description: e.target.value }))}
-                            rows={3}
+                            className="min-h-[150px] resize-y"
+                            placeholder="Enter exercise description, instructions, or notes here..."
                         />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Total Points (Metadata)</Label>
-                        <div className="flex items-center gap-2">
-                            <Input
-                                type="number"
-                                value={metadata.totalPoints || 0}
-                                onChange={e => setMetadata(prev => ({ ...prev, totalPoints: parseInt(e.target.value) || 0 }))}
-                                className={cn(hasPointsMismatch && "border-yellow-500 focus-visible:ring-yellow-500")}
-                            />
-                            {hasPointsMismatch && (
-                                <Badge variant="outline" className="text-yellow-600 border-yellow-500 bg-yellow-50 shrink-0">
-                                    <AlertTriangle className="h-3 w-3 mr-1" /> Mismatch
-                                </Badge>
-                            )}
-                        </div>
-                        {hasPointsMismatch && (
-                            <p className="text-[10px] text-yellow-600 mt-1">
-                                Metadata: {metadata.totalPoints} vs Questions: {calculatedTotal}
-                            </p>
-                        )}
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Questions List */}
-            <div className="space-y-4">
-                <div className="flex justify-between items-center">
+            {/* Bottom Actions moved here to be sticky or scrollable at bottom of left column */}
+            <div className="flex justify-between pt-4 border-t sticky bottom-0 bg-background/95 backdrop-blur-sm z-10 py-2">
+                <Button variant="outline" onClick={onBack}>Back to Import</Button>
+                <div className="space-x-2">
+                    <Button onClick={handlePublish} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+                        {isLoading ? "Publishing..." : <>Publish Exercise <Check className="ml-2 h-4 w-4" /></>}
+                    </Button>
+                </div>
+            </div>
+            
+            </div> {/* End Left Column */}
+
+            {/* Right Column: Questions List */}
+            <div className="md:col-span-8 flex flex-col h-full overflow-hidden border rounded-xl bg-card/50">
+                <div className="flex justify-between items-center p-4 border-b bg-muted/40 shrink-0">
                     <h3 className="text-lg font-semibold">Questions ({questions.length})</h3>
                     <ActionTooltip label="Thêm một câu hỏi mới vào cuối danh sách">
                         <Button variant="outline" size="sm" onClick={() => {
@@ -197,7 +214,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                     </ActionTooltip>
                 </div>
 
-                <ScrollArea className="h-[600px] pr-4">
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     <div className="space-y-4">
                         {questions.map((q, idx) => (
                             <Card key={idx} className="relative group">
@@ -258,12 +275,12 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                             </Card>
                         ))}
                     </div>
-                </ScrollArea>
-            </div>
+                </div>
+            </div> {/* End Right Column */}
 
             {/* Edit Question Dialog */}
             <Dialog open={!!editingQuestion} onOpenChange={(open) => !open && setEditingQuestion(null)}>
-                <DialogContent className="max-w-xl">
+                <DialogContent className="max-w-3xl">
                     <DialogHeader>
                         <DialogTitle>Edit Question</DialogTitle>
                     </DialogHeader>
@@ -273,6 +290,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                 <div className="col-span-3">
                                     <Label>Question Text</Label>
                                     <Textarea
+                                        className="min-h-[160px] resize-y"
                                         value={editingQuestion.data.questionText}
                                         onChange={e => setEditingQuestion({
                                             ...editingQuestion,
@@ -284,10 +302,11 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                     <Label>Points</Label>
                                     <Input
                                         type="number"
+                                        step="any"
                                         value={editingQuestion.data.points}
                                         onChange={e => setEditingQuestion({
                                             ...editingQuestion,
-                                            data: { ...editingQuestion.data, points: parseInt(e.target.value) || 0 }
+                                            data: { ...editingQuestion.data, points: parseFloat(e.target.value) || 0 }
                                         })}
                                     />
                                 </div>
@@ -335,6 +354,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                 <div>
                                     <Label>Rubric</Label>
                                     <Textarea
+                                        className="min-h-[200px] resize-y"
                                         value={editingQuestion.data.rubric || ''}
                                         onChange={e => setEditingQuestion({
                                             ...editingQuestion,
@@ -351,17 +371,6 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            {/* Bottom Actions */}
-            <div className="flex justify-between pt-4 border-t">
-                <Button variant="outline" onClick={onBack}>Back to Import</Button>
-                <div className="space-x-2">
-                    {/* Draft saving could be added here */}
-                    <Button onClick={handlePublish} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
-                        {isLoading ? "Publishing..." : <>Publish Exercise <Check className="ml-2 h-4 w-4" /></>}
-                    </Button>
-                </div>
-            </div>
         </div>
     );
 };

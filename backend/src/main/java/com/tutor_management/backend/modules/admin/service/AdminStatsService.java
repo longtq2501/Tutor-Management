@@ -51,6 +51,9 @@ public class AdminStatsService {
 
         Long totalPaid = sessionRecordRepository.sumTotalPaid();
         Long totalPaidMonth = sessionRecordRepository.sumTotalPaidByMonth(currentMonth);
+        Long totalUnpaid = sessionRecordRepository.sumTotalUnpaid();
+        Long totalUnpaidMonth = sessionRecordRepository.sumTotalUnpaidByMonth(currentMonth);
+        
         long totalRevenue = sessionRecordRepository.sumNonCancelledTotalAmount();
         long totalSessions = sessionRecordRepository.countNonCancelledSessions();
 
@@ -63,7 +66,10 @@ public class AdminStatsService {
                 .activeStudents(activeStudents)
                 .totalRevenueThisMonth(FormatterUtils.formatCurrency(totalPaidMonth != null ? totalPaidMonth : 0L))
                 .totalRevenueAllTime(FormatterUtils.formatCurrency(totalPaid != null ? totalPaid : 0L))
+                .totalDebtThisMonth(FormatterUtils.formatCurrency(totalUnpaidMonth != null ? totalUnpaidMonth : 0L))
+                .totalDebtAllTime(FormatterUtils.formatCurrency(totalUnpaid != null ? totalUnpaid : 0L))
                 .totalRevenue(totalRevenue)
+                .totalDebt(totalUnpaid != null ? totalUnpaid : 0L)
                 .totalSessions(totalSessions)
                 .proAccounts(proAccounts)
                 .freeAccounts(freeAccounts)

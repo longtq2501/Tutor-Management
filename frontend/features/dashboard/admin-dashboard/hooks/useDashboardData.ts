@@ -1,5 +1,6 @@
 import { dashboardApi } from '@/lib/services';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { DashboardStats } from '../types/dashboard.types';
 
 export const useDashboardData = () => {
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -44,7 +45,7 @@ export const useDashboardData = () => {
 
   // Calculate true revenue trend (DASH-1)
   let revenueTrendValue = stats?.revenueTrendValue || 0;
-  let revenueTrendDirection = stats?.revenueTrendDirection || 'neutral';
+  let revenueTrendDirection: 'up' | 'down' | 'neutral' = stats?.revenueTrendDirection || 'neutral';
 
   if (monthlyStats && monthlyStats.length >= 2) {
     const sorted = [...monthlyStats].sort((a, b) => a.month.localeCompare(b.month));
@@ -61,7 +62,11 @@ export const useDashboardData = () => {
   }
 
   return {
-    stats: stats ? { ...stats, revenueTrendValue, revenueTrendDirection } : null,
+    stats: stats ? { 
+      ...stats, 
+      revenueTrendValue: revenueTrendValue || stats.revenueTrendValue,
+      revenueTrendDirection: revenueTrendDirection !== 'neutral' ? revenueTrendDirection : stats.revenueTrendDirection 
+    } as DashboardStats : null,
     monthlyStats: monthlyStats || [],
     loadingStats,
     loadingMonthly,

@@ -1,17 +1,13 @@
 'use client';
 
-import React from 'react';
 import {
-    LineChart,
-    Line,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
     Area,
-    AreaChart,
-    type TooltipProps
+    AreaChart
 } from 'recharts';
 import { formatCurrency, getMonthName } from '../utils/formatters';
 import type { MonthlyChartData } from '../types/dashboard.types';
@@ -19,15 +15,19 @@ import type { MonthlyChartData } from '../types/dashboard.types';
 interface RevenueGrowthChartProps {
     data: MonthlyChartData[];
 }
+interface CustomTooltipProps {
+    active?: boolean;
+    payload?: Array<{ value: number; payload: MonthlyChartData }>;
+    label?: string;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-popover border shadow-xl p-3 rounded-xl text-xs">
-                <p className="font-bold mb-1 text-foreground">{getMonthName(label)}</p>
+                <p className="font-bold mb-1 text-foreground">{getMonthName(label as string)}</p>
                 <p className="text-primary font-semibold">
-                    Doanh thu: {formatCurrency(payload[0].value)}
+                    Doanh thu: {formatCurrency(payload[0].value as number)}
                 </p>
             </div>
         );

@@ -18,7 +18,10 @@ public class OverviewStatsResponse {
     private long activeStudents;
     private String totalRevenueThisMonth;
     private String totalRevenueAllTime;
+    private String totalDebtThisMonth;
+    private String totalDebtAllTime;
     private long totalRevenue;
+    private long totalDebt;
     private long totalSessions;
     private long proAccounts;
     private long freeAccounts;

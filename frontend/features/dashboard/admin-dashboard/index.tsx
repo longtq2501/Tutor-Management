@@ -10,8 +10,18 @@ import { DashboardExportButton } from './components/DashboardExportButton';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useMonthlyChartData } from './hooks/useMonthlyChartData';
 import { DashboardHeader } from '@/contexts/UIContext';
+import { DashboardStats } from './types/dashboard.types';
+
+import { useAuth } from '@/contexts/AuthContext';
 
 // 2. Thành phần nặng (Biểu đồ) thì import động
+const AnalyticsView = dynamic(
+  () => import('./components/AnalyticsView').then(mod => mod.AnalyticsView),
+  {
+    ssr: false,
+  }
+);
+
 const EnhancedRevenueChart = dynamic(
   () => import('./components/EnhancedRevenueChart').then(mod => mod.EnhancedRevenueChart),
   {
@@ -22,20 +32,38 @@ const EnhancedRevenueChart = dynamic(
 export default function AdminDashboard() {
   const { stats, monthlyStats, loadingStats, loadingMonthly } = useDashboardData();
   const chartData = useMonthlyChartData(monthlyStats);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   // Đồng bộ Loading: Chỉ hiện dữ liệu khi CẢ HAI nguồn đã sẵn sàng
   const isGlobalLoading = loadingStats || loadingMonthly;
 
   // 1. Safe stats - Giữ nguyên logic của bạn nhưng thay mặc định thành String
-  const safeStats = useMemo(() => stats || {
+  const safeStats = useMemo<DashboardStats>(() => (stats || {
     totalStudents: 0,
-    currentMonthTotal: "0 đ",
+    activeStudents: 0,
+    totalTutors: 0,
+    activeTutors: 0,
+    inactiveTutors: 0,
     totalPaidAllTime: "0 đ",
     totalUnpaidAllTime: "0 đ",
+    totalRevenueThisMonth: "0 đ",
+    totalRevenueAllTime: "0 đ",
+    totalDebtThisMonth: "0 đ",
+    totalDebtAllTime: "0 đ",
+    currentMonthTotal: "0 đ",
+    totalPaidRaw: 0,
+    totalUnpaidRaw: 0,
+    totalRevenue: 0,
+    totalDebt: 0,
     revenueTrendValue: 0,
-    revenueTrendDirection: 'up',
-    newStudentsCurrentMonth: 0
-  }, [stats]);
+    revenueTrendDirection: 'neutral',
+    newStudentsCurrentMonth: 0,
+    totalSessions: 0,
+    proAccounts: 0,
+    freeAccounts: 0,
+    pendingIssues: 0
+  }) as DashboardStats, [stats]);
 
   // 2. TẬN DỤNG TREND TỪ BACKEND - Giữ nguyên logic gán giá trị
   const revenueTrend = useMemo(() => {
@@ -80,7 +108,7 @@ export default function AdminDashboard() {
           badge={
             <div className="flex items-center text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 w-fit px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-800/30">
               <TrendingUp size={12} className="mr-1 flex-shrink-0" />
-              <span className="whitespace-nowrap">Đang hoạt động</span>
+              <span className="whitespace-nowrap">{safeStats.activeStudents || 0} đang học</span>
             </div>
           }
         />
@@ -88,7 +116,7 @@ export default function AdminDashboard() {
         {/* Revenue This Month */}
         <StatCard
           title="Doanh Thu Tháng"
-          value={safeStats.currentMonthTotal}
+          value={safeStats.totalRevenueThisMonth || safeStats.currentMonthTotal}
           subtitle="Cập nhật thời gian thực"
           icon={<BarChart3 />}
           variant="blue"
@@ -98,9 +126,9 @@ export default function AdminDashboard() {
 
         {/* Total Paid */}
         <StatCard
-          title="Tổng Đã Thu"
-          value={safeStats.totalPaidAllTime}
-          subtitle={`${paidPercentage}% trên tổng`}
+          title="Tổng Thu Nhập"
+          value={safeStats.totalRevenueAllTime || safeStats.totalPaidAllTime}
+          subtitle={`${paidPercentage}% trên dự kiến`}
           icon={<CheckCircle />}
           variant="green"
           progressBar={{
@@ -110,16 +138,16 @@ export default function AdminDashboard() {
           isLoading={isGlobalLoading}
         />
 
-        {/* Total Unpaid */}
+        {/* Total Debt (Unpaid) */}
         <StatCard
           title={
             <div className="flex items-center gap-1.5">
-              <span>Chưa Thu</span>
-              <span className="text-[10px] font-medium opacity-60">(tổng các buổi)</span>
+              <span>Còn Nợ</span>
+              <span className="text-[10px] font-medium opacity-60">(chưa thanh toán)</span>
             </div>
           }
-          value={safeStats.totalUnpaidAllTime}
-          subtitle={`${unpaidPercentage}% trên tổng`}
+          value={safeStats.totalDebtAllTime || safeStats.totalUnpaidAllTime}
+          subtitle={`${unpaidPercentage}% trên dự kiến`}
           icon={<XCircle />}
           variant="red"
           progressBar={{
@@ -129,6 +157,14 @@ export default function AdminDashboard() {
           isLoading={isGlobalLoading}
         />
       </div>
+
+      {/* Analytics Insights Section */}
+      {isAdmin && (
+        <AnalyticsView
+          stats={stats}
+          isLoading={isGlobalLoading}
+        />
+      )}
 
       {/* Enhanced Revenue Chart */}
       <EnhancedRevenueChart

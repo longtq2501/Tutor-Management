@@ -1,13 +1,15 @@
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+import Image from 'next/image';
 
 interface OptimizedAvatarProps {
     name: string;
     isActive?: boolean;
     className?: string; // Allow custom sizing/styling
+    avatarUrl?: string; // Optional backend URL
 }
 
-export function OptimizedAvatar({ name, isActive, className }: OptimizedAvatarProps) {
+export function OptimizedAvatar({ name, isActive, className, avatarUrl }: OptimizedAvatarProps) {
     const initial = name.charAt(0).toUpperCase();
     const hue = useMemo(() => {
         // Generate consistent color from name
@@ -26,10 +28,20 @@ export function OptimizedAvatar({ name, isActive, className }: OptimizedAvatarPr
                 className
             )}
             style={{
-                background: `linear-gradient(135deg, hsl(${hue}, 70%, 50%) 0%, hsl(${hue}, 70%, 40%) 100%)`
+                background: avatarUrl ? undefined : `linear-gradient(135deg, hsl(${hue}, 70%, 50%) 0%, hsl(${hue}, 70%, 40%) 100%)`
             }}
         >
-            <span className="select-none">{initial}</span>
+            {avatarUrl ? (
+                <Image
+                    src={avatarUrl}
+                    alt={name}
+                    fill
+                    sizes="(max-width: 640px) 56px, 64px"
+                    className="object-cover"
+                />
+            ) : (
+                <span className="select-none">{initial}</span>
+            )}
 
             {/* Status dot - pure CSS, no image */}
             {isActive !== undefined && (

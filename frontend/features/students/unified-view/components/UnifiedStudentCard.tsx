@@ -69,7 +69,11 @@ export const UnifiedStudentCard = memo(function UnifiedStudentCard({
                             <div className="absolute inset-0 bg-primary/15 dark:bg-primary/25 blur-xl rounded-full" />
                         )}
                         <div className="relative">
-                            <OptimizedAvatar name={student.name} isActive={student.active} />
+                            <OptimizedAvatar 
+                                name={student.name} 
+                                isActive={student.active} 
+                                avatarUrl={student.avatarUrl}
+                            />
                         </div>
                     </motion.div>
 
