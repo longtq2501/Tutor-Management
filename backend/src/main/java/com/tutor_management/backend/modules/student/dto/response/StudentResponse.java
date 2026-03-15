@@ -68,4 +68,5 @@ public class StudentResponse {
     // --- Account Information ---
     private String accountEmail;
     private String accountId;
+    private String avatarUrl;
 }

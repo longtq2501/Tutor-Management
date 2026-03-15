@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class AdminStudentService {
 
     private final StudentRepository studentRepository;
     private final TutorRepository tutorRepository;
+    private final com.tutor_management.backend.modules.auth.UserRepository userRepository;
 
     public Page<AdminStudentResponse> getAllStudents(String search, Long tutorId, Boolean active, Pageable pageable) {
         Page<Student> students = studentRepository.findAdminStudents(search, tutorId, active, pageable);
@@ -34,7 +36,13 @@ public class AdminStudentService {
         Map<Long, String> tutorNames = tutorRepository.findAllById(tutorIds).stream()
                 .collect(Collectors.toMap(Tutor::getId, Tutor::getFullName));
 
-        return students.map(s -> mapToResponse(s, tutorNames.get(s.getTutorId())));
+        // Batch fetch student avatars
+        List<Long> studentIds = students.getContent().stream().map(Student::getId).toList();
+        Map<Long, String> avatarMap = userRepository.findByStudentIdIn(studentIds).stream()
+                .filter(u -> u.getAvatarUrl() != null)
+                .collect(Collectors.toMap(com.tutor_management.backend.modules.auth.User::getStudentId, com.tutor_management.backend.modules.auth.User::getAvatarUrl));
+
+        return students.map(s -> mapToResponse(s, tutorNames.get(s.getTutorId()), avatarMap.get(s.getId())));
     }
 
     public AdminStudentResponse getStudentById(Long id) {
@@ -45,10 +53,14 @@ public class AdminStudentService {
                 .map(Tutor::getFullName)
                 .orElse("N/A");
 
-        return mapToResponse(student, tutorName);
+        String avatarUrl = userRepository.findByStudentId(id)
+                .map(com.tutor_management.backend.modules.auth.User::getAvatarUrl)
+                .orElse(null);
+
+        return mapToResponse(student, tutorName, avatarUrl);
     }
 
-    private AdminStudentResponse mapToResponse(Student student, String tutorName) {
+    private AdminStudentResponse mapToResponse(Student student, String tutorName, String avatarUrl) {
         return AdminStudentResponse.builder()
                 .id(student.getId())
                 .name(student.getName())
@@ -60,6 +72,7 @@ public class AdminStudentService {
                 .active(student.getActive())
                 .totalDebt(studentRepository.calculateTotalDebt(student.getId()))
                 .createdAt(student.getCreatedAt().toString())
+                .avatarUrl(avatarUrl)
                 .build();
     }
 }

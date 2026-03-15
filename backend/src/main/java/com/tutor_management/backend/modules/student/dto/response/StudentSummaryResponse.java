@@ -56,4 +56,5 @@ public class StudentSummaryResponse {
     private String parentName;
     private String parentEmail;
     private String parentPhone;
+    private String avatarUrl;
 }
