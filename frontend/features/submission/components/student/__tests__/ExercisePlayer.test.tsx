@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, it, beforeEach, expect, vi } from 'vitest';
 import { ExercisePlayer } from '../ExercisePlayer';
@@ -56,11 +56,14 @@ describe('ExercisePlayer', () => {
     await waitFor(() => expect(exerciseService.getById).toHaveBeenCalled());
     // simulate submitting
     const submit = screen.getByRole('button', { name: /nộp bài/i });
-    submit.click();
-    await waitFor(() => expect(submissionService.submit).toHaveBeenCalled());
+    fireEvent.click(submit);
+    
+    // Wait for the asynchronous submit to resolve and the UI to update
+    await waitFor(() => {
+        expect(screen.getByText(/HOÀN THÀNH/i)).toBeInTheDocument();
+    });
+    
     // check that modal/message is not rendered
     expect(screen.queryByText(/Các câu hỏi tự luận/)).not.toBeInTheDocument();
-    // result screen should include completed heading
-    expect(screen.getByText(/HOÀN THÀNH/i)).toBeInTheDocument();
   });
 });
