@@ -1,0 +1,11 @@
+target/
+!.run/
+.mvn/
+.git
+.github
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.class

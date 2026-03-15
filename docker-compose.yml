@@ -15,30 +15,39 @@ services:
     build: ./backend
     container_name: spring_backend
     restart: always
-    mem_limit: 1024m # Thoải mái xài tối đa 1GB RAM trên local để dev mượt mà
+    mem_limit: 1024m
     ports:
       - "8080:8080"
     depends_on:
       - db
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?rewriteBatchedStatements=true
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
+      SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      APP_INIT-DATA_ENABLED: "true"
-      SPRING_PROFILES_ACTIVE: prod
-      # Cấu hình mở rộng RAM: Max 768MB, dùng thuật toán dọn rác nhàn rỗi (G1GC) dành cho đa lõi
+      APP_INIT_DATA_ENABLED: "true"
+      SPRING_PROFILES_ACTIVE: dev
       JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: nextjs_frontend
     restart: always
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NODE_ENV: development
+    command: npm run dev
     depends_on:
       - backend
 
