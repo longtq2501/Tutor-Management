@@ -1,4 +1,4 @@
-﻿<# : batch portion
+<# : batch portion
 @REM ----------------------------------------------------------------------------
 @REM Licensed to the Apache Software Foundation (ASF) under one
 @REM or more contributor license agreements.  See the NOTICE file
@@ -50,13 +50,11 @@ if ($env:MVNW_VERBOSE -eq "true") {
   $VerbosePreference = "Continue"
 }
 
-# ========== THÊM ĐOẠN NÀY ==========
 # Set JAVA_HOME if not already set
 if (-not $env:JAVA_HOME) {
     $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot"
     Write-Verbose "Set JAVA_HOME to: $env:JAVA_HOME"
 }
-# ====================================
 
 # calculate distributionUrl, requires .mvn/wrapper/maven-wrapper.properties
 $distributionUrl = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData).distributionUrl

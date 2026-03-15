@@ -1,0 +1,200 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.tutor_management:backend >--------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ backend ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ backend ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 20 source files with javac [debug parameters release 21] to target\test-classes
+[WARNING] /D:/long-personal-project/Tutor-Management/backend/src/test/java/com/tutor_management/backend/modules/onlinesession/config/WebSocketConfigTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/long-personal-project/Tutor-Management/backend/src/test/java/com/tutor_management/backend/modules/onlinesession/config/WebSocketConfigTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/long-personal-project/Tutor-Management/backend/src/test/java/com/tutor_management/backend/modules/onlinesession/config/WebSocketConfigTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/long-personal-project/Tutor-Management/backend/src/test/java/com/tutor_management/backend/modules/onlinesession/config/WebSocketConfigTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/long-personal-project/Tutor-Management/backend/src/test/java/com/tutor_management/backend/modules/onlinesession/config/WebSocketConfigTest.java:[26,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.tutor_management.backend.modules.auth.AuthIntegrationTest
+07:38:13.307 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.tutor_management.backend.modules.auth.AuthIntegrationTest]: AuthIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+07:38:13.332 [main] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+07:38:13.346 [main] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+07:38:13.364 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.20.4
+07:38:13.481 [main] INFO org.testcontainers.dockerclient.DockerMachineClientProviderStrategy -- docker-machine executable was not found on PATH ([C:\WINDOWS\system32, C:\WINDOWS, C:\WINDOWS\System32\Wbem, C:\WINDOWS\System32\WindowsPowerShell\v1.0\, C:\WINDOWS\System32\OpenSSH\, C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common, C:\Program Files\Git\cmd, C:\Program Files\nodejs\, C:\Program Files\Docker\Docker\resources\bin, C:\Program Files\dotnet\, C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot\bin, C:\Users\Admin\AppData\Local\Microsoft\WindowsApps, C:\Users\Admin\AppData\Roaming\npm, C:\Users\Admin\.dotnet\tools, C:\Users\Admin\AppData\Local\Programs\cursor\resources\app\bin, C:\Users\Admin\AppData\Local\Programs\Microsoft VS Code\bin, C:\Users\Admin\AppData\Local\Programs\Antigravity\bin, D:\maven\apache-maven-3.9.12\bin])
+07:38:13.481 [main] ERROR org.testcontainers.dockerclient.DockerClientProviderStrategy -- Could not find a valid Docker environment. Please check configuration. Attempted configurations were:
+As no valid configuration was found, execution cannot continue.
+See https://java.testcontainers.org/on_failure.html for more details.
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.276 s <<< FAILURE! -- in com.tutor_management.backend.modules.auth.AuthIntegrationTest
+[ERROR] com.tutor_management.backend.modules.auth.AuthIntegrationTest -- Time elapsed: 0.276 s <<< ERROR!
+org.testcontainers.containers.ContainerFetchException: Can't get Docker image: RemoteDockerImage(imageName=mysql:8.0, imagePullPolicy=DefaultPullPolicy(), imageNameSubstitutor=org.testcontainers.utility.ImageNameSubstitutor$LogWrappedImageNameSubstitutor@611df6e3)
+	at org.testcontainers.containers.GenericContainer.getDockerImageName(GenericContainer.java:1364)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.createSource(ServiceConnectionContextCustomizerFactory.java:89)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.lambda$collectSources$0(ServiceConnectionContextCustomizerFactory.java:64)
+	at org.springframework.core.annotation.TypeMappedAnnotations$AggregatesSpliterator.tryAdvance(TypeMappedAnnotations.java:610)
+	at org.springframework.core.annotation.TypeMappedAnnotations$AggregatesSpliterator.tryAdvance(TypeMappedAnnotations.java:577)
+	at java.base/java.util.Spliterator.forEachRemaining(Spliterator.java:332)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.lambda$collectSources$1(ServiceConnectionContextCustomizerFactory.java:64)
+	at org.springframework.util.ReflectionUtils.doWithLocalFields(ReflectionUtils.java:691)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.collectSources(ServiceConnectionContextCustomizerFactory.java:61)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.collectSources(ServiceConnectionContextCustomizerFactory.java:72)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.createContextCustomizer(ServiceConnectionContextCustomizerFactory.java:53)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.getContextCustomizers(AbstractTestContextBootstrapper.java:360)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildMergedContextConfiguration(AbstractTestContextBootstrapper.java:332)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildDefaultMergedContextConfiguration(AbstractTestContextBootstrapper.java:267)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildMergedContextConfiguration(AbstractTestContextBootstrapper.java:215)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildTestContext(AbstractTestContextBootstrapper.java:108)
+	at org.springframework.boot.test.context.SpringBootTestContextBootstrapper.buildTestContext(SpringBootTestContextBootstrapper.java:111)
+	at org.springframework.test.context.TestContextManager.<init>(TestContextManager.java:142)
+	at org.springframework.test.context.TestContextManager.<init>(TestContextManager.java:126)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.getTestContextManager(SpringExtension.java:363)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.beforeAll(SpringExtension.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalStateException: Could not find a valid Docker environment. Please see logs and check configuration
+	at org.testcontainers.dockerclient.DockerClientProviderStrategy.lambda$getFirstValidStrategy$7(DockerClientProviderStrategy.java:274)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at org.testcontainers.dockerclient.DockerClientProviderStrategy.getFirstValidStrategy(DockerClientProviderStrategy.java:265)
+	at org.testcontainers.DockerClientFactory.getOrInitializeStrategy(DockerClientFactory.java:154)
+	at org.testcontainers.DockerClientFactory.client(DockerClientFactory.java:196)
+	at org.testcontainers.images.LocalImagesCache.get(LocalImagesCache.java:31)
+	at org.testcontainers.images.AbstractImagePullPolicy.shouldPull(AbstractImagePullPolicy.java:18)
+	at org.testcontainers.images.RemoteDockerImage.resolve(RemoteDockerImage.java:79)
+	at org.testcontainers.images.RemoteDockerImage.resolve(RemoteDockerImage.java:35)
+	at org.testcontainers.utility.LazyFuture.getResolvedValue(LazyFuture.java:20)
+	at org.testcontainers.utility.LazyFuture.get(LazyFuture.java:41)
+	at org.testcontainers.containers.GenericContainer.getDockerImageName(GenericContainer.java:1362)
+	... 22 more
+
+[INFO] Running com.tutor_management.backend.modules.document.service.DocumentServiceTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\Admin\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+07:38:14.549 [main] INFO com.tutor_management.backend.modules.document.service.DocumentService -- Deleted document with ID: 100
+07:38:14.615 [main] INFO com.tutor_management.backend.modules.document.service.DocumentService -- Document 'Test Doc' uploaded successfully with ID: null
+07:38:14.615 [main] WARN com.tutor_management.backend.modules.document.service.DocumentService -- Unauthorized delete attempt: Tutor 20 tried to delete document 100 owned by 99
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.118 s -- in com.tutor_management.backend.modules.document.service.DocumentServiceTest
+[INFO] Running com.tutor_management.backend.modules.feedback.service.ai.GroqAiIntegrationTest
+07:38:14.632 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.tutor_management.backend.modules.feedback.service.ai.GroqAiIntegrationTest]: GroqAiIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+07:38:14.646 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.20.4
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.024 s <<< FAILURE! -- in com.tutor_management.backend.modules.feedback.service.ai.GroqAiIntegrationTest
+[ERROR] com.tutor_management.backend.modules.feedback.service.ai.GroqAiIntegrationTest -- Time elapsed: 0.024 s <<< ERROR!
+org.testcontainers.containers.ContainerFetchException: Can't get Docker image: RemoteDockerImage(imageName=mysql:8.0, imagePullPolicy=DefaultPullPolicy(), imageNameSubstitutor=org.testcontainers.utility.ImageNameSubstitutor$LogWrappedImageNameSubstitutor@611df6e3)
+	at org.testcontainers.containers.GenericContainer.getDockerImageName(GenericContainer.java:1364)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.createSource(ServiceConnectionContextCustomizerFactory.java:89)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.lambda$collectSources$0(ServiceConnectionContextCustomizerFactory.java:64)
+	at org.springframework.core.annotation.TypeMappedAnnotations$AggregatesSpliterator.tryAdvance(TypeMappedAnnotations.java:610)
+	at org.springframework.core.annotation.TypeMappedAnnotations$AggregatesSpliterator.tryAdvance(TypeMappedAnnotations.java:577)
+	at java.base/java.util.Spliterator.forEachRemaining(Spliterator.java:332)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.lambda$collectSources$1(ServiceConnectionContextCustomizerFactory.java:64)
+	at org.springframework.util.ReflectionUtils.doWithLocalFields(ReflectionUtils.java:691)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.collectSources(ServiceConnectionContextCustomizerFactory.java:61)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.collectSources(ServiceConnectionContextCustomizerFactory.java:72)
+	at org.springframework.boot.testcontainers.service.connection.ServiceConnectionContextCustomizerFactory.createContextCustomizer(ServiceConnectionContextCustomizerFactory.java:53)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.getContextCustomizers(AbstractTestContextBootstrapper.java:360)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildMergedContextConfiguration(AbstractTestContextBootstrapper.java:332)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildDefaultMergedContextConfiguration(AbstractTestContextBootstrapper.java:267)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildMergedContextConfiguration(AbstractTestContextBootstrapper.java:215)
+	at org.springframework.test.context.support.AbstractTestContextBootstrapper.buildTestContext(AbstractTestContextBootstrapper.java:108)
+	at org.springframework.boot.test.context.SpringBootTestContextBootstrapper.buildTestContext(SpringBootTestContextBootstrapper.java:111)
+	at org.springframework.test.context.TestContextManager.<init>(TestContextManager.java:142)
+	at org.springframework.test.context.TestContextManager.<init>(TestContextManager.java:126)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.getTestContextManager(SpringExtension.java:363)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.beforeAll(SpringExtension.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalStateException: Previous attempts to find a Docker environment failed. Will not retry. Please see logs and check configuration
+	at org.testcontainers.dockerclient.DockerClientProviderStrategy.getFirstValidStrategy(DockerClientProviderStrategy.java:229)
+	at org.testcontainers.DockerClientFactory.getOrInitializeStrategy(DockerClientFactory.java:154)
+	at org.testcontainers.DockerClientFactory.client(DockerClientFactory.java:196)
+	at org.testcontainers.images.LocalImagesCache.get(LocalImagesCache.java:31)
+	at org.testcontainers.images.AbstractImagePullPolicy.shouldPull(AbstractImagePullPolicy.java:18)
+	at org.testcontainers.images.RemoteDockerImage.resolve(RemoteDockerImage.java:79)
+	at org.testcontainers.images.RemoteDockerImage.resolve(RemoteDockerImage.java:35)
+	at org.testcontainers.utility.LazyFuture.getResolvedValue(LazyFuture.java:20)
+	at org.testcontainers.utility.LazyFuture.get(LazyFuture.java:41)
+	at org.testcontainers.containers.GenericContainer.getDockerImageName(GenericContainer.java:1362)
+	... 22 more
+
+[INFO] Running com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceTest
+07:38:15.154 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 500 to online by user 1
+07:38:15.159 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Ending online session for room ID: complex-overlap
+07:38:15.159 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Flushed 1800 seconds to session complex-overlap. New Total: 1800s
+07:38:15.166 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Ending online session for room ID: no-overlap
+07:38:15.183 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 999 to online by user 1
+07:38:15.199 [main] WARN com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Auto-ending abandoned room: auto-end-room
+07:38:15.199 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Ending online session for room ID: auto-end-room
+07:38:15.199 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Flushed 3420 seconds to session auto-end-room. New Total: 3420s
+07:38:15.209 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 500 to online by user 1
+07:38:15.209 [main] ERROR com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Conflict detected during session conversion for ID 500: Duplicate key
+07:38:15.215 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 500 to online by user 1
+07:38:15.215 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 500 to online by user 1
+07:38:15.232 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 500 to online by user 1
+07:38:15.249 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- User 1 joining room room-join-123
+07:38:15.249 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Tutor 1 joined room room-join-123
+07:38:15.249 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Room room-join-123 activated
+07:38:15.259 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Fetching stats for room room-stats-123 by user 1
+07:38:15.265 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Creating new online session for student ID: 20
+07:38:15.283 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Ending online session for room ID: room-xyz
+07:38:15.283 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Flushed 2400 seconds to session room-xyz. New Total: 2400s
+07:38:15.296 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- User 1 joining room room-ended
+07:38:15.300 [main] INFO com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceImpl -- Converting session record ID 500 to online by user 1
+[ERROR] Tests run: 21, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.619 s <<< FAILURE! -- in com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceTest
+[ERROR] com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceTest.getMySessions_Tutor_Success -- Time elapsed: 0.017 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:31)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:231)
+	at com.tutor_management.backend.modules.onlinesession.service.OnlineSessionServiceTest.getMySessions_Tutor_Success(OnlineSessionServiceTest.java:754)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   OnlineSessionServiceTest.getMySessions_Tutor_Success:754 expected: <false> but was: <true>
+[ERROR] Errors: 
+[ERROR]   AuthIntegrationTest » ContainerFetch Can't get Docker image: RemoteDockerImage(imageName=mysql:8.0, imagePullPolicy=DefaultPullPolicy(), imageNameSubstitutor=org.testcontainers.utility.ImageNameSubstitutor$LogWrappedImageNameSubstitutor@611df6e3)
+[ERROR]   GroqAiIntegrationTest » ContainerFetch Can't get Docker image: RemoteDockerImage(imageName=mysql:8.0, imagePullPolicy=DefaultPullPolicy(), imageNameSubstitutor=org.testcontainers.utility.ImageNameSubstitutor$LogWrappedImageNameSubstitutor@611df6e3)
+[INFO] 
+[ERROR] Tests run: 29, Failures: 1, Errors: 2, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.589 s
+[INFO] Finished at: 2026-03-15T07:38:15+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project backend: There are test failures.
+[ERROR] 
+[ERROR] See D:\long-personal-project\Tutor-Management\backend\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
