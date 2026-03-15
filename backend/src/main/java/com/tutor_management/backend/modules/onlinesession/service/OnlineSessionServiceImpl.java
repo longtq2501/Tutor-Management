@@ -733,8 +733,18 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
 
     private OnlineSessionResponse mapToResponse(OnlineSession session) {
         LocalDateTime now = LocalDateTime.now(clock);
-        // Allow joining at any time if not ended (User Request: early access for setup)
-        boolean canJoinNow = session.getRoomStatus() != RoomStatus.ENDED;
+        
+        // canJoinNow logic:
+        // 1. If ACTIVE -> True (Join)
+        // 2. If WAITING -> True if within earlyJoinMinutes before scheduledStart
+        // 3. If ENDED -> False
+        boolean canJoinNow = false;
+        if (session.getRoomStatus() == RoomStatus.ACTIVE) {
+            canJoinNow = true;
+        } else if (session.getRoomStatus() == RoomStatus.WAITING) {
+            LocalDateTime earlyJoinTime = session.getScheduledStart().minusMinutes(earlyJoinMinutes);
+            canJoinNow = !now.isBefore(earlyJoinTime);
+        }
 
         return OnlineSessionResponse.builder()
                 .id(session.getId())

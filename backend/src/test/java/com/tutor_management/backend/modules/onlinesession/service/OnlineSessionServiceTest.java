@@ -827,8 +827,8 @@ class OnlineSessionServiceTest {
 
         org.springframework.data.domain.Window<OnlineSessionResponse> results = onlineSessionService.getMySessions(userId, null, 10);
 
-        // All non-ended sessions should return true for isCanJoinNow
-        assertTrue(results.getContent().get(0).isCanJoinNow()); // s1: WAITING
+        // far future or just outside window should be false
+        assertFalse(results.getContent().get(0).isCanJoinNow()); // s1: WAITING (16m > 15m window)
         assertTrue(results.getContent().get(1).isCanJoinNow()); // s2: WAITING
         assertTrue(results.getContent().get(2).isCanJoinNow()); // s3: ACTIVE
         assertFalse(results.getContent().get(3).isCanJoinNow()); // s4: ENDED
