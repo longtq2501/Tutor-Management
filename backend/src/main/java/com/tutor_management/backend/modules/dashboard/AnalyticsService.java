@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service for generating analytics data for the dashboard.
+ * Provides methods to calculate financial and performance metrics.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,6 +31,12 @@ public class AnalyticsService {
     private final StudentRepository studentRepository;
     private final SessionFeedbackRepository sessionFeedbackRepository;
 
+    /**
+     * Retrieves financial analytics data for the dashboard.
+     *
+     * @param month Optional month filter in the format "YYYY-MM". If null, defaults to the current month.
+     * @return FinancialAnalyticsResponse containing various financial metrics.
+     */
     public FinancialAnalyticsResponse getFinancialAnalytics(String month) {
         String targetMonth = (month == null || month.isEmpty()) ? YearMonth.now().toString() : month;
 
@@ -87,6 +97,11 @@ public class AnalyticsService {
                 .build();
     }
 
+    /**
+     * Retrieves performance analytics data for the dashboard.
+     *
+     * @return PerformanceAnalyticsResponse containing various performance metrics.
+     */
     public PerformanceAnalyticsResponse getPerformanceAnalytics() {
         // 1. Tutor Rankings (Average Rating)
         List<Object[]> ratingsData = sessionFeedbackRepository.findAverageRatingsByTutor();

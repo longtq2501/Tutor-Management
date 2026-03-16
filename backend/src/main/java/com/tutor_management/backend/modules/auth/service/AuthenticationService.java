@@ -15,6 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service class for handling authentication-related operations such as registration, login, token refresh, and logout.
+ * This class interacts with the UserRepository, RoleRepository, JwtService, and RefreshTokenService to manage user authentication and authorization.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -28,6 +32,7 @@ public class AuthenticationService {
     private final com.tutor_management.backend.modules.tutor.service.TutorService tutorService;
     private final com.tutor_management.backend.modules.admin.service.AdminStatsService adminStatsService;
 
+    // CRITICAL: Ensure that registration and login processes are wrapped in transactions to maintain data integrity, especially when auto-provisioning Tutor profiles.
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         // Check if user already exists
@@ -51,7 +56,7 @@ public class AuthenticationService {
 
         User savedUser = userRepository.save(user);
 
-        // ✅ CRITICAL: Auto-provision Tutor profile - ONLY for TUTORs
+        // CRITICAL: Auto-provision Tutor profile - ONLY for TUTORs
         if ("TUTOR".equals(savedUser.getRole().getName())) {
             tutorService.ensureTutorProfile(savedUser);
         }
@@ -71,6 +76,7 @@ public class AuthenticationService {
         return buildAuthResponse(savedUser, accessToken, refreshToken.getToken());
     }
 
+    // CRITICAL: Ensure that the login process is wrapped in a transaction to maintain data integrity, especially when auto-provisioning Tutor profiles on login.
     @Transactional
     public AuthResponse login(LoginRequest request) {
         // 1. Check if user exists first to give granular feedback
@@ -89,7 +95,7 @@ public class AuthenticationService {
         // 2. Get user
         User user = (User) authentication.getPrincipal();
 
-        // ✅ Ensure profile exists on every login (idempotent) - ONLY for TUTORs
+        // Ensure profile exists on every login (idempotent) - ONLY for TUTORs
         if ("TUTOR".equals(user.getRole().getName())) {
             tutorService.ensureTutorProfile(user);
         }
@@ -101,6 +107,7 @@ public class AuthenticationService {
         return buildAuthResponse(user, accessToken, refreshToken.getToken());
     }
 
+    // CRITICAL: Ensure that token refresh process is wrapped in a transaction to maintain data integrity when verifying and updating refresh tokens.
     @Transactional
     public AuthResponse refreshToken(String refreshTokenStr) {
         return refreshTokenService.findByToken(refreshTokenStr)
@@ -113,6 +120,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("Refresh token not found"));
     }
 
+    // CRITICAL: Ensure that logout process is wrapped in a transaction to maintain data integrity when deleting refresh tokens.
     @Transactional
     public void logout(Long userId) {
         refreshTokenService.deleteByUserId(userId);

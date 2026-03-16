@@ -3,6 +3,9 @@ package com.tutor_management.backend.modules.auth.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+/**
+ * DTO for user registration request.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

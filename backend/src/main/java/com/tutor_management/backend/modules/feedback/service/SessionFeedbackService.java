@@ -39,6 +39,7 @@ public class SessionFeedbackService {
     private final StudentRepository studentRepository;
     private final com.tutor_management.backend.modules.feedback.service.ai.AiGeneratorService aiGeneratorService;
 
+    // --- CRUD Operations for Session Feedback ---
     @Transactional
     public Long createFeedback(SessionFeedbackRequest request) {
         log.info("Creating new feedback for session {} and student {}", request.getSessionRecordId(), request.getStudentId());
@@ -64,6 +65,7 @@ public class SessionFeedbackService {
         return sessionFeedbackRepository.save(feedback).getId();
     }
 
+    // Update existing feedback by ID
     @Transactional
     public Long updateFeedback(Long id, SessionFeedbackRequest request) {
         log.info("Updating feedback ID: {}", id);
@@ -83,6 +85,7 @@ public class SessionFeedbackService {
         return sessionFeedbackRepository.save(feedback).getId();
     }
 
+    // Get the latest feedback for a specific session and student
     @Transactional(readOnly = true)
     public SessionFeedbackResponse getFeedbackBySession(Long sessionId, Long studentId) {
         return sessionFeedbackRepository
@@ -91,6 +94,7 @@ public class SessionFeedbackService {
                 .orElse(null);
     }
 
+    // Get feedback by its unique ID
     @Transactional(readOnly = true)
     public SessionFeedbackResponse getFeedbackById(Long id) {
         return sessionFeedbackRepository.findById(id)
@@ -98,6 +102,7 @@ public class SessionFeedbackService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phản hồi"));
     }
 
+    // Get paginated feedback history for a student
     @Transactional(readOnly = true)
     public Page<SessionFeedbackResponse> getFeedbackHistory(Long studentId, Pageable pageable) {
         return sessionFeedbackRepository.findByStudentId(studentId, pageable)
@@ -134,6 +139,7 @@ public class SessionFeedbackService {
 
     // --- Utility Methods ---
 
+    // Method to get clipboard content for a specific feedback, formatted for easy copying
     @Transactional(readOnly = true)
     public String getClipboardContent(Long id) {
         SessionFeedback feedback = sessionFeedbackRepository.findById(id)
@@ -151,6 +157,7 @@ public class SessionFeedbackService {
         );
     }
 
+    // --- Excel Export Logic ---
     @Transactional(readOnly = true)
     public void exportFeedbacksToExcel(Long studentId, jakarta.servlet.http.HttpServletResponse response)
             throws java.io.IOException {
@@ -223,6 +230,7 @@ public class SessionFeedbackService {
         }
     }
 
+    // --- Helper Methods ---
     private SessionFeedbackResponse convertToResponse(SessionFeedback fb) {
         return SessionFeedbackResponse.builder()
                 .id(fb.getId())

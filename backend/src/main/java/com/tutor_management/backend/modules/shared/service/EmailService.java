@@ -75,14 +75,23 @@ public class EmailService {
         }
     }
 
+    /**
+     * Constructs the email subject line for the invoice email.
+     */
     public String buildInvoiceSubject(String month, String studentName) {
         return String.format("Hóa đơn học phí tháng %s - %s", month, studentName);
     }
 
+    /**
+     * Constructs the filename for the invoice PDF attachment.
+     */
     public String buildInvoiceAttachmentName(String invoiceNumber) {
         return String.format("Hoa-don-%s.pdf", invoiceNumber);
     }
 
+    /**
+     * Constructs the HTML content for the invoice email.
+     */
     public String buildInvoiceHtmlContent(String parentName, String studentName,
             String month, String invoiceNumber) {
         return buildEmailContent(parentName, studentName, month, invoiceNumber);

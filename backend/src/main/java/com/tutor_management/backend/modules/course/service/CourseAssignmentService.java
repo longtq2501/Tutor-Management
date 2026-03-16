@@ -88,6 +88,10 @@ public class CourseAssignmentService {
         return responses;
     }
 
+    /**
+     * Ensures that for each lesson in the course, the student has an associated LessonAssignment and LessonProgress record.
+     * This method is idempotent and can be safely called multiple times without creating duplicates.
+     */
     private void provisionLessonsForStudent(Course course, Student student, String assignedBy) {
         Long studentId = student.getId();
         for (CourseLesson courseLesson : course.getCourseLessons()) {
@@ -227,6 +231,10 @@ public class CourseAssignmentService {
         }
     }
 
+    /**
+     * Recalculates the overall course progress percentage based on completed lessons.
+     * Updates the assignment status accordingly.
+     */
     private void recalculateCourseProgress(CourseAssignment assignment) {
         List<CourseLesson> courseLessons = assignment.getCourse().getCourseLessons();
         if (courseLessons.isEmpty()) return;
@@ -248,6 +256,9 @@ public class CourseAssignmentService {
                 assignment.getCourse().getId(), assignment.getStudent().getId(), percentage);
     }
 
+    /**
+     * Updates the assignment status based on the current progress percentage.
+     */
     private void updateAssignmentStatusByProgress(CourseAssignment assignment, int percentage) {
         if (percentage == 100) {
             assignment.setStatus(AssignmentStatus.COMPLETED);

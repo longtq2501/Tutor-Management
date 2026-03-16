@@ -48,17 +48,19 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository assignmentRepository;
     private final ApplicationEventPublisher eventPublisher;
     
+    // --- Public API Implementations ---
     @Override
     public SubmissionResponse saveDraft(CreateSubmissionRequest request, String studentId) {
-        log.info("📝 Saving submission draft | Exercise: {} | Student: {}", request.getExerciseId(), studentId);
+        log.info("Saving submission draft | Exercise: {} | Student: {}", request.getExerciseId(), studentId);
         Submission submission = syncDraftEntity(request, studentId);
         syncAssignmentStatus(submission);
         return mapToSubmissionResponse(submission);
     }
     
+    // Submits the student's answers, triggers auto-grading, and updates statuses accordingly.
     @Override
     public SubmissionResponse submit(CreateSubmissionRequest request, String studentId) {
-        log.info("🚀 Finalizing submission | Exercise: {} | Student: {}", request.getExerciseId(), studentId);
+        log.info("Finalizing submission | Exercise: {} | Student: {}", request.getExerciseId(), studentId);
         
         Submission submission = syncDraftEntity(request, studentId);
         submission.setStatus(SubmissionStatus.SUBMITTED);
@@ -87,6 +89,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         return mapToSubmissionResponse(saved);
     }
     
+    // Retrieves a submission by its ID, including all associated answers and metadata.
     @Override
     @Transactional(readOnly = true)
     public SubmissionResponse getSubmission(String id) {
@@ -95,6 +98,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         return mapToSubmissionResponse(submission);
     }
     
+    // Retrieves a student's submission for a specific exercise, if it exists.
     @Override
     @Transactional(readOnly = true)
     public SubmissionResponse getSubmissionByExerciseAndStudent(String exerciseId, String studentId) {
@@ -103,6 +107,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         return mapToSubmissionResponse(submission);
     }
     
+    // Lists all submissions for a given exercise, providing summary information for each.
     @Override
     @Transactional(readOnly = true)
     public List<SubmissionListItemResponse> listSubmissionsByExercise(String exerciseId) {
@@ -115,6 +120,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             .collect(Collectors.toList());
     }
     
+    // Lists all submissions made by a specific student across all exercises.
     @Override
     @Transactional(readOnly = true)
     public List<SubmissionResponse> listSubmissionsByStudent(String studentId) {
@@ -123,6 +129,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             .collect(Collectors.toList());
     }
     
+    // Grades a submission based on manual input from the tutor, updating scores and statuses accordingly.
     @Override
     public SubmissionResponse gradeSubmission(String id, GradeSubmissionRequest request) {
         log.info("⚖️ Grading submission: {}", id);

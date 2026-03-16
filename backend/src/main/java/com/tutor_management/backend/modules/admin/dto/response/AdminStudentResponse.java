@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO for representing student information in the admin dashboard.
+ */
 @Data
 @Builder
 @NoArgsConstructor

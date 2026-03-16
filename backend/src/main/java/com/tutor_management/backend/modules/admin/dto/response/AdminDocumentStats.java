@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO for representing document statistics in the admin dashboard.
+ */
 @Data
 @Builder
 @NoArgsConstructor

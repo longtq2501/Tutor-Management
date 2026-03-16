@@ -85,6 +85,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
     @Value("${app.online-session.early-join-minutes:15}")
     private int earlyJoinMinutes;
 
+    // Core Create Logic with Tutor Auto-Assignment and Event Publishing
     @Override
     @Transactional
     public OnlineSessionResponse createSession(CreateOnlineSessionRequest request, Long userId) {
@@ -133,6 +134,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
     }
 
 
+    // Core Join Logic with Silent Disconnect Handling
     @Override
     @Transactional
     public JoinRoomResponse joinRoom(String roomId, Long userId) {
@@ -141,7 +143,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         OnlineSession session = onlineSessionRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new RoomNotFoundException("Room not found: " + roomId));
 
-        // ✅ Check room status
+        // Check room status
         if (session.getRoomStatus() == RoomStatus.ENDED) {
             throw new RoomAlreadyEndedException("Cannot join: session has ended");
         }
@@ -149,7 +151,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // ✅ Record join time
+        // Record join time
         LocalDateTime now = LocalDateTime.now(clock);
         
         if ("TUTOR".equals(user.getRole().getName())) {
@@ -211,7 +213,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
             }
         }
         
-        // ✅ Activate room if still waiting
+        // Activate room if still waiting
         if (session.getRoomStatus() == RoomStatus.WAITING) {
             session.setRoomStatus(RoomStatus.ACTIVE);
             session.setActualStart(now);
@@ -229,6 +231,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
                 .build();
     }
 
+    // Core Stats Logic with Presence Integration
     @Override
     @Transactional(readOnly = true)
     public RoomStatsResponse getRoomStats(String roomId, Long userId) {
@@ -272,6 +275,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
                 .build();
     }
 
+    // Core Global Stats Logic with Aggregation and Presence Insights
     @Override
     @Transactional(readOnly = true)
     public GlobalStatsResponse getGlobalStats() {
@@ -309,6 +313,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         return count;
     }
 
+    // Calculate duration in seconds, including ongoing segment if active
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public OnlineSessionResponse endSession(String roomId, Long userId) {
@@ -347,14 +352,15 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         eventPublisher.publishEvent(OnlineSessionEndedEvent.builder()
                 .sessionId(saved.getId())
                 .roomId(saved.getRoomId())
-                .tutorId(tutorUserId) // ✅ Correct
-                .studentId(studentUserId) // ✅ Correct (may be null, handled in listener)
+                .tutorId(tutorUserId) // Correct
+                .studentId(studentUserId) // Correct (may be null, handled in listener)
                 .durationMinutes(saved.getTotalDurationMinutes())
                 .build());
 
         return mapToResponse(saved);
     }
 
+    // Core Heartbeat Logic with Presence Service Integration
     @Override
     @Transactional
     public void updateHeartbeat(String roomId, Long userId) {
@@ -366,7 +372,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
             return;
         }
 
-        // ✅ check participant correctly to avoid NPE
+        // Check participant correctly to avoid NPE
         boolean isParticipant = false;
         
         // Check if tutor
@@ -375,7 +381,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
             isParticipant = true;
         }
         
-        // ✅ Check if student (via User.studentId)
+        // Check if student (via User.studentId)
         if (!isParticipant) {
             User user = userRepository.findById(userId).orElse(null);
             if (user != null && user.getStudentId() != null) {
@@ -384,7 +390,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         }
 
         if (isParticipant) {
-            // ✅ Update in-memory presence (fast) - avoiding constant DB writes
+            // Update in-memory presence (fast) - avoiding constant DB writes
             presenceService.updateHeartbeat(roomId, userId);
             
             // If they were marked as left, announce they are back and clear left time
@@ -432,6 +438,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         }
     }
 
+    // Core My Sessions Logic with Cursor-Based Pagination
     @Override
     @Transactional(readOnly = true)
     public OnlineSessionResponse getCurrentSession(Long userId) {
@@ -454,6 +461,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         return session.map(this::mapToResponse).orElse(null);
     }
 
+    // Core My Sessions Logic with Cursor-Based Pagination
     @Override
     @Transactional(readOnly = true)
     public Window<OnlineSessionResponse> getMySessions(Long userId, String continuationToken, int size) {
@@ -507,6 +515,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         messagingTemplate.convertAndSend("/topic/room/" + roomId + "/status", response);
     }
 
+    // Core Inactivity Detection Logic with Presence Service Integration
     @Override
     @Scheduled(fixedRate = 60000) // Every 60 seconds
     public void detectInactiveParticipants() {
@@ -532,6 +541,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         }
     }
 
+    // Core Recording Metadata Update Logic with Validation
     @Override
     @Transactional
     public OnlineSessionResponse updateRecordingMetadata(String roomId, UpdateRecordingMetadataRequest request) {
@@ -552,6 +562,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         return mapToResponse(onlineSessionRepository.save(session));
     }
 
+    // Core Conversion Logic with Pessimistic Locking and Robust Validation
     @Override
     @Transactional
     public OnlineSessionResponse convertToOnline(Long sessionRecordId, Long userId) {
@@ -618,6 +629,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         }
     }
 
+    // Core Revert Logic with Validation and Idempotency
     @Override
     @Transactional
     public void revertToOffline(Long sessionRecordId, Long userId) {
@@ -646,6 +658,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         // No need to explicitly update SessionRecord as the isOnline flag is derived from existence of OnlineSession
     }
 
+    // Helper method to flush duration when participant leaves or session ends
     @Transactional
     public void processSessionInactivity(OnlineSession session, LocalDateTime now, User studentUser) {
         if (Boolean.TRUE.equals(session.getPreventAutoEnd())) {
@@ -761,6 +774,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
                 .build();
     }
 
+    // Core Presence Notification Logic for User Join/Leave with WebSocket Broadcasting
     @Override
     @Transactional(readOnly = true)
     public void notifyUserJoined(String roomId, Long userId) {
@@ -785,6 +799,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         messagingTemplate.convertAndSend("/topic/room/" + roomId + "/presence", message);
     }
 
+    // Core Presence Notification Logic for User Join/Leave with WebSocket Broadcasting
     @Override
     public void notifyUserLeft(String roomId, Long userId) {
         log.info("Broadcasting LEAVE for user {} in room {}", userId, roomId);

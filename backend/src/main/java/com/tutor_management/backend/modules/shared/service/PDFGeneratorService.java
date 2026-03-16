@@ -40,7 +40,7 @@ public class PDFGeneratorService {
     /**
      * Generates a PDF report for the system dashboard.
      *
-     * @param stats        Aggregate system statistics.
+     * @param stats Aggregate system statistics.
      * @param monthlyStats Historical monthly revenue data.
      * @return A byte array representing the dashboard report PDF.
      * @throws Exception If PDF generation fails.

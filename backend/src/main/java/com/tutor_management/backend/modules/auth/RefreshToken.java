@@ -8,9 +8,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+/**
+ * Represents a refresh token for user authentication.
+ * Each user can have multiple refresh tokens to support multi-device login.
+ * The token is associated with a user and has an expiry date.
+ */
 @Entity
 @Table(name = "refresh_tokens",
-       uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))  // ✅ Explicit constraint
+       uniqueConstraints = @UniqueConstraint(columnNames = "user_id")) // Ensure one active token per user, can be relaxed for multi-device support
 @Data
 @Builder
 @NoArgsConstructor

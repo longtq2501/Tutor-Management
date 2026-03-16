@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * DTO for financial analytics data to be displayed on the dashboard.
+ */
 @Data
 @Builder
 @NoArgsConstructor

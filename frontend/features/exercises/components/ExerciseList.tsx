@@ -16,6 +16,7 @@ import { useExerciseListLogic } from '../hooks/useExerciseListLogic';
 import { ExercisePagination } from './ExercisePagination';
 import { StudentExerciseCard } from './StudentExerciseCard';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ExerciseListProps {
     role: 'STUDENT' | 'TEACHER' | 'ADMIN';
@@ -41,6 +42,11 @@ const EmptyState = () => (
  */
 export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExercise, onCreateNew }) => {
     const l = useExerciseListLogic(role);
+    const studentExerciseGroups = {
+        pending: l.exercises.filter(ex => !ex.submissionStatus),
+        submitted: l.exercises.filter(ex => ex.submissionStatus === 'SUBMITTED'),
+        graded: l.exercises.filter(ex => ex.submissionStatus === 'GRADED')
+    };
 
     if (l.isExercisesLoading) {
         return (
@@ -84,16 +90,54 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                     {l.exercises.length === 0 ? <EmptyState /> : (
                         role === 'STUDENT' ? (
                             <div className="p-4 md:p-6 space-y-8">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-                                    {l.exercises.map(ex => (
-                                        <StudentExerciseCard
-                                            key={ex.id}
-                                            exercise={ex}
-                                            onClick={() => {
-                                                const action = (ex.submissionStatus === 'SUBMITTED' || ex.submissionStatus === 'GRADED') ? 'REVIEW' : 'PLAY';
-                                                onSelectExercise(ex, action);
-                                            }}
-                                        />
+                                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+                                    {[
+                                        {
+                                            key: 'pending',
+                                            title: 'Chưa làm',
+                                            items: studentExerciseGroups.pending,
+                                            accent: 'border-orange-400/40 bg-orange-500/5'
+                                        },
+                                        {
+                                            key: 'submitted',
+                                            title: 'Đã nộp',
+                                            items: studentExerciseGroups.submitted,
+                                            accent: 'border-blue-400/40 bg-blue-500/5'
+                                        },
+                                        {
+                                            key: 'graded',
+                                            title: 'Đã chấm',
+                                            items: studentExerciseGroups.graded,
+                                            accent: 'border-green-400/40 bg-green-500/5'
+                                        }
+                                    ].map((group) => (
+                                        <div key={group.key} className="rounded-2xl border border-border/70 bg-background/70 backdrop-blur-sm p-3 md:p-4">
+                                            <div className={cn("rounded-xl border px-3 py-2 mb-3 flex items-center justify-between", group.accent)}>
+                                                <p className="text-sm font-black tracking-tight">{group.title}</p>
+                                                <Badge variant="secondary" className="h-6 px-2.5 text-xs font-black">
+                                                    {group.items.length}
+                                                </Badge>
+                                            </div>
+
+                                            {group.items.length === 0 ? (
+                                                <div className="rounded-xl border border-dashed border-border px-3 py-8 text-center text-xs text-muted-foreground">
+                                                    Chưa có bài tập
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    {group.items.map(ex => (
+                                                        <StudentExerciseCard
+                                                            key={ex.id}
+                                                            exercise={ex}
+                                                            onClick={() => {
+                                                                const action = (ex.submissionStatus === 'SUBMITTED' || ex.submissionStatus === 'GRADED') ? 'REVIEW' : 'PLAY';
+                                                                onSelectExercise(ex, action);
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
                                 {l.hasNextPage && (

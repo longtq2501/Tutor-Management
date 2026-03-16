@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.tutor_management.backend.modules.course.entity.LessonProgress;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,7 +20,7 @@ public interface LessonProgressRepository extends JpaRepository<LessonProgress, 
 
     List<LessonProgress> findByStudentId(Long studentId);
 
-    @org.springframework.data.jpa.repository.Modifying
+    @Modifying
     @Query("DELETE FROM LessonProgress lp WHERE lp.lesson.id = :lessonId")
     void deleteByLessonId(@Param("lessonId") Long lessonId);
 

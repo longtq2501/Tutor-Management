@@ -31,6 +31,7 @@ public class AutoGradingServiceImpl implements AutoGradingService {
     private final SubmissionRepository submissionRepository;
     private final QuestionRepository questionRepository;
     
+    // Auto-grades a submission by its ID, returning the total MCQ score.
     @Override
     public int gradeSubmission(String submissionId) {
         log.info("🤖 Auto-grading submission: {}", submissionId);
@@ -40,6 +41,7 @@ public class AutoGradingServiceImpl implements AutoGradingService {
         return gradeSubmission(submission);
     }
 
+    // Core grading logic that processes the submission and updates scores.
     @Override
     public int gradeSubmission(Submission submission) {
         log.debug("Auto-grading entity attempt for ID: {}", submission.getId());
@@ -89,7 +91,7 @@ public class AutoGradingServiceImpl implements AutoGradingService {
         
         // Finalize state
         submissionRepository.save(submission);
-        log.info("✅ Auto-grading complete for {}. Score: {}", submission.getId(), mcqTotal);
+        log.info("Auto-grading complete for {}. Score: {}", submission.getId(), mcqTotal);
         return mcqTotal;
     }
 

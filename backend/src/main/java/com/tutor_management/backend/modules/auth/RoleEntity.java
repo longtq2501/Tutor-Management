@@ -8,6 +8,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+/**
+ * RoleEntity represents a user role in the system, containing a set of permissions.
+ * It is used for authorization purposes to determine what actions a user can perform.
+ */
 @Entity
 @Table(name = "roles")
 @Getter

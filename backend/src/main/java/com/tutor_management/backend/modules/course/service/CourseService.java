@@ -121,6 +121,13 @@ public class CourseService {
         return CourseResponse.fromEntity(courseRepository.save(course));
     }
 
+    /**
+     * Synchronizes the course's curriculum to match the provided list of lesson IDs.
+     * This method will clear existing mappings and rebuild them according to the new order.
+     * 
+     * @param course The course being updated
+     * @param newLessonIds The new ordered list of lesson IDs for the course
+     */
     private void syncCourseLessons(Course course, List<Long> newLessonIds) {
         // Clear existing mappings to rebuild the sequence
         courseLessonRepository.deleteAllByCourse(course);

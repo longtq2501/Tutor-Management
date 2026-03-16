@@ -22,11 +22,13 @@ public class AdminUserController {
 
     private final UserRepository userRepository;
 
+    // get all users with pagination
     @GetMapping
     public ResponseEntity<ApiResponse<Page<User>>> getAllUsers(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userRepository.findAll(pageable)));
     }
 
+    // toggle user status (enable/disable)
     @PutMapping("/{id}/toggle-status")
     public ResponseEntity<ApiResponse<User>> toggleUserStatus(@PathVariable Long id) {
         User user = userRepository.findById(id)
@@ -36,6 +38,7 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.success("Trạng thái người dùng đã được cập nhật", userRepository.save(user)));
     }
 
+    // delete user by id
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {

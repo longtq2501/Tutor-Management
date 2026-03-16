@@ -4,7 +4,6 @@ import java.util.List;
 import java.time.YearMonth;
 import java.time.LocalDateTime;
 
-import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.dashboard.dto.response.StudentDashboardStats;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
@@ -79,6 +78,7 @@ public class DashboardService {
         return stats;
     }
 
+    // Helper method to calculate revenue growth trend compared to previous month
     private void calculateRevenueTrend(DashboardStats stats, Long tutorId, String currentMonth) {
         List<MonthlyStats> monthlyList;
         if (tutorId != null) {
@@ -114,6 +114,7 @@ public class DashboardService {
         }
     }
 
+    // Helper method to calculate new student signups for the current month
     private void calculateNewStudentGrowth(DashboardStats stats, String monthStr, Long tutorId) {
         try {
             YearMonth yearMonth = YearMonth.parse(monthStr);
@@ -220,6 +221,7 @@ public class DashboardService {
         return status == LessonStatus.COMPLETED || status == LessonStatus.PAID;
     }
 
+    // Helper method to generate motivational quotes based on attendance progress
     private String getMotivationalQuote(int completed, int total) {
         if (total == 0) {
             return "Hãy kiểm tra lịch học sắp tới nhé!";

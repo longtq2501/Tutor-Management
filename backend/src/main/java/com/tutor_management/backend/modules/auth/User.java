@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * User entity representing application users.
+ * Implements UserDetails for Spring Security integration.
+ */
 @Entity
 @Table(name = "users",
        indexes = {

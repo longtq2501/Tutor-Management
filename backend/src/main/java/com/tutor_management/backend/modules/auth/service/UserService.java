@@ -10,6 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service class for managing user-related operations such as retrieving user profiles,
+ * changing passwords, and updating user information.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -17,6 +21,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Retrieves the profile information of a user by their ID.
+     *
+     * @param userId The ID of the user whose profile is to be retrieved.
+     * @return An AuthResponse.UserInfo object containing the user's profile information.
+     * @throws RuntimeException if the user with the specified ID is not found.
+     */
     @Transactional(readOnly = true)
     public AuthResponse.UserInfo getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
@@ -25,6 +36,16 @@ public class UserService {
         return mapToUserInfo(user);
     }
 
+    /**
+     * Changes the password of a user.
+     *
+     * @param userId  The ID of the user whose password is to be changed.
+     * @param request A ChangePasswordRequest object containing the current password,
+     *                new password, and confirm password.
+     * @throws RuntimeException if the user with the specified ID is not found.
+     * @throws IllegalArgumentException if the current password is incorrect or if the new password
+     *                                  and confirm password do not match.
+     */
     @Transactional
     public void changePassword(Long userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
@@ -45,6 +66,14 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Updates the profile information of a user.
+     *
+     * @param userId  The ID of the user whose profile is to be updated.
+     * @param request An UpdateUserRequest object containing the new profile information.
+     * @return An AuthResponse.UserInfo object containing the updated user's profile information.
+     * @throws RuntimeException if the user with the specified ID is not found.
+     */
     @Transactional
     public AuthResponse.UserInfo updateUserProfile(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
@@ -59,6 +88,12 @@ public class UserService {
         return mapToUserInfo(userRepository.save(user));
     }
 
+    /**
+     * Maps a User entity to an AuthResponse.UserInfo DTO.
+     *
+     * @param user The User entity to be mapped.
+     * @return An AuthResponse.UserInfo object containing the user's profile information.
+     */
     private AuthResponse.UserInfo mapToUserInfo(User user) {
         return AuthResponse.UserInfo.builder()
                 .id(user.getId())

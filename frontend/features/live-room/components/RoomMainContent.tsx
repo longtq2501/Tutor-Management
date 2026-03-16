@@ -204,15 +204,15 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                     onToggleRecording={handleToggleRecording}
                     onQualityChange={media.setQuality}
                     isRecordingSupported={media.isSupported && isTutor}
-                    className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 scale-90 md:scale-100 origin-bottom"
+                    className="absolute bottom-[5.25rem] md:bottom-8 left-1/2 -translate-x-1/2 scale-90 md:scale-100 origin-bottom"
                 />
             </div>
 
             {/* ---- Video Side Area ---- */}
             <div className={cn(
                 "w-full md:w-80 p-3 flex-col gap-3 bg-background md:bg-card border-t md:border-t-0 md:border-l border-border",
-                activeTab === 'video' ? "flex flex-1 min-h-0" : "hidden md:flex min-h-0",
-                activeTab === 'video' && "md:border-t-2 md:border-t-primary"
+                (activeTab === 'video' || activeTab === 'chat') ? "flex flex-1 min-h-0" : "hidden md:flex min-h-0",
+                (activeTab === 'video' || activeTab === 'chat') && "md:border-t-2 md:border-t-primary"
             )}>
                 <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-hidden">
 
@@ -250,7 +250,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                     )}
 
                     {/* Camera BAN (local) */}
-                    <div className="space-y-1">
+                    <div className={cn("space-y-1", isMobile && activeTab === 'chat' && "hidden")}>
                         <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
                             {state.contentMode === 'screen' ? 'Camera (Bạn)' : 'Bạn (Local)'}
                         </span>
@@ -264,7 +264,7 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                     </div>
 
                     {/* Camera ĐỐI PHƯƠNG (remote) */}
-                    <div className="space-y-1">
+                    <div className={cn("space-y-1", isMobile && activeTab === 'chat' && "hidden")}>
                         <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
                             {state.contentMode === 'screen' ? 'Camera (Đối phương)' : 'Đối phương (Remote)'}
                         </span>
@@ -282,7 +282,11 @@ export const RoomMainContent: React.FC<RoomMainContentProps> = ({
                     </div>
 
                     {/* Chat */}
-                    <div className="mt-2 flex-1 flex flex-col min-h-0 border-t border-border pt-3 overflow-hidden">
+                    <div className={cn(
+                        "mt-2 flex-1 flex flex-col min-h-0 border-t border-border pt-3 overflow-hidden",
+                        isMobile && activeTab === 'video' && "hidden",
+                        isMobile && activeTab === 'chat' && "mt-0 pt-0 border-t-0"
+                    )}>
                         <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1 mb-2">
                             Trò chuyện
                         </span>

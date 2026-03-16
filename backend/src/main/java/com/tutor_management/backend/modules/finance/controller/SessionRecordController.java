@@ -39,6 +39,9 @@ public class SessionRecordController {
     private final ExportService exportService;
     private final OnlineSessionService onlineSessionService;
 
+    /**
+     * Retrieves a paginated list of session records with optional filtering by search term, month, and payment status.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getAllRecords(
@@ -50,6 +53,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getAllRecordsFiltered(search, month, paid, pageable)));
     }
 
+    /**
+     * Retrieves session records for a specific student with optional filtering by month.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR', 'STUDENT')")
     @GetMapping("/month/{month}")
     public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getRecordsByMonth(
@@ -59,12 +65,18 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getRecordsByMonth(month, pageable)));
     }
 
+    /**
+     * Retrieves session records for a specific student with optional filtering by month.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR', 'STUDENT')")
     @GetMapping("/months")
     public ResponseEntity<ApiResponse<List<String>>> getDistinctMonths() {
         return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getDistinctMonths()));
     }
 
+    /**
+     * Creates a new session record based on the provided request data.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping
     public ResponseEntity<ApiResponse<SessionRecordResponse>> createRecord(@Valid @RequestBody SessionRecordRequest request) {
@@ -73,6 +85,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success("Đã tạo buổi học thành công", response));
     }
 
+    /**
+     * Toggles the payment status of a session record, enforcing optimistic locking with versioning.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PutMapping("/{id}/toggle-payment")
     public ResponseEntity<ApiResponse<SessionRecordResponse>> togglePayment(
@@ -83,6 +98,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success("Đã cập nhật trạng thái thanh toán", response));
     }
 
+    /**
+     * Deletes a session record by its ID.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteRecord(@PathVariable Long id) {
@@ -91,6 +109,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success("Đã xóa buổi học thành công", null));
     }
 
+    /**
+     * Retrieves all unpaid session records with optional filtering for only taught sessions.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @GetMapping("/unpaid")
     public ResponseEntity<ApiResponse<Page<SessionRecordResponse>>> getAllUnpaidSessions(
@@ -100,6 +121,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success(sessionRecordService.getAllUnpaidSessions(pageable, taughtOnly)));
     }
 
+    /**
+     * Updates an existing session record with new details, enforcing optimistic locking with versioning.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<SessionRecordResponse>> updateRecord(
@@ -110,6 +134,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success("Đã cập nhật thông tin buổi học", response));
     }
 
+    /**
+     * Retrieves a session record by its ID.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR', 'STUDENT')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<SessionRecordResponse>> getSessionById(@PathVariable Long id) {
@@ -131,6 +158,9 @@ public class SessionRecordController {
         return ResponseEntity.ok(ApiResponse.success("Đã cập nhật trạng thái buổi học", response));
     }
 
+    /**
+     * Duplicates an existing session record, creating a new one with the same details but a new ID.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<ApiResponse<SessionRecordResponse>> duplicateSession(@PathVariable Long id) {
@@ -174,6 +204,9 @@ public class SessionRecordController {
         }
     }
 
+    /**
+     * Deletes all session records for a specific month.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @DeleteMapping("/month/{month}")
     public ResponseEntity<ApiResponse<Void>> deleteSessionsByMonth(@PathVariable String month) {

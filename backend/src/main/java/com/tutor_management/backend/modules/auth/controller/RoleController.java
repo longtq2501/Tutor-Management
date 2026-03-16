@@ -27,11 +27,19 @@ public class RoleController {
     private final RoleRepository roleRepository;
     private final com.tutor_management.backend.modules.auth.service.PermissionService permissionService;
 
+    /**
+     * Retrieves all roles in the system.
+     * Accessible only to ADMIN users.
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<List<RoleEntity>>> getAllRoles() {
         return ResponseEntity.ok(ApiResponse.success(roleRepository.findAll()));
     }
 
+    /**
+     * Retrieves all available permissions in the system.
+     * Accessible only to ADMIN users.
+     */
     @GetMapping("/permissions")
     public ResponseEntity<ApiResponse<List<String>>> getAllAvailablePermissions() {
         List<String> permissions = Arrays.stream(Permission.values())
@@ -40,6 +48,10 @@ public class RoleController {
         return ResponseEntity.ok(ApiResponse.success(permissions));
     }
 
+    /**
+     * Updates the permissions of a specific role.
+     * Accessible only to ADMIN users.
+     */
     @PutMapping("/{id}/permissions")
     public ResponseEntity<ApiResponse<RoleEntity>> updateRolePermissions(
             @PathVariable Long id,

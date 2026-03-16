@@ -27,28 +27,33 @@ public class AdminStatsController {
 
     private final AdminStatsService adminStatsService;
 
+    // get overview stats (total students, tutors, sessions, revenue)
     @GetMapping("/stats/overview")
     public ApiResponse<OverviewStatsResponse> getOverviewStats() {
         return ApiResponse.success(adminStatsService.getOverviewStats());
     }
 
+    // get monthly revenue for the past N months
     @GetMapping("/stats/monthly-revenue")
     public ApiResponse<List<MonthlyRevenueResponse>> getMonthlyRevenue(
             @RequestParam(defaultValue = "6") int months) {
         return ApiResponse.success(adminStatsService.getMonthlyRevenue(months));
     }
 
+    // get paginated activity logs (admin actions, tutor/student signups, session bookings)
     @GetMapping("/activity-log")
     public ApiResponse<Page<ActivityLogResponse>> getActivityLogs(
             @PageableDefault(size = 20) Pageable pageable) {
         return ApiResponse.success(adminStatsService.getActivityLogs(pageable));
     }
 
+    // get student growth over time (new signups per month)
     @GetMapping("/stats/student-growth")
     public ApiResponse<List<StudentGrowthResponse>> getStudentGrowth() {
         return ApiResponse.success(adminStatsService.getStudentGrowth());
     }
 
+    // get top tutors by revenue or sessions
     @GetMapping("/stats/top-tutors")
     public ApiResponse<List<TopTutorResponse>> getTopTutors(
             @RequestParam(defaultValue = "5") int limit) {

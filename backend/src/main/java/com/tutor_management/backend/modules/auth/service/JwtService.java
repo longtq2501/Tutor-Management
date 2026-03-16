@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Service for handling JWT operations such as token generation and validation.
+ */
 @Service
 public class JwtService {
 
@@ -33,13 +36,13 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // ✅ OVERLOAD METHOD - Accept User type to include custom claims
+    // OVERLOAD METHOD - Accept User type to include custom claims
     public String generateToken(User user) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", user.getRole().getName());
         extraClaims.put("fullName", user.getFullName());
 
-        // ✅ ADD studentId if present
+        // ADD studentId if present
         if (user.getStudentId() != null) {
             extraClaims.put("studentId", user.getStudentId());
         }
@@ -87,7 +90,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // ✅ ADD method to extract studentId from token
+    // ADD method to extract studentId from token
     public Long extractStudentId(String token) {
         final Claims claims = extractAllClaims(token);
         Object studentId = claims.get("studentId");

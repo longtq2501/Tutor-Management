@@ -24,6 +24,9 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for admin statistics and activity logging.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +38,10 @@ public class AdminStatsService {
     private final SessionRecordRepository sessionRecordRepository;
     private final ActivityLogRepository activityLogRepository;
 
+    /**
+     * Get an overview of key statistics for the admin dashboard.
+     * @return OverviewStatsResponse containing various counts and financial metrics.
+     */
     public OverviewStatsResponse getOverviewStats() {
         String currentMonth = YearMonth.now().toString();
 
@@ -77,6 +84,11 @@ public class AdminStatsService {
                 .build();
     }
 
+    /**
+     * Get monthly revenue data for the past N months.
+     * @param months Number of months to retrieve data for.
+     * @return List of MonthlyRevenueResponse containing month and total revenue.
+     */
     public List<MonthlyRevenueResponse> getMonthlyRevenue(int months) {
         List<MonthlyStats> stats = sessionRecordRepository.findAllMonthlyStatsAggregated();
         
@@ -89,6 +101,10 @@ public class AdminStatsService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get student growth data by month.
+     * @return List of StudentGrowthResponse containing month and student count.
+     */
     public List<StudentGrowthResponse> getStudentGrowth() {
         List<Object[]> results = studentRepository.countByMonth();
         return results.stream()
@@ -99,6 +115,11 @@ public class AdminStatsService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get top tutors by revenue.
+     * @param limit Number of top tutors to retrieve.
+     * @return List of TopTutorResponse containing tutor details and revenue.
+     */
     public List<TopTutorResponse> getTopTutors(int limit) {
         List<Object[]> results = sessionRecordRepository.findTopTutorsByRevenue(org.springframework.data.domain.PageRequest.of(0, limit));
         return results.stream()
@@ -117,11 +138,23 @@ public class AdminStatsService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get paginated activity logs for admin review.
+     * @param pageable Pagination information.
+     * @return Page of ActivityLogResponse containing activity details.
+     */
     public Page<ActivityLogResponse> getActivityLogs(Pageable pageable) {
         return activityLogRepository.findAll(pageable)
                 .map(this::mapToResponse);
     }
 
+    /**
+     * Log an admin activity for auditing purposes.
+     * @param type Type of activity (e.g., "USER_MANAGEMENT", "FINANCE", etc.).
+     * @param actorName Name of the admin performing the action.
+     * @param actorRole Role of the admin (e.g., "SUPER_ADMIN", "ADMIN").
+     * @param description Detailed description of the activity.
+     */
     @Transactional
     public void logActivity(String type, String actorName, String actorRole, String description) {
         ActivityLog log = ActivityLog.builder()
@@ -133,6 +166,11 @@ public class AdminStatsService {
         activityLogRepository.save(log);
     }
 
+    /**
+     * Map an ActivityLog entity to an ActivityLogResponse DTO.
+     * @param log ActivityLog entity to map.
+     * @return ActivityLogResponse DTO containing log details.
+     */
     private ActivityLogResponse mapToResponse(ActivityLog log) {
         return ActivityLogResponse.builder()
                 .id(log.getId())

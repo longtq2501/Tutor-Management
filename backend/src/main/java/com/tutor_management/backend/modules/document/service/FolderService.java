@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for managing folders in the document library, including creation, retrieval, and deletion.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +31,7 @@ public class FolderService {
     private final DocumentService documentService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
+    // Retrieves all root folders for the current tutor. If no tutor is logged in, returns all root folders.
     public List<FolderResponse> getRootFolders() {
         Long tutorId = documentService.getCurrentTutorId();
         return folderRepository.findRootFoldersByTutorId(tutorId).stream()
@@ -35,12 +39,14 @@ public class FolderService {
                 .collect(Collectors.toList());
     }
 
+    // Retrieves all subfolders under a given parent folder. If no tutor is logged in, returns all subfolders under the parent.
     public List<FolderResponse> getSubfolders(Long parentId) {
         return folderRepository.findByParentId(parentId).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
+    // Creates a new folder under the specified parent (if provided) and associates it with the current tutor (if logged in).
     public FolderResponse createFolder(FolderRequest request) {
         Long tutorId = documentService.getCurrentTutorId();
         Tutor tutor = null;
@@ -66,6 +72,7 @@ public class FolderService {
         return convertToResponse(saved);
     }
 
+    // Deletes a folder by ID, ensuring that the folder belongs to the current tutor (if logged in) before deletion.
     public void deleteFolder(Long id) {
         Long tutorId = documentService.getCurrentTutorId();
         Folder folder;
@@ -79,6 +86,7 @@ public class FolderService {
         folderRepository.delete(folder);
     }
 
+    // Helper method to convert a Folder entity to a FolderResponse DTO, including basic details and document count.
     private FolderResponse convertToResponse(Folder folder) {
         return FolderResponse.builder()
                 .id(folder.getId())

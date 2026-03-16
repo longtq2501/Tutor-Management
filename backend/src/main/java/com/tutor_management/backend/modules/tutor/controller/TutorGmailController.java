@@ -31,6 +31,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Controller to handle Gmail integration for tutors.
+ * Provides endpoints to connect/disconnect Gmail and check connection status.
+ */
 @RestController
 @RequestMapping("/api/tutor")
 @RequiredArgsConstructor
@@ -54,6 +58,13 @@ public class TutorGmailController {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
 
+    /**
+     * Endpoint to check the Gmail connection status for the authenticated tutor.
+     * Returns whether the tutor has connected their Gmail account and the associated email.
+     *
+     * @param authentication The authentication object containing the tutor's details.
+     * @return A response entity with the Gmail connection status and email.
+     */
     @GetMapping("/gmail-status")
     @PreAuthorize("hasRole('TUTOR')")
     public ResponseEntity<Map<String, Object>> getGmailStatus(Authentication authentication) {
@@ -66,6 +77,15 @@ public class TutorGmailController {
         ));
     }
 
+    /**
+     * Endpoint to initiate the Gmail connection process for the authenticated tutor.
+     * Redirects the tutor to Google's OAuth 2.0 authorization endpoint.
+     *
+     * @param authentication The authentication object containing the tutor's details.
+     * @param request        The HTTP servlet request.
+     * @param response       The HTTP servlet response.
+     * @throws IOException If an input or output exception occurs during redirection.
+     */
     @GetMapping("/gmail/connect")
     @PreAuthorize("hasRole('TUTOR')")
     public void initiateGmailConnect(Authentication authentication, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -92,6 +112,17 @@ public class TutorGmailController {
         response.sendRedirect(redirectUrl);
     }
 
+    /**
+     * Endpoint to handle the callback from Google's OAuth 2.0 authorization endpoint.
+     * Exchanges the authorization code for access and refresh tokens, and saves them to the user's record.
+     *
+     * @param code    The authorization code returned by Google.
+     * @param state   The state parameter returned by Google, used for CSRF protection.
+     * @param error   Any error returned by Google during the authorization process.
+     * @param request  The HTTP servlet request.
+     * @param response The HTTP servlet response.
+     * @throws IOException If an input or output exception occurs during redirection.
+     */
     @GetMapping("/gmail/connect/callback")
     public void handleGmailConnectCallback(
             @RequestParam(required = false) String code,
@@ -143,6 +174,13 @@ public class TutorGmailController {
         }
     }
 
+    /**
+     * Endpoint to disconnect the tutor's Gmail account.
+     * Clears the stored access and refresh tokens from the user's record.
+     *
+     * @param authentication The authentication object containing the tutor's details.
+     * @return A response entity indicating that the disconnection was successful.
+     */
     @DeleteMapping("/gmail/disconnect")
     @PreAuthorize("hasRole('TUTOR')")
     public ResponseEntity<Map<String, Object>> disconnectGmail(Authentication authentication) {

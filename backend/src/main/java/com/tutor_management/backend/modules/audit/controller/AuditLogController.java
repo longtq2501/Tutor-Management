@@ -27,6 +27,13 @@ public class AuditLogController {
 
     private final AuditRepository auditRepository;
 
+    /**
+     * Get paginated audit logs with optional filtering by actor and action.
+     * @param actorId Optional filter for the ID of the user who performed the action.
+     * @param action Optional filter for the type of action performed.
+     * @param pageable Pagination information.
+     * @return Paginated list of audit logs.
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(
             @RequestParam(required = false) String actorId,

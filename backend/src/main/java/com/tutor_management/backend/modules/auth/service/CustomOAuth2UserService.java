@@ -4,8 +4,6 @@ import com.tutor_management.backend.modules.auth.RoleEntity;
 import com.tutor_management.backend.modules.auth.RoleRepository;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
-import com.tutor_management.backend.modules.tutor.entity.Tutor;
-import com.tutor_management.backend.modules.tutor.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +20,11 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * CustomOAuth2UserService is responsible for processing OAuth2 user information during authentication.
+ * It handles both new user registration and existing user updates based on the email provided by the OAuth2 provider.
+ * The service also manages role assignment based on hints provided via session or cookies, ensuring a seamless user experience.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final com.tutor_management.backend.modules.tutor.service.TutorService tutorService;
     private final PasswordEncoder passwordEncoder;
 
+    // The loadUser method is overridden to process the OAuth2 user information after it is retrieved from the provider.
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -39,6 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return processOAuth2User(oAuth2User);
     }
 
+    // The processOAuth2User method extracts user information from the OAuth2User object, checks if the user already exists in the database, and either updates the existing user or registers a new one. It also handles role assignment based on hints provided via session or cookies.
     private OAuth2User processOAuth2User(OAuth2User oAuth2User) {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
@@ -91,7 +96,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             
             user = registerNewUser(email, name, picture, role);
 
-            // ✅ CRITICAL: Provision Tutor profile ONLY for new TUTOR registrations
+            // CRITICAL: Provision Tutor profile ONLY for new TUTOR registrations
             if ("TUTOR".equals(user.getRole().getName())) {
                 tutorService.ensureTutorProfile(user);
             }
@@ -100,6 +105,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
+    // The registerNewUser method creates a new User entity based on the information provided by the OAuth2 provider and saves it to the database. It also assigns a default role to the user based on the hints provided via session or cookies.
     private User registerNewUser(String email, String name, String picture, RoleEntity role) {
         User user = User.builder()
                 .email(email)
@@ -115,6 +121,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return userRepository.save(user);
     }
 
+    // The updateExistingUser method updates the existing user's information (name and picture) if it has changed since the last login. It checks for changes to avoid unnecessary database updates and logs any updates made to the user's information.
     private void updateExistingUser(User user, String name, String picture) {
         boolean updated = false;
         if (name != null && !name.equals(user.getFullName())) {

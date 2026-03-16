@@ -13,6 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for managing whiteboard strokes in online sessions.
+ * Handles saving, retrieving, and deleting stroke data associated with specific rooms and users.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,6 +25,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
     private final WhiteboardStrokeRepository repository;
     private final ObjectMapper objectMapper;
 
+    // Core Stroke Management Logic with JSON Serialization and Robust Error Handling
     @Override
     @Transactional
     public void saveStroke(String roomId, WhiteboardStrokeMessage.StrokeData stroke) {
@@ -40,6 +45,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
         }
     }
 
+    // Core Stroke Retrieval Logic with JSON Deserialization and Robust Error Handling
     @Override
     @Transactional(readOnly = true)
     public List<WhiteboardStrokeMessage.StrokeData> getStrokes(String roomId) {
@@ -56,6 +62,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
                 .collect(Collectors.toList());
     }
 
+    // Core Stroke Deletion Logic with Validation and Logging
     @Override
     @Transactional
     public void deleteStroke(String roomId, String strokeId) {
@@ -63,6 +70,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
         log.debug("Deleted stroke {} from room {}", strokeId, roomId);
     }
 
+    // Core Stroke Clearing Logic with Validation and Logging
     @Override
     @Transactional
     public void clearStrokes(String roomId, String userId) {

@@ -12,6 +12,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Service for generating downloadable reports based on analytics data.
+ * Provides methods to create CSV and Excel files for financial and performance analytics.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -19,6 +23,7 @@ public class ReportService {
 
     private final AnalyticsService analyticsService;
 
+    // Generates a CSV report for financial analytics of a given month
     public byte[] generateFinancialCSV(String month) {
         FinancialAnalyticsResponse stats = analyticsService.getFinancialAnalytics(month);
         StringBuilder csv = new StringBuilder();
@@ -30,6 +35,7 @@ public class ReportService {
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 
+    // Generates an Excel report for financial analytics of a given month
     public byte[] generateFinancialExcel(String month) throws IOException {
         FinancialAnalyticsResponse stats = analyticsService.getFinancialAnalytics(month);
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -63,6 +69,7 @@ public class ReportService {
         }
     }
 
+    // Generates a CSV report for performance analytics of tutors
     public byte[] generatePerformanceCSV() {
         PerformanceAnalyticsResponse stats = analyticsService.getPerformanceAnalytics();
         StringBuilder csv = new StringBuilder();

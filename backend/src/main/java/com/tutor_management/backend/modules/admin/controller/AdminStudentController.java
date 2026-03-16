@@ -18,6 +18,7 @@ public class AdminStudentController {
 
     private final AdminStudentService adminStudentService;
 
+    // get all students with optional filters for search, tutorId, and active status
     @GetMapping
     public ApiResponse<Page<AdminStudentResponse>> getAllStudents(
             @RequestParam(required = false) String search,
@@ -27,6 +28,7 @@ public class AdminStudentController {
         return ApiResponse.success(adminStudentService.getAllStudents(search, tutorId, active, pageable));
     }
 
+    // get student by id
     @GetMapping("/{id}")
     public ApiResponse<AdminStudentResponse> getStudentById(@PathVariable Long id) {
         return ApiResponse.success(adminStudentService.getStudentById(id));

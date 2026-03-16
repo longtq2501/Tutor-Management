@@ -28,6 +28,10 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Service for sending emails via Gmail API on behalf of tutors.
+ * It handles OAuth2 token management and email composition.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -44,6 +48,16 @@ public class GmailService {
     @Value("${app.gmail.enabled:true}")
     private boolean gmailEnabled;
 
+    /**
+     * Send an email from a tutor's Gmail account.
+     *
+     * @param tutorUserId      The ID of the tutor sending the email.
+     * @param toEmail          The recipient's email address.
+     * @param subject          The email subject.
+     * @param htmlBody         The HTML content of the email body.
+     * @param attachmentBytes  Optional byte array for an attachment (e.g., PDF).
+     * @param attachmentName   The filename for the attachment.
+     */
     public void sendFromTutor(Long tutorUserId, String toEmail, String subject,
                               String htmlBody, byte[] attachmentBytes, String attachmentName) {
         if (!gmailEnabled) {
@@ -61,6 +75,12 @@ public class GmailService {
         sendViaGmailApi(accessToken, tutor.getEmail(), toEmail, subject, htmlBody, attachmentBytes, attachmentName);
     }
 
+    /**
+     * Check if a tutor has connected their Gmail account.
+     *
+     * @param userId The ID of the tutor.
+     * @return True if connected, false otherwise.
+     */
     public boolean isConnected(Long userId) {
         return userRepository.findById(userId)
                 .map(user -> user.getGoogleRefreshToken() != null && !user.getGoogleRefreshToken().isBlank())

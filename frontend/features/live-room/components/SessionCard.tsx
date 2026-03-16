@@ -141,9 +141,10 @@ const SessionCardActions: React.FC<{
     roomStatus: string;
     onJoinClick: () => void;
 }> = ({ isReady, canJoinNow, isTutor, roomStatus, onJoinClick }) => {
-    const isDisabled = !canJoinNow || roomStatus === 'ENDED';
+    const effectiveCanJoinNow = roomStatus === 'ACTIVE' || canJoinNow || isReady;
+    const isDisabled = !effectiveCanJoinNow || roomStatus === 'ENDED';
     const buttonText = isTutor ? 'Bắt đầu dạy' : 'Tham gia học';
-    const buttonVariant = isReady && canJoinNow ? 'default' : 'outline';
+    const buttonVariant = effectiveCanJoinNow ? 'default' : 'outline';
 
     return (
         <Button

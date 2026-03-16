@@ -19,9 +19,6 @@ import com.tutor_management.backend.modules.document.entity.Document;
 import com.tutor_management.backend.modules.document.repository.DocumentRepository;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.finance.entity.SessionRecord;
-import com.tutor_management.backend.modules.finance.service.SessionRecordService;
-import com.tutor_management.backend.modules.student.service.StudentService;
-import com.tutor_management.backend.modules.document.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -49,11 +45,6 @@ public class TutorService {
     private final DocumentRepository documentRepository;
     private final com.tutor_management.backend.modules.admin.service.AdminStatsService adminStatsService;
     private final RoleRepository roleRepository;
-    
-    // Inject services for mapping/logic reuse
-    private final StudentService studentService;
-    private final SessionRecordService sessionRecordService;
-    private final DocumentService documentService;
 
     /**
      * Get all tutors with pagination and filtering.
@@ -176,6 +167,9 @@ public class TutorService {
         log.info("Created automatic Tutor profile for user: {}", user.getEmail());
     }
 
+    /**
+     * Update an existing tutor.
+     */
     @Transactional
     public TutorResponse updateTutor(Long id, TutorRequest request) {
         Tutor tutor = tutorRepository.findById(id)
@@ -218,6 +212,9 @@ public class TutorService {
         return mapToResponse(tutorRepository.save(tutor));
     }
 
+    /**
+     * Get tutor statistics for dashboard.
+     */
     @Transactional(readOnly = true)
     public TutorStatsDTO getTutorStats(Long id) {
         if (!tutorRepository.existsById(id)) {
@@ -245,6 +242,9 @@ public class TutorService {
                 .build();
     }
     
+    /**
+     * Delete a tutor by ID.
+     */
     @Transactional
     public void deleteTutor(Long id) {
          if (!tutorRepository.existsById(id)) {
@@ -253,6 +253,9 @@ public class TutorService {
         tutorRepository.deleteById(id);
     }
 
+    /**
+     * Toggle tutor's subscription status between ACTIVE and SUSPENDED.
+     */
     @Transactional
     public TutorResponse toggleTutorStatus(Long id) {
         Tutor tutor = tutorRepository.findById(id)
@@ -274,6 +277,9 @@ public class TutorService {
         return mapToResponse(tutorRepository.save(tutor));
     }
 
+    /**
+     * Get all students of a tutor with pagination.
+     */
     @Transactional(readOnly = true)
     public Page<StudentResponse> getTutorStudents(Long tutorId, Pageable pageable) {
         if (!tutorRepository.existsById(tutorId)) {
@@ -283,6 +289,9 @@ public class TutorService {
                 .map(this::mapToStudentResponse);
     }
 
+    /**
+     * Get all session records of a tutor with pagination and optional month filter.
+     */
     @Transactional(readOnly = true)
     public Page<SessionRecordResponse> getTutorSessions(Long tutorId, String month, Pageable pageable) {
         if (!tutorRepository.existsById(tutorId)) {
@@ -299,6 +308,9 @@ public class TutorService {
         return sessions.map(this::mapToSessionResponse);
     }
 
+    /**
+     * Get all documents of a tutor with pagination.
+     */
     @Transactional(readOnly = true)
     public Page<DocumentResponse> getTutorDocuments(Long tutorId, Pageable pageable) {
         if (!tutorRepository.existsById(tutorId)) {

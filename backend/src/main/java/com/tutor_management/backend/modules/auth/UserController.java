@@ -17,6 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+/**
+ * UserController handles user-related operations such as fetching user profile,
+ * updating profile information, changing password, and updating avatar.
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class UserController {
     private final CloudinaryService cloudinaryService;
     private final UserService userService;
 
+    // Get current authenticated user's profile
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<AuthResponse.UserInfo>> getCurrentUser(Authentication authentication) {
@@ -34,6 +39,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(userService.getUserProfile(user.getId())));
     }
 
+    // Update current authenticated user's profile
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<AuthResponse.UserInfo>> updateProfile(
@@ -47,6 +53,7 @@ public class UserController {
         ));
     }
 
+    // Update current authenticated user's avatar
     @PutMapping("/me/avatar")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<String>> updateAvatar(
@@ -73,6 +80,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Avatar updated successfully", avatarUrl));
     }
 
+    // Change current authenticated user's password
     @PutMapping("/me/password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> changePassword(
