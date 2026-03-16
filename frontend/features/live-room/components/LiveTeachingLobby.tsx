@@ -14,7 +14,6 @@ interface LiveTeachingLobbyProps {
     onJoin: (roomId: string) => void;
     currentUserId: number;
     isTutor: boolean;
-    onCreateTestRoom?: () => void;
 }
 
 const SessionListSkeleton = () => (
@@ -44,8 +43,7 @@ const SessionListSkeleton = () => (
 export const LiveTeachingLobby: React.FC<LiveTeachingLobbyProps> = ({
     onJoin,
     currentUserId,
-    isTutor,
-    onCreateTestRoom
+    isTutor
 }) => {
     const {
         data: currentSession,
@@ -128,12 +126,6 @@ export const LiveTeachingLobby: React.FC<LiveTeachingLobbyProps> = ({
                             <RefreshCw className={`w-4 h-4 ${isFetchingNextPage ? 'animate-spin' : ''}`} />
                             Làm mới
                         </Button>
-                        {isTutor && onCreateTestRoom && (
-                            <Button size="lg" onClick={onCreateTestRoom} className="rounded-xl font-bold bg-gradient-to-r from-primary to-purple-600 shadow-xl shadow-primary/20 gap-2">
-                                <Video className="w-4 h-4" />
-                                Dạy ngay (Test)
-                            </Button>
-                        )}
                     </div>
                 }
             />

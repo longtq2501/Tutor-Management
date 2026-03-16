@@ -31,15 +31,15 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
     };
 
     return (
-        <header className="h-14 border-b border-border flex items-center px-4 justify-between bg-card shrink-0">
+        <header className="h-14 border-b border-border flex items-center px-3 md:px-4 justify-between bg-card shrink-0 gap-2">
             <div className="flex items-center gap-2 min-w-0">
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <h2 className="font-semibold truncate text-sm md:text-base cursor-help flex items-center gap-1.5">
+                            <h2 className="font-semibold truncate text-xs sm:text-sm md:text-base cursor-help flex items-center gap-1.5">
                                 <span className="hidden sm:inline">Phòng: </span>
                                 <span className="hidden sm:inline">{roomId}</span>
-                                <span className="sm:hidden">{roomId.slice(0, 12)}...</span>
+                                <span className="sm:hidden">{roomId.slice(0, 8)}...</span>
                             </h2>
                         </TooltipTrigger>
                         <TooltipContent className="flex flex-col gap-2 p-3">
@@ -55,9 +55,11 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                     </Tooltip>
                 </TooltipProvider>
 
-                <BillableTimer roomId={roomId} />
+                <BillableTimer roomId={roomId} className="hidden md:flex" />
 
-                <ParticipantPresence />
+                <div className="hidden md:block">
+                    <ParticipantPresence />
+                </div>
 
                 {isRecording && (
                     <span className="flex items-center gap-1 text-[10px] md:text-xs text-red-500 font-medium animate-pulse whitespace-nowrap">
@@ -65,8 +67,8 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                     </span>
                 )}
             </div>
-            <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                <span className="hidden sm:inline text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                <span className="hidden md:inline text-xs text-muted-foreground">
                     {isConnected ? '● Đã kết nối' : '○ Đang kết nối...'}
                 </span>
                 <ModeToggle />

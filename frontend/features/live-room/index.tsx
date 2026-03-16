@@ -9,8 +9,6 @@ import { onlineSessionApi } from '@/lib/services/onlineSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { studentsApi } from '@/lib/services/student';
-import { Loader2 } from 'lucide-react';
 import { LiveTeachingLobby } from './components/LiveTeachingLobby';
 import { LobbyErrorBoundary } from './components/LobbyErrorBoundary';
 import { RoomErrorBoundary } from './components/RoomErrorBoundary';
@@ -28,6 +26,7 @@ export const LiveRoomFeature = ({ roomId: propRoomId }: { roomId?: string }) => 
 
     // Joining State (when entering a specific room)
     const [token, setToken] = useState<string | null>(null);
+    const [turnServers, setTurnServers] = useState<Array<Record<string, unknown>>>([]);
     const [isJoining, setIsJoining] = useState(false);
     const [joinError, setJoinError] = useState<string | null>(null);
 
@@ -41,6 +40,7 @@ export const LiveRoomFeature = ({ roomId: propRoomId }: { roomId?: string }) => 
             try {
                 const response = await onlineSessionApi.joinRoom(roomId);
                 setToken(response.token);
+                setTurnServers(response.turnServers || []);
             } catch (err: unknown) {
                 console.error("Failed to join room:", err);
                 const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể tham gia phòng học.";
@@ -55,39 +55,6 @@ export const LiveRoomFeature = ({ roomId: propRoomId }: { roomId?: string }) => 
         }
     }, [roomId, user]);
 
-    const handleCreateTestRoom = async () => {
-        try {
-            setIsJoining(true);
-            const studentsPage = await studentsApi.getAll(0, 10);
-
-            // P2: Find an active student for the test room
-            const activeStudent = studentsPage.content.find((s: any) =>
-                s.status === 'ACTIVE' || s.status === 'STUDYING'
-            );
-
-            const studentId = activeStudent?.id || studentsPage.content[0]?.id;
-
-            if (!studentId) {
-                throw new Error("Không tìm thấy học sinh khả dụng để tạo phòng test.");
-            }
-
-            const start = new Date(Date.now() + 60 * 1000);
-            const end = new Date(start.getTime() + 60 * 60 * 1000);
-
-            const session = await onlineSessionApi.createSession({
-                studentId,
-                scheduledStart: start.toISOString(),
-                scheduledEnd: end.toISOString()
-            });
-
-            router.push(`/dashboard?view=live-room&roomId=${session.roomId}`);
-        } catch (error) {
-            console.error("Failed to create test room:", error);
-            setJoinError("Không thể tạo phòng test. Hệ thống cần ít nhất 1 học sinh.");
-            setIsJoining(false);
-        }
-    };
-
     // If no specific room ID is provided, show the lobby
     if (!roomId) {
         return (
@@ -96,7 +63,6 @@ export const LiveRoomFeature = ({ roomId: propRoomId }: { roomId?: string }) => 
                     onJoin={(rid) => router.push(`/live-teaching/${rid}`)}
                     currentUserId={user?.id || 0}
                     isTutor={user?.role !== 'STUDENT'}
-                    onCreateTestRoom={handleCreateTestRoom}
                 />
             </LobbyErrorBoundary>
         );
@@ -128,7 +94,7 @@ export const LiveRoomFeature = ({ roomId: propRoomId }: { roomId?: string }) => 
         <RoomErrorBoundary onReset={() => window.location.reload()}>
             <WebSocketProvider roomId={roomId} token={token}>
                 <RoomStateProvider>
-                    <LiveRoomDisplay roomId={roomId} currentUserId={user.id} />
+                    <LiveRoomDisplay roomId={roomId} currentUserId={user.id} turnServers={turnServers} />
                 </RoomStateProvider>
             </WebSocketProvider>
         </RoomErrorBoundary>

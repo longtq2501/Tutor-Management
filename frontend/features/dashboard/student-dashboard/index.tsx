@@ -119,7 +119,7 @@ export default function StudentDashboard() {
 
         <div className="space-y-6">
           {schedule && <ScheduleSection schedule={schedule} />}
-          <DocumentsSection documents={documents.slice(0, 4)} />
+          <DocumentsSection documents={documents} />
         </div>
       </div>
 

@@ -22,13 +22,14 @@ import { useWebRTCSignaling } from '../hooks/useWebRTCSignaling';
 interface LiveRoomDisplayProps {
     roomId: string;
     currentUserId: number;
+    turnServers?: Array<Record<string, unknown>>;
 }
 
 /**
  * Main display component for the Live Room feature.
  * Refactored to separate concerns and prevent infinite re-renders.
  */
-export const LiveRoomDisplay: React.FC<LiveRoomDisplayProps> = ({ roomId, currentUserId }) => {
+export const LiveRoomDisplay: React.FC<LiveRoomDisplayProps> = ({ roomId, currentUserId, turnServers = [] }) => {
     const { isConnected, sendMessage } = useWebSocket();
     const { state, actions } = useRoomState();
     const retryCountRef = React.useRef(0);
@@ -46,7 +47,7 @@ export const LiveRoomDisplay: React.FC<LiveRoomDisplayProps> = ({ roomId, curren
     useRoomSync(roomId);
 
     // ✅ WebRTC Signaling
-    useWebRTCSignaling(roomId, currentUserId, media);
+    useWebRTCSignaling(roomId, currentUserId, media, turnServers);
 
     // Start heartbeat
     useHeartbeat(roomId);

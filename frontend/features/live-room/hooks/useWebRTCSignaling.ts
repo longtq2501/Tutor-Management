@@ -33,12 +33,15 @@ import { useRoomState } from '../context/RoomStateContext';
 export const useWebRTCSignaling = (
     roomId: string,
     currentUserId: number,
-    media: any // eslint-disable-line @typescript-eslint/no-explicit-any
+    media: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    turnServers: Array<Record<string, unknown>> = []
 ) => {
     const { subscribe, sendMessage, isConnected, connectionId } = useWebSocket();
     const { state, actions } = useRoomState();
 
     const pcRef = useRef<RTCPeerConnection | null>(null);
+    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const restartAttemptRef = useRef(0);
 
     // ---- Refs: mirror live state for use inside async callbacks / closures ----
     const participantsRef = useRef(state.participants);
@@ -58,15 +61,42 @@ export const useWebRTCSignaling = (
     const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
 
     // ---- PeerConnection Configuration ----
-    const configuration: RTCConfiguration = useMemo(() => ({
-        iceServers: [
+    const configuration: RTCConfiguration = useMemo(() => {
+        const parsedTurnServers: RTCIceServer[] = turnServers
+            .map((server) => {
+                const urls = server.urls;
+                if (!urls) return null;
+
+                const normalizedUrls = Array.isArray(urls)
+                    ? urls.filter((url): url is string => typeof url === 'string')
+                    : (typeof urls === 'string' ? [urls] : []);
+
+                if (normalizedUrls.length === 0) return null;
+
+                const iceServer: RTCIceServer = { urls: normalizedUrls };
+                if (typeof server.username === 'string') iceServer.username = server.username;
+                if (typeof server.credential === 'string') iceServer.credential = server.credential;
+                return iceServer;
+            })
+            .filter((server): server is RTCIceServer => server !== null);
+
+        const fallbackStun: RTCIceServer[] = [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-        ],
-    }), []);
+        ];
+
+        return {
+            iceServers: [...parsedTurnServers, ...fallbackStun],
+            iceCandidatePoolSize: 10,
+        };
+    }, [turnServers]);
 
     // ---- Cleanup ----
     const cleanup = useCallback(() => {
+        if (reconnectTimerRef.current) {
+            clearTimeout(reconnectTimerRef.current);
+            reconnectTimerRef.current = null;
+        }
         if (pcRef.current) {
             console.log('[WebRTC] Closing PeerConnection');
             pcRef.current.onicecandidate = null;
@@ -109,14 +139,60 @@ export const useWebRTCSignaling = (
         pc.onconnectionstatechange = () => {
             const cs = pc.connectionState;
             console.log(`[WebRTC] Connection state: ${cs}`);
+
             if (cs === 'connected') {
+                restartAttemptRef.current = 0;
+                if (reconnectTimerRef.current) {
+                    clearTimeout(reconnectTimerRef.current);
+                    reconnectTimerRef.current = null;
+                }
                 actions.setConnectionState('CONNECTED');
-            } else if (cs === 'failed') {
-                actions.setConnectionState('FAILED');
-                actions.setError('Kết nối P2P thất bại. Vui lòng thử lại.');
-            } else if (cs === 'disconnected') {
-                console.warn('[WebRTC] Peer disconnected — may recover automatically');
-                // Do NOT set FAILED here; ICE may self-recover within a few seconds.
+                return;
+            }
+
+            if (cs === 'disconnected' || cs === 'failed') {
+                console.warn('[WebRTC] Peer connection degraded:', cs);
+
+                if (!isTutorRef.current || !isConnected) {
+                    if (cs === 'failed') {
+                        actions.setConnectionState('FAILED');
+                        actions.setError('Kết nối P2P thất bại. Vui lòng thử lại.');
+                    }
+                    return;
+                }
+
+                if (restartAttemptRef.current >= 2) {
+                    actions.setConnectionState('FAILED');
+                    actions.setError('Kết nối P2P không ổn định. Vui lòng vào lại phòng học.');
+                    return;
+                }
+
+                if (reconnectTimerRef.current) return;
+
+                reconnectTimerRef.current = setTimeout(async () => {
+                    reconnectTimerRef.current = null;
+                    const other = participantsRef.current.find(p => Number(p.id) !== currentUserId);
+
+                    if (!other || !pcRef.current || pcRef.current.signalingState !== 'stable') {
+                        return;
+                    }
+
+                    try {
+                        restartAttemptRef.current += 1;
+                        console.log('[WebRTC] Attempting ICE restart', restartAttemptRef.current);
+                        const restartOffer = await pcRef.current.createOffer({ iceRestart: true });
+                        await pcRef.current.setLocalDescription(restartOffer);
+
+                        sendMessage(`/app/room/${roomId}/signal`, {
+                            type: 'offer',
+                            data: restartOffer,
+                            senderId: currentUserId,
+                            receiverId: Number(other.id),
+                        });
+                    } catch (error) {
+                        console.error('[WebRTC] ICE restart failed:', error);
+                    }
+                }, cs === 'failed' ? 1000 : 2500);
             }
         };
 
@@ -134,7 +210,7 @@ export const useWebRTCSignaling = (
 
         pcRef.current = pc;
         return pc;
-    }, [roomId, currentUserId, sendMessage, actions, cleanup, configuration]);
+    }, [roomId, currentUserId, sendMessage, actions, cleanup, configuration, isConnected]);
 
     // ---- Track Replacement + mode-change Broadcast (Atomic) ----
     // Bug 7: replaceTrack and mode-change signal are ONE atomic operation.
