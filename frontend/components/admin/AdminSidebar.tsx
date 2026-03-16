@@ -14,7 +14,6 @@ import {
     History,
     ChevronLeft,
     ChevronRight,
-    Tornado,
     UserCog
 } from 'lucide-react';
 import {
@@ -82,11 +81,11 @@ export function AdminSidebar({
             {/* Logo area */}
             <div className="h-[52px] px-4 flex items-center justify-between border-b border-[var(--admin-border)]">
                 <div className={`flex items-center gap-3 overflow-hidden ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} transition-all`}>
-                    <Tornado className="h-6 w-6 text-[var(--admin-accent)] shrink-0" />
+                    <GraduationCap className="h-6 w-6 text-[var(--admin-accent)] shrink-0" />
                     <span className="font-black text-lg tracking-tighter whitespace-nowrap">TUTOR <span className="text-[var(--admin-accent)]">PRO</span></span>
                 </div>
                 {collapsed && (
-                    <Tornado className="h-6 w-6 text-[var(--admin-accent)] mx-auto" />
+                    <GraduationCap className="h-6 w-6 text-[var(--admin-accent)] mx-auto" />
                 )}
 
                 <button

@@ -139,7 +139,7 @@ export function StudentFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto admin-glass border-[var(--admin-border)]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto admin-theme admin-glass border-[var(--admin-border)]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-[var(--admin-text)]">
                         {studentId ? 'CHỈNH SỬA HỌC SINH' : 'THÊM MỚI HỌC SINH'}

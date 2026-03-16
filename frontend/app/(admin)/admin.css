@@ -1,4 +1,4 @@
-.admin-theme {
+:root[data-admin-theme] {
   --admin-bg: #0c0c0f;
   --admin-surface: #131318;
   --admin-surface2: #1a1a22;
@@ -17,14 +17,9 @@
   --admin-shadow: rgba(3, 7, 18, 0.25);
   --admin-glass-bg: rgba(19, 19, 24, 0.7);
   --admin-overlay: rgba(2, 6, 23, 0.56);
-
-  background-color: var(--admin-bg);
-  color: var(--admin-text);
-  min-height: 100vh;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-:root[data-admin-theme='light'] .admin-theme {
+:root[data-admin-theme='light'] {
   --admin-bg: #f8f9fa;
   --admin-surface: #ffffff;
   --admin-surface2: #f1f3f5;
@@ -45,7 +40,7 @@
   --admin-overlay: rgba(0, 0, 0, 0.45);
 }
 
-:root[data-admin-theme='dark'] .admin-theme {
+:root[data-admin-theme='dark'] {
   --admin-bg: #09090b;
   --admin-surface: #121215;
   --admin-surface2: #18181b;
@@ -64,6 +59,13 @@
   --admin-shadow: rgba(0, 0, 0, 0.5);
   --admin-glass-bg: rgba(9, 9, 11, 0.85);
   --admin-overlay: rgba(0, 0, 0, 0.8);
+}
+
+.admin-theme {
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .admin-theme * {

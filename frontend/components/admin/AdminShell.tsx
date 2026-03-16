@@ -30,7 +30,10 @@ function useAdminThemeSync() {
             attributeFilter: ['class'],
         });
 
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            document.documentElement.removeAttribute('data-admin-theme');
+        };
     }, []);
 }
 
