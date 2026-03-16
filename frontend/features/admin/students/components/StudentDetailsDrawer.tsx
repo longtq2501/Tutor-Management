@@ -53,7 +53,7 @@ export function StudentDetailsDrawer({
     if (!student && loading) {
         return (
             <Sheet open={isOpen} onOpenChange={onClose}>
-                <SheetContent className="sm:max-w-[500px] admin-glass border-[var(--admin-border)]">
+                <SheetContent className="sm:max-w-[500px] admin-theme admin-glass border-[var(--admin-border)]">
                     <SheetHeader className="sr-only">
                         <SheetTitle>Chi tiết học sinh</SheetTitle>
                     </SheetHeader>
@@ -69,12 +69,12 @@ export function StudentDetailsDrawer({
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
-            <SheetContent className="sm:max-w-[500px] admin-glass border-[var(--admin-border)] overflow-y-auto">
+            <SheetContent className="sm:max-w-[500px] admin-theme admin-glass border-[var(--admin-border)] overflow-y-auto">
                 <SheetHeader className="mb-8">
                     <div className="flex items-center gap-5">
                         <OptimizedAvatar
                             name={student.name}
-                            avatarUrl={(student as any).avatarUrl}
+                            avatarUrl={student.avatarUrl}
                             isActive={student.active}
                             className="w-20 h-20 rounded-2xl shadow-glow-lg"
                         />
