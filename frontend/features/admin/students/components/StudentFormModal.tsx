@@ -139,138 +139,140 @@ export function StudentFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto admin-glass border-[var(--admin-border)]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden admin-theme admin-glass border-[var(--admin-border)] flex flex-col max-h-[90vh]">
+                <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-xl font-black text-[var(--admin-text)]">
                         {studentId ? 'CHỈNH SỬA HỌC SINH' : 'THÊM MỚI HỌC SINH'}
                     </DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold text-[var(--admin-text2)]">HỌ TÊN HỌC SINH *</Label>
-                            <Input
-                                required
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="Nguyễn Văn A"
-                                className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold text-[var(--admin-text2)]">SỐ ĐIỆN THOẠI</Label>
-                            <Input
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                placeholder="0987xxxxxx"
-                                className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold text-[var(--admin-text2)]">LỊCH HỌC *</Label>
-                            <Input
-                                required
-                                value={formData.schedule}
-                                onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
-                                placeholder="Thứ 2-4-6 (19:00)"
-                                className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold text-[var(--admin-text2)]">HỌC PHÍ / GIỜ *</Label>
-                            <Input
-                                required
-                                type="number"
-                                value={formData.pricePerHour}
-                                onChange={(e) => setFormData({ ...formData, pricePerHour: Number(e.target.value) })}
-                                className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold text-[var(--admin-text2)]">PHỤ HUYNH LIÊN KẾT</Label>
-                        <select
-                            className="w-full h-10 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-lg px-3 text-sm focus:outline-none focus:border-[var(--admin-accent)]"
-                            value={formData.parentId}
-                            onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                        >
-                            <option value="">-- Chọn phụ huynh --</option>
-                            {parents.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.name} - {p.phone}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold text-[var(--admin-text2)]">GHI CHÚ</Label>
-                        <textarea
-                            className="w-full min-h-[80px] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-xl p-3 text-sm focus:outline-none focus:border-[var(--admin-accent)] transition-all"
-                            value={formData.notes}
-                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            placeholder="Tình hình học tập, lưu ý đặc biệt..."
-                        />
-                    </div>
-
-                    {!studentId && (
-                        <div className="space-y-4 pt-2 border-t border-[var(--admin-border)]">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="createAccount"
-                                    checked={formData.createAccount}
-                                    onChange={(e) => setFormData({ ...formData, createAccount: e.target.checked })}
-                                    className="accent-[var(--admin-accent)]"
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-[var(--admin-text2)]">HỌ TÊN HỌC SINH *</Label>
+                                <Input
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    placeholder="Nguyễn Văn A"
+                                    className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
                                 />
-                                <Label htmlFor="createAccount" className="text-xs font-bold cursor-pointer">TẠO TÀI KHOẢN ĐĂNG NHẬP</Label>
                             </div>
-
-                            {formData.createAccount && (
-                                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-bold text-[var(--admin-text2)]">EMAIL</Label>
-                                        <Input
-                                            type="email"
-                                            required={formData.createAccount}
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-bold text-[var(--admin-text2)]">MẬT KHẨU</Label>
-                                        <Input
-                                            type="password"
-                                            required={formData.createAccount}
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-[var(--admin-text2)]">SỐ ĐIỆN THOẠI</Label>
+                                <Input
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    placeholder="0987xxxxxx"
+                                    className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
+                                />
+                            </div>
                         </div>
-                    )}
 
-                    <DialogFooter className="pt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-[var(--admin-text2)]">LỊCH HỌC *</Label>
+                                <Input
+                                    required
+                                    value={formData.schedule}
+                                    onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
+                                    placeholder="Thứ 2-4-6 (19:00)"
+                                    className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-[var(--admin-text2)]">HỌC PHÍ / GIỜ *</Label>
+                                <Input
+                                    required
+                                    type="number"
+                                    value={formData.pricePerHour}
+                                    onChange={(e) => setFormData({ ...formData, pricePerHour: Number(e.target.value) })}
+                                    className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs font-bold text-[var(--admin-text2)]">PHỤ HUYNH LIÊN KẾT</Label>
+                            <select
+                                className="w-full h-10 bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-lg px-3 text-sm focus:outline-none focus:border-[var(--admin-accent)] transition-all"
+                                value={formData.parentId}
+                                onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                            >
+                                <option value="">-- Chọn phụ huynh --</option>
+                                {parents.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name} - {p.phone}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs font-bold text-[var(--admin-text2)]">GHI CHÚ</Label>
+                            <textarea
+                                className="w-full min-h-[80px] bg-[var(--admin-surface)] border border-[var(--admin-border)] rounded-xl p-3 text-sm focus:outline-none focus:border-[var(--admin-accent)] transition-all resize-none"
+                                value={formData.notes}
+                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                placeholder="Tình hình học tập, lưu ý đặc biệt..."
+                            />
+                        </div>
+
+                        {!studentId && (
+                            <div className="space-y-4 pt-2 border-t border-[var(--admin-border)]">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="createAccount"
+                                        checked={formData.createAccount}
+                                        onChange={(e) => setFormData({ ...formData, createAccount: e.target.checked })}
+                                        className="accent-[var(--admin-accent)] h-4 w-4"
+                                    />
+                                    <Label htmlFor="createAccount" className="text-xs font-bold cursor-pointer">TẠO TÀI KHOẢN ĐĂNG NHẬP</Label>
+                                </div>
+
+                                {formData.createAccount && (
+                                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300 pb-2">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold text-[var(--admin-text2)]">EMAIL</Label>
+                                            <Input
+                                                type="email"
+                                                required={formData.createAccount}
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold text-[var(--admin-text2)]">MẬT KHẨU</Label>
+                                            <Input
+                                                type="password"
+                                                required={formData.createAccount}
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                className="bg-[var(--admin-surface)] border-[var(--admin-border)] text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter className="p-6 pt-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface2)]/30">
                         <Button
                             type="button"
                             variant="ghost"
                             onClick={onClose}
-                            className="text-[var(--admin-text)]"
+                            className="text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] font-bold transition-all"
                         >
-                            HỦY
+                            HỦY BỎ
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-[var(--admin-accent)] text-[var(--admin-bg)] font-black shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:scale-105 transition-all"
+                            className="px-8 bg-[var(--admin-accent)] text-white font-black shadow-glow-md shadow-[var(--admin-accent)]/30 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest"
                         >
                             {loading ? 'ĐANG XỬ LÝ...' : (studentId ? 'CẬP NHẬT' : 'TẠO MỚI')}
                         </Button>

@@ -259,8 +259,11 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                                         <div className="flex items-start gap-2">
                                                             <span className="font-semibold text-sm uppercase opacity-70 shrink-0">Câu trả lời:</span>
-                                                            <div className="flex flex-col gap-1 min-w-0">
+                                                            <div className="flex flex-row items-center flex-wrap gap-1.5 min-w-0">
                                                                 <span className="text-lg font-bold">{answer?.selectedOption || '(Chưa làm)'}</span>
+                                                                {answer?.selectedOption && selectedOptionText && (
+                                                                    <span className="text-lg font-bold">-</span>
+                                                                )}
                                                                 {selectedOptionText && (
                                                                     <span className="text-sm opacity-90 break-words">{selectedOptionText}</span>
                                                                 )}
@@ -286,10 +289,13 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                 <div className="text-sm bg-muted/50 p-3 rounded-md border border-border space-y-1">
                                                     <div className="flex flex-col sm:flex-row sm:items-start gap-1">
                                                         <span className="text-muted-foreground font-semibold">Đáp án đúng:</span>
-                                                        <div className="flex flex-col gap-0.5">
+                                                        <div className="flex flex-row items-center flex-wrap gap-1.5 min-w-0">
                                                             <span className="font-bold text-foreground">{correctOption || 'N/A'}</span>
+                                                            {correctOption && correctOptionText && (
+                                                                <span className="font-bold text-foreground">-</span>
+                                                            )}
                                                             {correctOptionText && (
-                                                                <span className="text-xs opacity-90">{correctOptionText}</span>
+                                                                <span className="text-xs opacity-90 break-words">{correctOptionText}</span>
                                                             )}
                                                         </div>
                                                     </div>

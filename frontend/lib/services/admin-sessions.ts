@@ -38,5 +38,25 @@ export const adminSessionsApi = {
 
     delete: async (id: number): Promise<void> => {
         await axiosInstance.delete(`/sessions/${id}`);
+    },
+    
+    exportToExcel: async (month = '', studentId?: number): Promise<void> => {
+        const params = new URLSearchParams();
+        if (month) params.append('month', month);
+        if (studentId) params.append('studentId', studentId.toString());
+
+        const response = await axiosInstance.get(`/sessions/export/excel?${params.toString()}`, {
+            responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const fileName = `Doi_Soat_Buoi_Hoc_${month || 'Tat_Ca'}.xlsx`;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
     }
 };

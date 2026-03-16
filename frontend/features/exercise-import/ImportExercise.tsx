@@ -5,6 +5,7 @@ import { ImportUploadStep } from './components/ImportUploadStep';
 import { useImport } from './hooks/useImport';
 import { CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface ImportExerciseProps {
     classId?: string;
@@ -44,8 +45,11 @@ export const ImportExercise: React.FC<ImportExerciseProps> = ({ classId, onSucce
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-4 space-y-6">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+        <div className={cn(
+            "mx-auto p-4 space-y-4 flex flex-col flex-1 min-h-0 w-full",
+            step === 2 ? "max-w-[1600px]" : "max-w-4xl overflow-y-auto"
+        )}>
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4 shrink-0">
                 <span className={step === 1 ? "font-bold text-primary" : ""}>1. Upload Content</span>
                 <span>→</span>
                 <span className={step === 2 ? "font-bold text-primary" : ""}>2. Preview & Edit</span>
@@ -62,12 +66,14 @@ export const ImportExercise: React.FC<ImportExerciseProps> = ({ classId, onSucce
             )}
 
             {step === 2 && previewData && (
-                <ImportPreviewStep
-                    initialData={previewData}
-                    onSave={saveExercise}
-                    onBack={() => goToStep(1)}
-                    isLoading={isLoading}
-                />
+                <div className="flex-1 min-h-0">
+                    <ImportPreviewStep
+                        initialData={previewData}
+                        onSave={saveExercise}
+                        onBack={() => goToStep(1)}
+                        isLoading={isLoading}
+                    />
+                </div>
             )}
         </div>
     );

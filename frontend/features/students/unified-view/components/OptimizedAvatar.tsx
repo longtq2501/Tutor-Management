@@ -1,14 +1,20 @@
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+import Image from 'next/image';
 
 interface OptimizedAvatarProps {
     name: string;
     isActive?: boolean;
     className?: string; // Allow custom sizing/styling
+    avatarUrl?: string; // Optional backend URL
 }
 
-export function OptimizedAvatar({ name, isActive, className }: OptimizedAvatarProps) {
-    const initial = name.charAt(0).toUpperCase();
+export function OptimizedAvatar({ name, isActive, className, avatarUrl }: OptimizedAvatarProps) {
+    const initials = useMemo(() => {
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }, [name]);
     const hue = useMemo(() => {
         // Generate consistent color from name
         let hash = 0;
@@ -26,10 +32,20 @@ export function OptimizedAvatar({ name, isActive, className }: OptimizedAvatarPr
                 className
             )}
             style={{
-                background: `linear-gradient(135deg, hsl(${hue}, 70%, 50%) 0%, hsl(${hue}, 70%, 40%) 100%)`
+                background: avatarUrl ? undefined : `linear-gradient(135deg, hsl(${hue}, 70%, 50%) 0%, hsl(${hue}, 70%, 40%) 100%)`
             }}
         >
-            <span className="select-none">{initial}</span>
+            {avatarUrl ? (
+                <Image
+                    src={avatarUrl}
+                    alt={name}
+                    fill
+                    sizes="(max-width: 640px) 56px, 64px"
+                    className="object-cover"
+                />
+            ) : (
+                <span className="select-none text-[10px] sm:text-xs font-black uppercase tracking-tighter">{initials}</span>
+            )}
 
             {/* Status dot - pure CSS, no image */}
             {isActive !== undefined && (

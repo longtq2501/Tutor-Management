@@ -22,9 +22,10 @@ export const useImport = (classId?: string) => {
                 setPreviewData(data);
                 setStep(2);
             } else {
+                const firstError = data.validationErrors?.[0] || "Please check the errors and try again.";
                 setError(data.validationErrors.join('\n'));
-                toast.error("Import Failed", {
-                    description: "Please check the errors and try again."
+                toast.error("Validation Error", {
+                    description: firstError
                 });
             }
         } catch (err: unknown) {

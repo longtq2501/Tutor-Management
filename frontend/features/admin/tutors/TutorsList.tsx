@@ -6,6 +6,9 @@ import { StatsBar } from '@/components/admin/StatsBar';
 import { AdminTable } from '@/components/admin/AdminTable';
 import { TutorDetailDrawer } from './TutorDetailDrawer';
 import { CreateTutorModal } from './CreateTutorModal';
+import { OptimizedAvatar } from '@/features/students/unified-view/components/OptimizedAvatar';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -104,25 +107,15 @@ export function TutorsList() {
             header: 'Gia Sư',
             accessor: (t: Tutor) => (
                 <div className="flex items-center gap-4 group/tutor">
-                    <div className="relative">
-                        {t.avatarUrl ? (
-                            <img
-                                src={t.avatarUrl}
-                                alt={t.fullName}
-                                className="w-11 h-11 rounded-xl object-cover border-2 border-border/20 shadow-glow-sm group-hover/tutor:border-primary transition-all duration-500"
-                            />
-                        ) : (
-                            <div className="w-11 h-11 rounded-xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center font-black text-primary text-xs shadow-glow-sm group-hover/tutor:border-primary transition-all duration-500 uppercase">
-                                {t.fullName.split(' ').map((n: string) => n[0]).join('')}
-                            </div>
-                        )}
-                        {t.subscriptionStatus === 'ACTIVE' && (
-                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full shadow-glow-sm shadow-green-500/50" />
-                        )}
-                    </div>
+                    <OptimizedAvatar
+                        name={t.fullName}
+                        avatarUrl={t.avatarUrl}
+                        isActive={t.subscriptionStatus === 'ACTIVE'}
+                        className="w-11 h-11 rounded-xl"
+                    />
                     <div className="flex flex-col gap-0.5">
-                        <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors duration-300 leading-none">{t.fullName}</span>
-                        <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest opacity-60 leading-none mt-1">{t.email}</span>
+                        <span className="text-sm font-black text-foreground group-hover:text-[var(--admin-accent)] transition-colors duration-300 leading-none">{t.fullName}</span>
+                        <span className="text-[11px] font-black text-[var(--admin-text2)] uppercase tracking-widest opacity-60 leading-none mt-1">{t.email}</span>
                     </div>
                 </div>
             ),
@@ -141,10 +134,10 @@ export function TutorsList() {
                 const isPro = t.subscriptionPlan === 'PREMIUM';
                 return (
                     <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${isPro
-                            ? 'bg-gradient-to-r from-violet-600/10 to-fuchsia-600/10 text-violet-500 border border-violet-500/20 shadow-glow-sm shadow-fuchsia-500/10'
-                            : 'bg-slate-100 dark:bg-white/5 text-muted-foreground border border-border/50'
+                            ? 'bg-[var(--admin-accent)]/10 text-[var(--admin-accent)] border border-[var(--admin-accent)]/20 shadow-glow-sm shadow-[var(--admin-accent)]/10'
+                            : 'bg-muted/50 text-[var(--admin-text2)] border border-border/50'
                         }`}>
-                        {isPro && <ShieldAlert className="w-3 h-3 text-fuchsia-500" />}
+                        {isPro && <ShieldAlert className="w-3 h-3 text-[var(--admin-accent)]" />}
                         {isPro ? 'PRO MAX' : 'BASIC'}
                     </div>
                 );
@@ -152,12 +145,17 @@ export function TutorsList() {
         },
         {
             header: 'Ngày Tham Gia',
-            accessor: (t: Tutor) => (
-                <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-black text-foreground opacity-80">{new Date(t.createdAt).toLocaleDateString('vi-VN')}</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter opacity-40">Hội viên mới</span>
-                </div>
-            )
+            accessor: (t: Tutor) => {
+                const date = t.createdAt ? new Date(t.createdAt) : null;
+                return (
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-black text-foreground opacity-80">
+                            {date && !isNaN(date.getTime()) ? format(date, 'dd/MM/yyyy', { locale: vi }) : 'N/A'}
+                        </span>
+                        <span className="text-[10px] font-bold text-[var(--admin-text3)] uppercase tracking-tighter opacity-40">Hội viên mới</span>
+                    </div>
+                );
+            }
         },
         {
             header: 'Trạng Thái',
@@ -165,8 +163,8 @@ export function TutorsList() {
                 const isActive = t.subscriptionStatus === 'ACTIVE';
                 return (
                     <div className="flex items-center gap-2.5">
-                        <div className={`w-2 h-2 rounded-full shadow-glow-sm ${isActive ? 'bg-green-500 shadow-green-500/50' : 'bg-red-500 shadow-red-500/50'}`} />
-                        <span className={`text-[11px] font-black uppercase tracking-[0.15em] ${isActive ? 'text-green-500' : 'text-red-500'}`}>
+                        <div className={`w-2 h-2 rounded-full shadow-glow-sm ${isActive ? 'bg-[var(--admin-green)] shadow-[var(--admin-green)]/50' : 'bg-[var(--admin-red)] shadow-[var(--admin-red)]/50'}`} />
+                        <span className={`text-[11px] font-black uppercase tracking-[0.15em] ${isActive ? 'text-[var(--admin-green)]' : 'text-[var(--admin-red)]'}`}>
                             {isActive ? 'Hoạt động' : 'Tạm khóa'}
                         </span>
                     </div>
@@ -179,7 +177,7 @@ export function TutorsList() {
             accessor: (t: Tutor) => (
                 <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                     <button
-                        className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-primary bg-slate-100 dark:bg-white/5 hover:bg-primary/10 border border-transparent hover:border-primary/20 rounded-xl transition-all duration-300 group/btn"
+                        className="w-10 h-10 flex items-center justify-center text-[var(--admin-text2)] hover:text-[var(--admin-accent)] bg-[var(--admin-surface2)] hover:bg-[var(--admin-accent-dim)] border border-transparent hover:border-[var(--admin-accent)]/20 rounded-xl transition-all duration-300 group/btn"
                         title="Xem chi tiết"
                         onClick={() => handleViewTutor(t)}
                     >
@@ -187,8 +185,8 @@ export function TutorsList() {
                     </button>
                     <button
                         className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 group/btn ${t.subscriptionStatus === 'ACTIVE'
-                                ? 'text-muted-foreground hover:text-red-500 bg-slate-100 dark:bg-white/5 hover:bg-red-500/10 border border-transparent hover:border-red-500/20'
-                                : 'text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20'
+                                ? 'text-[var(--admin-text2)] hover:text-[var(--admin-red)] bg-[var(--admin-surface2)] hover:bg-[var(--admin-red)]/10 border border-transparent hover:border-[var(--admin-red)]/20'
+                                : 'text-[var(--admin-red)] bg-[var(--admin-red)]/10 border border-[var(--admin-red)]/20 hover:bg-[var(--admin-red)]/20 shadow-glow-sm shadow-[var(--admin-red)]/20'
                             }`}
                         title={t.subscriptionStatus === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                         onClick={() => handleToggleStatus(t.id, t.fullName)}
@@ -245,7 +243,7 @@ export function TutorsList() {
 
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center justify-center gap-3 px-8 py-3 bg-primary text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-md shadow-primary/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 shrink-0"
+                    className="flex items-center justify-center gap-3 px-8 py-3 bg-[var(--admin-accent)] text-[var(--admin-bg)] rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-md shadow-[var(--admin-accent)]/30 hover:scale-[1.03] active:scale-95 transition-all duration-300 shrink-0"
                 >
                     <UserPlus className="h-4.5 w-4.5" />
                     <span>THÊM GIA SƯ</span>

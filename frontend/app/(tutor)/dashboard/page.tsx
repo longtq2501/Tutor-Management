@@ -283,12 +283,11 @@ function AppContent() {
             { id: 'dashboard', label: 'Tổng Quan', icon: LayoutDashboard },
             { id: 'tutors', label: 'Gia Sư', icon: Users },
             { id: 'students', label: 'Học Sinh & PH', icon: GraduationCap },
-            { id: 'finance', label: 'Tài Chính', icon: TrendingUp }, // Unified View
+            { id: 'finance', label: 'Tài Chính', icon: TrendingUp },
             { id: 'calendar', label: 'Lịch Dạy', icon: CalendarDays },
-            { id: 'lessons', label: 'Bài Giảng', icon: BookOpen },
             { id: 'exercises', label: 'Khảo thí', icon: ClipboardList },
-            // { id: 'unpaid', label: 'Công Nợ', icon: AlertCircle },
             { id: 'documents', label: 'Tài Liệu', icon: FileText },
+            { id: 'lessons', label: 'Bài Giảng', icon: BookOpen },
             { id: 'live-room', label: 'Lớp học', icon: Video },
             { id: 'settings', label: 'Cài đặt', icon: Settings },
         ];

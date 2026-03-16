@@ -47,6 +47,7 @@ export interface AdminStudent extends Student {
     tutorId: number;
     tutorName: string;
     totalDebt: number;
+    avatarUrl?: string;
 }
 
 export interface AdminDocument extends DocumentType {

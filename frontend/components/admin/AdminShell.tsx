@@ -30,7 +30,10 @@ function useAdminThemeSync() {
             attributeFilter: ['class'],
         });
 
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            document.documentElement.removeAttribute('data-admin-theme');
+        };
     }, []);
 }
 
@@ -103,7 +106,7 @@ export function AdminShell({ children }: AdminShellProps) {
             >
                 <AdminTopNav onMenuClick={toggleSidebar} />
 
-                <main className="mt-[52px] h-[calc(100vh-52px)] overflow-y-auto p-5 lg:p-8">
+                <main className="mt-[52px] h-[calc(100vh-52px)] overflow-y-auto overflow-x-hidden p-5 lg:p-8">
                     <div className="max-w-[1440px] mx-auto">
                         {children}
                     </div>

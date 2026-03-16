@@ -51,7 +51,7 @@ export const QuestionNav: React.FC<QuestionNavProps> = ({
                 />
             </div>
 
-            <ScrollArea className="max-h-[300px]">
+            <div className="pb-4">
                 <div className="grid grid-cols-5 gap-2 pr-2">
                     {questions.map((q, idx) => {
                         const isAnswered = answers instanceof Map && answers.has(q.id || `temp-${q.orderIndex}`);
@@ -77,7 +77,7 @@ export const QuestionNav: React.FC<QuestionNavProps> = ({
                         );
                     })}
                 </div>
-            </ScrollArea>
+            </div>
 
             <div className="text-xs text-muted-foreground space-y-1">
                 <div className="flex items-center gap-2">
