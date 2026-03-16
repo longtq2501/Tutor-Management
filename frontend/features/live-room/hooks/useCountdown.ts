@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface CountdownResult {
     seconds: number;
@@ -11,9 +11,14 @@ interface CountdownResult {
  * 
  * @param {string} targetDate - The ISO date string to count down to.
  * @param {number} [readyThresholdMinutes=15] - Minutes before the target when the session is "ready".
+ * @param {() => void} [onReady] - Callback fired once when countdown enters the ready window.
  * @returns {CountdownResult} The current countdown state.
  */
-export const useCountdown = (targetDate: string, readyThresholdMinutes: number = 15): CountdownResult => {
+export const useCountdown = (
+    targetDate: string,
+    readyThresholdMinutes: number = 15,
+    onReady?: () => void
+): CountdownResult => {
     const calculateDelta = useCallback(() => {
         const now = new Date().getTime();
         const target = new Date(targetDate).getTime();
@@ -22,6 +27,7 @@ export const useCountdown = (targetDate: string, readyThresholdMinutes: number =
     }, [targetDate]);
 
     const [seconds, setSeconds] = useState<number>(calculateDelta());
+    const onReadyFiredRef = useRef(false);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -31,6 +37,16 @@ export const useCountdown = (targetDate: string, readyThresholdMinutes: number =
 
         return () => clearInterval(timer);
     }, [calculateDelta]);
+
+    const isReady = seconds <= readyThresholdMinutes * 60;
+
+    // Fire onReady exactly once when entering the ready window
+    useEffect(() => {
+        if (isReady && !onReadyFiredRef.current && onReady) {
+            onReadyFiredRef.current = true;
+            onReady();
+        }
+    }, [isReady, onReady]);
 
     const formatTime = (totalSeconds: number): string => {
         if (totalSeconds <= 0) return '00:00:00';
@@ -45,8 +61,6 @@ export const useCountdown = (targetDate: string, readyThresholdMinutes: number =
 
         return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
-
-    const isReady = seconds <= readyThresholdMinutes * 60;
 
     return {
         seconds,

@@ -34,7 +34,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Window;
 import org.springframework.data.domain.ScrollPosition;
-import org.springframework.data.domain.KeysetScrollPosition;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.scheduling.annotation.Scheduled;
