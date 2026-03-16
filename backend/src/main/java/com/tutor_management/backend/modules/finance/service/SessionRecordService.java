@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.document.repository.DocumentRepository;
 import com.tutor_management.backend.modules.document.entity.Document;
 import com.tutor_management.backend.modules.finance.LessonStatus;

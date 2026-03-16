@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing students in the admin module.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,6 +28,15 @@ public class AdminStudentService {
     private final TutorRepository tutorRepository;
     private final com.tutor_management.backend.modules.auth.UserRepository userRepository;
 
+    /**
+     * Retrieves a paginated list of students based on search criteria.
+     *
+     * @param search   the search keyword for filtering students by name or phone
+     * @param tutorId  the ID of the tutor to filter students by
+     * @param active   the active status to filter students by
+     * @param pageable the pagination information
+     * @return a paginated list of AdminStudentResponse objects
+     */
     public Page<AdminStudentResponse> getAllStudents(String search, Long tutorId, Boolean active, Pageable pageable) {
         Page<Student> students = studentRepository.findAdminStudents(search, tutorId, active, pageable);
         
@@ -45,6 +57,12 @@ public class AdminStudentService {
         return students.map(s -> mapToResponse(s, tutorNames.get(s.getTutorId()), avatarMap.get(s.getId())));
     }
 
+    /**
+     * Retrieves a student by their ID.
+     *
+     * @param id the ID of the student
+     * @return an AdminStudentResponse object containing the student's details
+     */
     public AdminStudentResponse getStudentById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
@@ -60,6 +78,14 @@ public class AdminStudentService {
         return mapToResponse(student, tutorName, avatarUrl);
     }
 
+    /**
+     * Maps a Student entity to an AdminStudentResponse DTO.
+     *
+     * @param student   the Student entity to map
+     * @param tutorName the name of the tutor associated with the student
+     * @param avatarUrl the URL of the student's avatar
+     * @return an AdminStudentResponse object containing the mapped data
+     */
     private AdminStudentResponse mapToResponse(Student student, String tutorName, String avatarUrl) {
         return AdminStudentResponse.builder()
                 .id(student.getId())

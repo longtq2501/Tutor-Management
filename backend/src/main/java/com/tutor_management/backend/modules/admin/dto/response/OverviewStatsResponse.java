@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response DTO for overview statistics in the admin dashboard.
+ */
 @Data
 @Builder
 @NoArgsConstructor

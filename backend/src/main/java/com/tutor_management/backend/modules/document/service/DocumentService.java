@@ -13,7 +13,6 @@ import com.tutor_management.backend.modules.document.entity.Document;
 import com.tutor_management.backend.modules.document.entity.DocumentCategory;
 import com.tutor_management.backend.modules.document.repository.FolderRepository;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
-import com.tutor_management.backend.modules.shared.service.CloudinaryService;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import com.tutor_management.backend.modules.tutor.entity.Tutor;
@@ -34,7 +33,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Service for managing file uploads, document library navigation, and storage statistics.

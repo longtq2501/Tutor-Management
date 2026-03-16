@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for logging security-sensitive actions to the audit log.
+ * Uses REQUIRES_NEW to ensure logs are saved even if the main transaction fails (e.g., on AccessDenied).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -43,6 +47,10 @@ public class AuditService {
         auditRepository.save(auditLog);
     }
 
+    /**
+     * Logs a security-sensitive action with a specified actor.
+     * Uses REQUIRES_NEW to ensure the audit log is saved even if the primary transaction fails (e.g., on AccessDenied).
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logWithActor(String action, User user, String description, String metadata) {
         AuditLog auditLog = AuditLog.builder()

@@ -14,6 +14,12 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Service for managing refresh tokens.
+ * <p>
+ * This service provides methods to create, verify, and delete refresh tokens.
+ * It ensures that token creation is atomic and handles token expiration properly.
+ */
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -28,15 +34,16 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
+    // Creates or updates a refresh token for the given user ID
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
         String token = UUID.randomUUID().toString();
         Instant expiryDate = Instant.now().plusMillis(refreshTokenDurationMs);
 
-        // ✅ ATOMIC: Single database operation, no race condition possible
+        // ATOMIC: Single database operation, no race condition possible
         refreshTokenRepository.upsert(userId, token, expiryDate);
 
-        // ✅ Return the created/updated token
+        // Return the created/updated token
         return refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Failed to create refresh token"));
     }
@@ -50,6 +57,7 @@ public class RefreshTokenService {
         return token;
     }
 
+    // Deletes all refresh tokens associated with a user
     @Transactional
     public void deleteByUserId(Long userId) {
         User user = userRepository.findById(userId)

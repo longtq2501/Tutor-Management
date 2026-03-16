@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing an activity log entry for administrative actions.
+ */
 @Entity
 @Table(name = "activity_logs")
 @Data

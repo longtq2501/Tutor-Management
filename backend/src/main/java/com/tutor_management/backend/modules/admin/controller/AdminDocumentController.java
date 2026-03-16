@@ -19,6 +19,7 @@ public class AdminDocumentController {
 
     private final AdminDocumentService adminDocumentService;
 
+    // Endpoint to get all documents with optional filters and pagination
     @GetMapping
     public ApiResponse<Page<AdminDocumentResponse>> getAllDocuments(
             @RequestParam(required = false) String search,
@@ -28,11 +29,13 @@ public class AdminDocumentController {
         return ApiResponse.success(adminDocumentService.getAllDocuments(search, tutorId, category, pageable));
     }
 
+    // Endpoint to get document statistics
     @GetMapping("/stats")
     public ApiResponse<AdminDocumentStats> getStats() {
         return ApiResponse.success(adminDocumentService.getStats());
     }
 
+    // Endpoint to delete a document by ID
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteDocument(@PathVariable Long id) {
         adminDocumentService.deleteDocument(id);

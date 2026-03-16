@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing audit logs.
+ */
 @Repository
 public interface AuditRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByActorIdOrderByTimestampDesc(String actorId);

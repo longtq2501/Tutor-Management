@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response DTO for admin document entries.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Response DTO for activity log entries.
+ */
 @Data
 @Builder
 @NoArgsConstructor

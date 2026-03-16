@@ -19,6 +19,7 @@ public class AuditLogInterceptor implements HandlerInterceptor {
 
     private final AuditService auditService;
 
+    // We log after the request is completed to capture the final status
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         String method = request.getMethod();
@@ -45,10 +46,12 @@ public class AuditLogInterceptor implements HandlerInterceptor {
         }
     }
 
+    // Helper method to determine if the HTTP method is a mutation
     private boolean isMutation(String method) {
         return "POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method) || "PATCH".equals(method);
     }
 
+    // Helper method to determine if the request path is considered sensitive
     private boolean isSensitivePath(String path) {
         return path.contains("/api/auth") || 
                path.contains("/api/admin") || 

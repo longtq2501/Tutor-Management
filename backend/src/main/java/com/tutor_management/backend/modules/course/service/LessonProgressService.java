@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
  * Service for tracking lesson progress and calculating course navigation.
@@ -155,6 +154,7 @@ public class LessonProgressService {
         return mapToResponse(progress);
     }
     
+    // Helper method to create a new progress record when none exists
     private LessonProgress createNewProgress(Long studentId, Long lessonId) {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
@@ -172,6 +172,7 @@ public class LessonProgressService {
             .build();
     }
     
+    // Maps the LessonProgress entity to a response DTO for API output
     private LessonProgressResponse mapToResponse(LessonProgress progress) {
         return LessonProgressResponse.builder()
             .lessonId(progress.getLesson().getId())

@@ -32,6 +32,7 @@ public class GroqGeneratorServiceImpl implements AiGeneratorService {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
+    // Constructor with configuration properties injected
     public GroqGeneratorServiceImpl(
             @Value("${feedback.ai.groq.api-key:}") String apiKey,
             @Value("${feedback.ai.groq.api-url:https://api.groq.com/openai/v1/chat/completions}") String apiUrl,
@@ -48,6 +49,7 @@ public class GroqGeneratorServiceImpl implements AiGeneratorService {
                 .build();
     }
 
+    // Main method to generate feedback comment using Groq API
     @Override
     public String generate(GenerateCommentRequest request) {
         if (!isEnabled()) {
@@ -103,6 +105,7 @@ public class GroqGeneratorServiceImpl implements AiGeneratorService {
         return enabled && apiKey != null && !apiKey.isEmpty();
     }
 
+    // Helper method to build a detailed prompt for the Groq model based on the request parameters
     private String buildPrompt(GenerateCommentRequest request) {
         String student = (request.getStudentName() != null) ? request.getStudentName() : "Con";
         String lang = (request.getLanguage() != null) ? request.getLanguage() : "Vietnamese";

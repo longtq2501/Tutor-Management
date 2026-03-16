@@ -8,12 +8,8 @@ import java.util.stream.Collectors;
 
 import com.tutor_management.backend.exception.ResourceNotFoundException;
 import com.tutor_management.backend.modules.student.entity.Student;
-import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
-import com.tutor_management.backend.modules.tutor.entity.Tutor;
 import com.tutor_management.backend.modules.tutor.repository.TutorRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    private final TutorRepository tutorRepository;
     private final SessionRecordRepository sessionRecordRepository;
     private final ParentRepository parentRepository;
     private final UserRepository userRepository;

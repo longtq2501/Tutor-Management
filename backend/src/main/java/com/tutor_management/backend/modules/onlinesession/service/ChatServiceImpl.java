@@ -31,6 +31,14 @@ public class ChatServiceImpl implements ChatService {
     private final OnlineSessionRepository onlineSessionRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Saves a chat message to the database.
+     *
+     * @param roomId  the ID of the chat room
+     * @param userId  the ID of the user sending the message
+     * @param request the chat message request containing the message content
+     * @return a response containing the saved chat message details
+     */
     @Override
     @Transactional
     public ChatMessageResponse saveMessage(String roomId, Long userId, ChatMessageRequest request) {
@@ -55,6 +63,13 @@ public class ChatServiceImpl implements ChatService {
         return mapToResponse(saved);
     }
 
+    /**
+     * Retrieves paginated chat messages for a given room.
+     *
+     * @param roomId   the ID of the chat room
+     * @param pageable pagination information
+     * @return a page of chat message responses
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<ChatMessageResponse> getMessages(String roomId, Pageable pageable) {
@@ -69,6 +84,13 @@ public class ChatServiceImpl implements ChatService {
                 .map(this::mapToResponse);
     }
 
+    /**
+     * Creates a typing response indicating whether a user is typing.
+     *
+     * @param userId   the ID of the user
+     * @param isTyping whether the user is currently typing
+     * @return a response containing the user's typing status
+     */
     @Transactional(readOnly = true)
     @Override
     public TypingResponse createTypingResponse(Long userId, boolean isTyping) {
@@ -81,6 +103,12 @@ public class ChatServiceImpl implements ChatService {
                 .build();
     }
 
+    /**
+     * Retrieves the full name of a user by their ID, with caching to improve performance.
+     *
+     * @param userId the ID of the user
+     * @return the full name of the user
+     */
     @Cacheable(value = "userNames", key = "#userId")
     public String getUserFullName(Long userId) {
         return userRepository.findById(userId)
@@ -88,6 +116,12 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userId));
     }
 
+    /**
+     * Maps a ChatMessage entity to a ChatMessageResponse DTO.
+     *
+     * @param message the ChatMessage entity to map
+     * @return the corresponding ChatMessageResponse DTO
+     */
     private ChatMessageResponse mapToResponse(ChatMessage message) {
         return ChatMessageResponse.builder()
                 .id(message.getId())

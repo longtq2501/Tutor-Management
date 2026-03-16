@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * Repository for managing RefreshToken entities.
+ * Provides methods to find, delete, and upsert refresh tokens.
+ */
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     
@@ -19,7 +23,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Modifying
     void deleteByUser(User user);
     
-    // ✅ NEW: MySQL UPSERT using ON DUPLICATE KEY UPDATE
+    // NEW: MySQL UPSERT using ON DUPLICATE KEY UPDATE
     @Modifying
     @Query(value = """
         INSERT INTO refresh_tokens (user_id, token, expiry_date, created_at)

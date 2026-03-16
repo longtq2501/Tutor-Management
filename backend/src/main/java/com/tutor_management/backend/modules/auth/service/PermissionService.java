@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+/**
+ * Service for managing permissions and roles.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

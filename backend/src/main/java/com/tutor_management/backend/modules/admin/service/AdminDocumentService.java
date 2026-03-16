@@ -18,6 +18,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Service for managing documents in the admin panel.
+ * Provides functionalities to list, get stats, and delete documents.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,6 +32,15 @@ public class AdminDocumentService {
     private final CloudinaryService cloudinaryService;
     private final com.tutor_management.backend.modules.finance.repository.SessionRecordRepository sessionRecordRepository;
 
+    /**
+     * Retrieves a paginated list of documents with optional filtering by search term, tutor ID, and category.
+     *
+     * @param search   Optional search term to filter documents by title.
+     * @param tutorId  Optional tutor ID to filter documents by tutor.
+     * @param category Optional category code to filter documents by category.
+     * @param pageable Pagination information.
+     * @return A page of AdminDocumentResponse containing document details and associated tutor names.
+     */
     public Page<AdminDocumentResponse> getAllDocuments(String search, Long tutorId, String category, Pageable pageable) {
         Page<Document> documents;
         if (search != null && !search.isBlank()) {
@@ -50,6 +63,11 @@ public class AdminDocumentService {
         return documents.map(d -> mapToResponse(d, d.getTutor() != null ? tutorNames.get(d.getTutor().getId()) : "Admin"));
     }
 
+    /**
+     * Retrieves statistics about the documents, including total count, total downloads, and total storage used.
+     *
+     * @return An AdminDocumentStats object containing the aggregated statistics.
+     */
     public AdminDocumentStats getStats() {
         Long totalDocuments = documentRepository.count();
         Long totalDownloads = documentRepository.sumTotalDownloads(null);
@@ -64,6 +82,12 @@ public class AdminDocumentService {
                 .build();
     }
 
+    /**
+     * Deletes a document by its ID, including removing the file from Cloudinary and cleaning up references in session records.
+     *
+     * @param id The ID of the document to delete.
+     * @throws RuntimeException if the document is not found or if deletion fails.
+     */
     @Transactional
     public void deleteDocument(Long id) {
         Document document = documentRepository.findById(id)
@@ -78,6 +102,7 @@ public class AdminDocumentService {
         }
     }
 
+    // Helper method to map Document entity to AdminDocumentResponse DTO
     private AdminDocumentResponse mapToResponse(Document d, String tutorName) {
         return AdminDocumentResponse.builder()
                 .id(d.getId())

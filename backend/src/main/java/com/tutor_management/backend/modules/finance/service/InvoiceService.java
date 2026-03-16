@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
-import com.tutor_management.backend.modules.auth.RoleEntity;
 
 /**
  * Service for dynamically generating financial invoices from session data.

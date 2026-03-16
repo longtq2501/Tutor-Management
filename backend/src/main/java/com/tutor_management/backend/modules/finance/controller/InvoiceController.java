@@ -49,6 +49,7 @@ public class InvoiceController {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
 
+    // Endpoint to generate invoice data based on request parameters
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/generate")
     public ResponseEntity<ApiResponse<InvoiceResponse>> generateInvoice(@RequestBody InvoiceRequest request) {
@@ -56,6 +57,7 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success(invoiceService.generateInvoice(request)));
     }
 
+    // Endpoint to generate and download invoice PDF based on request parameters
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/download-pdf")
     public ResponseEntity<byte[]> downloadInvoicePDF(@RequestBody InvoiceRequest request) {
@@ -81,6 +83,7 @@ public class InvoiceController {
         }
     }
 
+    // Convenience endpoint to download monthly invoice PDF for all students
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/download-monthly-pdf")
     public ResponseEntity<byte[]> downloadMonthlyInvoicePDF(@RequestParam String month) {
@@ -91,6 +94,7 @@ public class InvoiceController {
         return downloadInvoicePDF(request);
     }
 
+    // Endpoint to send invoice PDF via email to the parent of a specific student
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/send-email")
     public ResponseEntity<ApiResponse<String>> sendInvoiceViaEmail(@RequestBody InvoiceRequest request, Authentication authentication) {
@@ -121,6 +125,7 @@ public class InvoiceController {
         }
     }
 
+    // Endpoint to send invoice PDF via email to the parent of multiple students (batch)
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/send-email-batch")
     public ResponseEntity<ApiResponse<com.tutor_management.backend.modules.finance.dto.response.BatchEmailResult>> sendInvoiceBatch(
@@ -164,6 +169,7 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
+    // Endpoint to send invoice PDF via email to the parent of all active students for a given month (batch)
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/send-email-all")
     public ResponseEntity<ApiResponse<String>> sendInvoiceToAll(@RequestBody InvoiceRequest request) {
@@ -174,6 +180,7 @@ public class InvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Tính năng gửi hàng loạt đang được xử lý"));
     }
 
+    // Helper methods for validation and email sending
     private void validateParentEmail(Parent parent) {
         if (parent == null) throw new RuntimeException("Học sinh chưa có thông tin phụ huynh");
         if (parent.getEmail() == null || parent.getEmail().isBlank()) {
@@ -181,6 +188,7 @@ public class InvoiceController {
         }
     }
 
+    // Validates that all students belong to the same parent and returns that parent
     private Parent validateBatchParents(List<Student> students) {
         if (students.isEmpty()) throw new IllegalArgumentException("Không tìm thấy học sinh");
         Parent p = students.get(0).getParent();
@@ -193,6 +201,7 @@ public class InvoiceController {
         return p;
     }
 
+    // Resolves the currently authenticated user from the authentication object
     private User resolveCurrentUser(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             throw new RuntimeException("Không xác định được người dùng hiện tại");
@@ -202,6 +211,7 @@ public class InvoiceController {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản người dùng hiện tại"));
     }
 
+    // Sends the invoice email using Gmail if the user has a Google refresh token, otherwise falls back to standard email service
     private void sendInvoiceWithGmailFallback(User currentUser, String toEmail, String parentName,
                                               String studentName, String month, byte[] pdfData, String invoiceNumber) {
         if (currentUser.getGoogleRefreshToken() != null && !currentUser.getGoogleRefreshToken().isBlank()) {

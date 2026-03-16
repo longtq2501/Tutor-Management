@@ -12,7 +12,6 @@ import com.tutor_management.backend.exception.ResourceNotFoundException;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import com.tutor_management.backend.modules.tutor.entity.Tutor;
 import com.tutor_management.backend.modules.tutor.repository.TutorRepository;
-import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.course.repository.CourseLessonRepository;
 import com.tutor_management.backend.modules.course.repository.LessonProgressRepository;
@@ -20,8 +19,6 @@ import com.tutor_management.backend.modules.finance.repository.SessionRecordRepo
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +43,6 @@ public class LessonLibraryService {
     private final StudentRepository studentRepository;
     private final LessonCategoryRepository categoryRepository;
     private final TutorRepository tutorRepository;
-    private final UserRepository userRepository;
     private final SessionRecordRepository sessionRecordRepository;
     private final CourseLessonRepository courseLessonRepository;
     private final LessonProgressRepository lessonProgressRepository;
@@ -144,7 +140,7 @@ public class LessonLibraryService {
         }
 
         Lesson lesson = Lesson.builder()
-                .tutor(currentTutor) // ✅ Auto-assign tutor
+                .tutor(currentTutor) // Auto-assign tutor
                 .tutorName(request.getTutorName()).title(request.getTitle())
                 .summary(request.getSummary()).content(request.getContent())
                 .lessonDate(request.getLessonDate()).videoUrl(request.getVideoUrl())
@@ -237,6 +233,6 @@ public class LessonLibraryService {
         }
 
         lessonRepository.delete(lesson);
-        log.info("✅ Deleted library lesson {} and all references", lessonId);
+        log.info("Deleted library lesson {} and all references", lessonId);
     }
 }

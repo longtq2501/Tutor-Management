@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response DTO for student growth data.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -3,6 +3,10 @@ package com.tutor_management.backend.modules.auth;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Enum representing various permissions in the tutor management system.
+ * Each permission is associated with a specific string value that can be used for authorization checks.
+ */
 @RequiredArgsConstructor
 public enum Permission {
 
