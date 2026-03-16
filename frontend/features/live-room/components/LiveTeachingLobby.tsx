@@ -171,6 +171,7 @@ export const LiveTeachingLobby: React.FC<LiveTeachingLobbyProps> = ({
                                         session={session}
                                         onJoin={onJoin}
                                         currentUserId={currentUserId}
+                                        onRefetch={handleRefresh}
                                     />
                                 </div>
                             ))}
@@ -219,6 +220,7 @@ export const LiveTeachingLobby: React.FC<LiveTeachingLobbyProps> = ({
                                             session={session}
                                             onJoin={onJoin}
                                             currentUserId={currentUserId}
+                                            onRefetch={handleRefresh}
                                         />
                                     </div>
                                 ))}

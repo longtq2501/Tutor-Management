@@ -1,6 +1,7 @@
 'use client';
 
 import { invoicesApi, sessionsApi } from '@/lib/services';
+import { buildGmailConnectUrl, gmailApi } from '@/lib/services/gmail';
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -144,6 +145,24 @@ export function useFinanceActions({ confirm }: UseFinanceActionsProps = {}) {
     const sessionIds = getSelectedSessionIds();
     if (selectedStudentIds.length === 0) {
       toast.error('Vui lòng chọn ít nhất một học sinh!');
+      return;
+    }
+
+    try {
+      const gmailStatus = await gmailApi.getStatus();
+      if (!gmailStatus.connected) {
+        toast.error('Bạn cần kết nối Gmail trước khi gửi báo giá.', {
+          action: {
+            label: 'Kết nối ngay',
+            onClick: () => {
+              window.location.href = buildGmailConnectUrl();
+            },
+          },
+        });
+        return;
+      }
+    } catch {
+      toast.error('Không kiểm tra được trạng thái Gmail. Vui lòng thử lại.');
       return;
     }
 

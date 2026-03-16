@@ -14,6 +14,7 @@ interface SessionCardProps {
     session: OnlineSessionResponse;
     onJoin: (roomId: string) => void;
     currentUserId: number;
+    onRefetch?: () => void;
 }
 
 /**
@@ -25,10 +26,15 @@ interface SessionCardProps {
 export const SessionCard: React.FC<SessionCardProps> = ({
     session,
     onJoin,
-    currentUserId
+    currentUserId, 
+    onRefetch
 }) => {
     const isTutor = currentUserId === session.tutorId;
-    const { formatted, isReady } = useCountdown(session.scheduledStart);
+    const { formatted, isReady } = useCountdown(
+    session.scheduledStart,
+    15,
+    onRefetch 
+);
     const router = useRouter();
     const [showRecordingPrompt, setShowRecordingPrompt] = useState(false);
     const canRecord = isMediaRecorderSupported();

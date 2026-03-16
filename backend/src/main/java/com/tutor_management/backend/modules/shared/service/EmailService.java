@@ -49,12 +49,12 @@ public class EmailService {
 
             helper.setFrom(fromEmail, fromName);
             helper.setTo(toEmail);
-            helper.setSubject(String.format("Hóa đơn học phí tháng %s - %s", month, studentName));
+            helper.setSubject(buildInvoiceSubject(month, studentName));
 
-            String htmlContent = buildEmailContent(parentName, studentName, month, invoiceNumber);
+            String htmlContent = buildInvoiceHtmlContent(parentName, studentName, month, invoiceNumber);
             helper.setText(htmlContent, true);
 
-            String fileName = String.format("Hoa-don-%s.pdf", invoiceNumber);
+            String fileName = buildInvoiceAttachmentName(invoiceNumber);
             helper.addAttachment(fileName, new ByteArrayResource(pdfData));
 
             mailSender.send(message);
@@ -73,6 +73,19 @@ public class EmailService {
         if (pdfData == null || pdfData.length == 0) {
             throw new IllegalArgumentException("Dữ liệu PDF không hợp lệ hoặc bị trống");
         }
+    }
+
+    public String buildInvoiceSubject(String month, String studentName) {
+        return String.format("Hóa đơn học phí tháng %s - %s", month, studentName);
+    }
+
+    public String buildInvoiceAttachmentName(String invoiceNumber) {
+        return String.format("Hoa-don-%s.pdf", invoiceNumber);
+    }
+
+    public String buildInvoiceHtmlContent(String parentName, String studentName,
+            String month, String invoiceNumber) {
+        return buildEmailContent(parentName, studentName, month, invoiceNumber);
     }
 
     /**

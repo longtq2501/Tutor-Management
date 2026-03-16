@@ -3,7 +3,6 @@ package com.tutor_management.backend.modules.auth;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -13,7 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "users",
        indexes = {
-           @Index(name = "idx_users_email", columnList = "email"),  // ✅ Explicit index
+           @Index(name = "idx_users_email", columnList = "email"), 
            @Index(name = "idx_users_student_id", columnList = "student_id")
        })
 @Getter
@@ -75,6 +74,15 @@ public class User implements UserDetails {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "google_access_token", length = 2048)
+    private String googleAccessToken;
+
+    @Column(name = "google_refresh_token", length = 512)
+    private String googleRefreshToken;
+
+    @Column(name = "google_token_expiry")
+    private LocalDateTime googleTokenExpiry;
 
     @PrePersist
     protected void onCreate() {
