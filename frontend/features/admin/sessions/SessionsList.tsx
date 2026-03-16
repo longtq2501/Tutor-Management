@@ -206,7 +206,7 @@ export function SessionsList() {
     ];
 
     return (
-        <div className="flex flex-col gap-6">
+        <div id="sessions-list-container" className="flex flex-col gap-6">
             <StatsBar items={[
                 { label: 'Tổng Buổi Học', value: totalElements.toLocaleString() },
                 { label: 'Hoàn Thành', value: stats ? (stats.totalSessions - 2).toString() : '...', variant: 'green' }, // Mocking completed sessions for now

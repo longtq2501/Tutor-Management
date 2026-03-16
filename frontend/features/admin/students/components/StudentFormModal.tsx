@@ -258,19 +258,19 @@ export function StudentFormModal({
                         </div>
                     )}
 
-                    <DialogFooter className="pt-4">
+                    <DialogFooter className="pt-6 border-t border-[var(--admin-border)] mt-4">
                         <Button
                             type="button"
                             variant="ghost"
                             onClick={onClose}
-                            className="text-[var(--admin-text)]"
+                            className="text-[var(--admin-text2)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface2)] font-bold transition-all"
                         >
-                            HỦY
+                            HỦY BỎ
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-[var(--admin-accent)] text-[var(--admin-bg)] font-black shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:scale-105 transition-all"
+                            className="px-8 bg-[var(--admin-accent)] text-[var(--admin-bg)] font-black shadow-glow-md shadow-[var(--admin-accent)]/30 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest"
                         >
                             {loading ? 'ĐANG XỬ LÝ...' : (studentId ? 'CẬP NHẬT' : 'TẠO MỚI')}
                         </Button>

@@ -70,6 +70,20 @@ export interface LessonResource {
   displayOrder: number; // THỨ TỰ HIỂN THỊ TRONG DANH SÁCH
 }
 
+export interface LessonProgress {
+  lessonId: number;
+  lessonTitle: string;
+  videoProgress: number;
+  learningStatus: string;
+  learningStatusColor: string;
+  isCompleted: boolean;
+  completedAt: string;
+  canUnlockNext: boolean;
+  lastProgressUpdate: string;
+  viewCount: number;
+  lastViewedAt: string;
+}
+
 export interface LessonStats {
   totalLessons: number; // TỔNG SỐ BÀI HỌC ĐÃ GIAO
   completedLessons: number; // SỐ BÀI ĐÃ HOÀN THÀNH

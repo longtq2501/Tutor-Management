@@ -367,6 +367,7 @@ public class TutorService {
                 .subscriptionStatus(tutor.getSubscriptionStatus())
                 .createdAt(tutor.getCreatedAt())
                 .updatedAt(tutor.getUpdatedAt())
+                .avatarUrl(tutor.getUser().getAvatarUrl())
                 .build();
     }
 }

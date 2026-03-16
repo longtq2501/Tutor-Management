@@ -11,8 +11,9 @@ import { adminStudentsApi } from '@/lib/services/admin-students';
 import { toast } from 'sonner';
 import type { AdminStudent } from '@/lib/types/admin';
 import { Badge } from '@/components/ui/badge';
-import { GraduationCap, Phone, Mail, MapPin, Calendar, CreditCard, User } from 'lucide-react';
+import { Phone, Mail, MapPin, Calendar, CreditCard, User } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { OptimizedAvatar } from '@/features/students/unified-view/components/OptimizedAvatar';
 
 interface StudentDetailsDrawerProps {
     isOpen: boolean;
@@ -70,17 +71,23 @@ export function StudentDetailsDrawer({
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="sm:max-w-[500px] admin-glass border-[var(--admin-border)] overflow-y-auto">
                 <SheetHeader className="mb-8">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-[var(--admin-accent)]/10 flex items-center justify-center border border-[var(--admin-accent)]/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
-                            <GraduationCap className="h-8 w-8 text-[var(--admin-accent)]" />
-                        </div>
-                        <div>
-                            <SheetTitle className="text-2xl font-black text-[var(--admin-text)] uppercase tracking-tight">
+                    <div className="flex items-center gap-5">
+                        <OptimizedAvatar
+                            name={student.name}
+                            avatarUrl={(student as any).avatarUrl}
+                            isActive={student.active}
+                            className="w-20 h-20 rounded-2xl shadow-glow-lg"
+                        />
+                        <div className="flex flex-col gap-1.5">
+                            <SheetTitle className="text-2xl font-black text-[var(--admin-text)] uppercase tracking-tight leading-none">
                                 {student.name}
                             </SheetTitle>
-                            <Badge variant={student.active ? "default" : "secondary"} className={student.active ? "bg-[var(--admin-green)]/10 text-[var(--admin-green)] border-[var(--admin-green)]/20" : ""}>
-                                {student.active ? 'Đang theo học' : 'Đã nghỉ'}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Badge variant={student.active ? "default" : "secondary"} className={student.active ? "bg-[var(--admin-green)]/15 text-[var(--admin-green)] border-[var(--admin-green)]/30 font-black px-2.5 py-0.5" : "bg-[var(--admin-text3)]/10 text-[var(--admin-text3)] border-transparent font-black px-2.5 py-0.5"}>
+                                    {student.active ? 'ĐANG THEO HỌC' : 'ĐÃ NGHỈ HỌC'}
+                                </Badge>
+                                <span className="text-[10px] font-bold text-[var(--admin-text3)] uppercase tracking-widest opacity-40">ID: {student.id}</span>
+                            </div>
                         </div>
                     </div>
                 </SheetHeader>
