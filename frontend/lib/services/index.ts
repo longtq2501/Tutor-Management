@@ -19,4 +19,5 @@ export * from './course-student';
 export * from './admin-auth';
 export * from './admin-audit';
 export * from './analytics-api';
+export * from './gmail';
 export { default as api } from './axios-instance';

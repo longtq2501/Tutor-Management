@@ -5,12 +5,15 @@ import java.util.stream.Collectors;
 
 import com.tutor_management.backend.modules.finance.service.InvoiceService;
 import com.tutor_management.backend.modules.shared.dto.response.ApiResponse;
+import com.tutor_management.backend.modules.auth.User;
+import com.tutor_management.backend.modules.auth.UserRepository;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +24,7 @@ import com.tutor_management.backend.modules.finance.dto.request.InvoiceRequest;
 import com.tutor_management.backend.modules.finance.dto.response.InvoiceResponse;
 import com.tutor_management.backend.modules.parent.entity.Parent;
 import com.tutor_management.backend.modules.shared.service.EmailService;
+import com.tutor_management.backend.modules.shared.service.GmailService;
 import com.tutor_management.backend.modules.shared.service.PDFGeneratorService;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
@@ -41,6 +45,8 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
     private final PDFGeneratorService pdfGeneratorService;
     private final EmailService emailService;
+    private final GmailService gmailService;
+    private final UserRepository userRepository;
     private final StudentRepository studentRepository;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
@@ -87,7 +93,7 @@ public class InvoiceController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/send-email")
-    public ResponseEntity<ApiResponse<String>> sendInvoiceViaEmail(@RequestBody InvoiceRequest request) {
+    public ResponseEntity<ApiResponse<String>> sendInvoiceViaEmail(@RequestBody InvoiceRequest request, Authentication authentication) {
         log.info("Sending invoice email for student ID: {}", request.getStudentId());
         try {
             if (request.getStudentId() == null) {
@@ -103,13 +109,9 @@ public class InvoiceController {
             InvoiceResponse invoice = invoiceService.generateInvoice(request);
             byte[] pdfData = pdfGeneratorService.generateInvoicePDF(invoice);
 
-            emailService.sendInvoiceEmail(
-                    parent.getEmail(),
-                    parent.getName(),
-                    student.getName(),
-                    request.getMonth(),
-                    pdfData,
-                    invoice.getInvoiceNumber());
+                User currentUser = resolveCurrentUser(authentication);
+                sendInvoiceWithGmailFallback(currentUser, parent.getEmail(), parent.getName(), student.getName(),
+                    request.getMonth(), pdfData, invoice.getInvoiceNumber());
 
             return ResponseEntity.ok(ApiResponse.success("Đã gửi email báo giá thành công đến " + parent.getEmail()));
         } catch (Exception e) {
@@ -121,7 +123,9 @@ public class InvoiceController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
     @PostMapping("/send-email-batch")
-    public ResponseEntity<ApiResponse<com.tutor_management.backend.modules.finance.dto.response.BatchEmailResult>> sendInvoiceBatch(@RequestBody InvoiceRequest request) throws Exception {
+    public ResponseEntity<ApiResponse<com.tutor_management.backend.modules.finance.dto.response.BatchEmailResult>> sendInvoiceBatch(
+            @RequestBody InvoiceRequest request,
+            Authentication authentication) throws Exception {
         log.info("Sending batch invoice email");
         List<Long> studentIds = request.getSelectedStudentIds();
         if (studentIds == null || studentIds.isEmpty()) {
@@ -135,13 +139,9 @@ public class InvoiceController {
         byte[] pdfData = pdfGeneratorService.generateInvoicePDF(invoice);
 
         String allStudentNames = students.stream().map(Student::getName).collect(Collectors.joining(", "));
-        emailService.sendInvoiceEmail(
-                firstParent.getEmail(),
-                firstParent.getName(),
-                allStudentNames,
-                invoice.getMonth(),
-                pdfData,
-                invoice.getInvoiceNumber());
+        User currentUser = resolveCurrentUser(authentication);
+        sendInvoiceWithGmailFallback(currentUser, firstParent.getEmail(), firstParent.getName(), allStudentNames,
+            invoice.getMonth(), pdfData, invoice.getInvoiceNumber());
 
         // Construct detailed result
         var result = com.tutor_management.backend.modules.finance.dto.response.BatchEmailResult.builder()
@@ -191,6 +191,28 @@ public class InvoiceController {
             }
         }
         return p;
+    }
+
+    private User resolveCurrentUser(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new RuntimeException("Không xác định được người dùng hiện tại");
+        }
+
+        return userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản người dùng hiện tại"));
+    }
+
+    private void sendInvoiceWithGmailFallback(User currentUser, String toEmail, String parentName,
+                                              String studentName, String month, byte[] pdfData, String invoiceNumber) {
+        if (currentUser.getGoogleRefreshToken() != null && !currentUser.getGoogleRefreshToken().isBlank()) {
+            String subject = emailService.buildInvoiceSubject(month, studentName);
+            String htmlBody = emailService.buildInvoiceHtmlContent(parentName, studentName, month, invoiceNumber);
+            String attachmentName = emailService.buildInvoiceAttachmentName(invoiceNumber);
+            gmailService.sendFromTutor(currentUser.getId(), toEmail, subject, htmlBody, pdfData, attachmentName);
+            return;
+        }
+
+        emailService.sendInvoiceEmail(toEmail, parentName, studentName, month, pdfData, invoiceNumber);
     }
 }
 
