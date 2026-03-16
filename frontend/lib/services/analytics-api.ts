@@ -61,14 +61,14 @@ export interface PerformanceAnalytics {
 
 export const analyticsApi = {
   getFinancialAnalytics: async (month?: string) => {
-    const res = await axiosInstance.get<ApiResponse<FinancialAnalytics>>('/api/analytics/finance', {
+    const res = await axiosInstance.get<ApiResponse<FinancialAnalytics>>('/analytics/finance', {
       params: { month }
     });
     return res.data.data;
   },
 
   getPerformanceAnalytics: async () => {
-    const res = await axiosInstance.get<ApiResponse<PerformanceAnalytics>>('/api/analytics/performance');
+    const res = await axiosInstance.get<ApiResponse<PerformanceAnalytics>>('/analytics/performance');
     return res.data.data;
   },
 

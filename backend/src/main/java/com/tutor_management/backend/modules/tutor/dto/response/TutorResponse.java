@@ -16,4 +16,5 @@ public class TutorResponse {
     private String subscriptionStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String avatarUrl;
 }

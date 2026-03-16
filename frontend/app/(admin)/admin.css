@@ -40,30 +40,30 @@
   --admin-red: #ef4444;
   --admin-amber: #f59e0b;
   --admin-blue: #3b82f6;
-  --admin-shadow: rgba(0, 0, 0, 0.05);
-  --admin-glass-bg: rgba(255, 255, 255, 0.8);
-  --admin-overlay: rgba(0, 0, 0, 0.4);
+  --admin-shadow: rgba(0, 0, 0, 0.1);
+  --admin-glass-bg: rgba(255, 255, 255, 0.9);
+  --admin-overlay: rgba(0, 0, 0, 0.45);
 }
 
 :root[data-admin-theme='dark'] .admin-theme {
-  --admin-bg: #0c0c0f;
-  --admin-surface: #131318;
-  --admin-surface2: #1a1a22;
-  --admin-surface3: #22222d;
-  --admin-border: rgba(255, 255, 255, 0.07);
-  --admin-border2: rgba(255, 255, 255, 0.12);
-  --admin-text: #f0f0f5;
-  --admin-text2: #8888a0;
-  --admin-text3: #555568;
-  --admin-accent: #6366f1;
-  --admin-accent-dim: rgba(99, 102, 241, 0.15);
+  --admin-bg: #09090b;
+  --admin-surface: #121215;
+  --admin-surface2: #18181b;
+  --admin-surface3: #27272a;
+  --admin-border: rgba(255, 255, 255, 0.08);
+  --admin-border2: rgba(255, 255, 255, 0.15);
+  --admin-text: #ffffff;
+  --admin-text2: #a1a1aa;
+  --admin-text3: #71717a;
+  --admin-accent: #818cf8;
+  --admin-accent-dim: rgba(129, 140, 248, 0.15);
   --admin-green: #22c55e;
   --admin-red: #ef4444;
   --admin-amber: #f59e0b;
   --admin-blue: #3b82f6;
-  --admin-shadow: rgba(3, 7, 18, 0.25);
-  --admin-glass-bg: rgba(19, 19, 24, 0.7);
-  --admin-overlay: rgba(2, 6, 23, 0.56);
+  --admin-shadow: rgba(0, 0, 0, 0.5);
+  --admin-glass-bg: rgba(9, 9, 11, 0.85);
+  --admin-overlay: rgba(0, 0, 0, 0.8);
 }
 
 .admin-theme * {

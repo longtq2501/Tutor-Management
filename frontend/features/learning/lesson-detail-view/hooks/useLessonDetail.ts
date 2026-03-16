@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { lessonsApi } from '@/lib/services';
 import { toast } from 'sonner';
-import type { Lesson, CourseNavigation, LessonResource } from '@/lib/types';
+import type { Lesson, CourseNavigation, LessonResource, LessonProgress } from '@/lib/types';
 
 // Query keys for student lessons
 export const studentLessonKeys = {
@@ -72,7 +72,7 @@ export function useLessonDetail(lessonId: number, isPreview = false, courseId?: 
   // Mutation for syncing video progress
   const { mutate: syncProgress } = useMutation({
     mutationFn: (progress: number) => lessonsApi.updateProgress(lessonId, progress),
-    onSuccess: (updatedProgress: any) => {
+    onSuccess: (updatedProgress: LessonProgress) => {
       // Optimistically update the lesson cache if needed
       if (updatedProgress.isCompleted && lesson && !lesson.isCompleted) {
         queryClient.setQueryData<Lesson>(studentLessonKeys.detail(lessonId), (old) => {

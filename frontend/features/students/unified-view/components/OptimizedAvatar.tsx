@@ -10,7 +10,11 @@ interface OptimizedAvatarProps {
 }
 
 export function OptimizedAvatar({ name, isActive, className, avatarUrl }: OptimizedAvatarProps) {
-    const initial = name.charAt(0).toUpperCase();
+    const initials = useMemo(() => {
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }, [name]);
     const hue = useMemo(() => {
         // Generate consistent color from name
         let hash = 0;
@@ -40,7 +44,7 @@ export function OptimizedAvatar({ name, isActive, className, avatarUrl }: Optimi
                     className="object-cover"
                 />
             ) : (
-                <span className="select-none">{initial}</span>
+                <span className="select-none text-[10px] sm:text-xs font-black uppercase tracking-tighter">{initials}</span>
             )}
 
             {/* Status dot - pure CSS, no image */}

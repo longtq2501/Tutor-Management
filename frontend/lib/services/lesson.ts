@@ -1,5 +1,5 @@
 import api from './axios-instance';
-import type { Lesson, LessonStats, ApiResponse, PageResponse } from '../types';
+import type { Lesson, LessonStats, ApiResponse, PageResponse, LessonProgress, CourseNavigation } from '../types';
 
 export const lessonsApi = {
   /** * LẤY DANH SÁCH TẤT CẢ BÀI HỌC CỦA HỌC SINH HIỆN TẠI
@@ -61,8 +61,8 @@ export const lessonsApi = {
    * @param {number} lessonId - ID bài học
    * @param {number} progress - % tiến độ (0-100)
    */
-  updateProgress: async (lessonId: number, progress: number): Promise<unknown> => {
-    const response = await api.post<ApiResponse<unknown>>(`/student/progress/${lessonId}`, { progress });
+  updateProgress: async (lessonId: number, progress: number): Promise<LessonProgress> => {
+    const response = await api.post<ApiResponse<LessonProgress>>(`/student/progress/${lessonId}`, { progress });
     return response.data.data;
   },
 
@@ -70,8 +70,8 @@ export const lessonsApi = {
    * @param {number} courseId - ID khóa học
    * @param {number} lessonId - ID bài học hiện tại
    */
-  getNavigation: async (courseId: number, lessonId: number): Promise<unknown> => {
-    const response = await api.get<ApiResponse<unknown>>(`/student/progress/navigation/${courseId}/${lessonId}`);
+  getNavigation: async (courseId: number, lessonId: number): Promise<CourseNavigation> => {
+    const response = await api.get<ApiResponse<CourseNavigation>>(`/student/progress/navigation/${courseId}/${lessonId}`);
     return response.data.data;
   },
 };

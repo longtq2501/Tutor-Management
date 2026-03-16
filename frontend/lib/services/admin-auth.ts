@@ -10,7 +10,7 @@ export const adminAuthApi = {
      * Retrieves all roles defined in the system.
      */
     getAllRoles: async (): Promise<Role[]> => {
-        const response = await api.get('/auth/roles');
+        const response = await api.get('/admin/roles');
         return response.data.data;
     },
 
@@ -18,7 +18,7 @@ export const adminAuthApi = {
      * Returns a list of all available permission names.
      */
     getAvailablePermissions: async (): Promise<string[]> => {
-        const response = await api.get('/auth/roles/permissions');
+        const response = await api.get('/admin/roles/permissions');
         return response.data.data;
     },
 
@@ -28,7 +28,7 @@ export const adminAuthApi = {
      * @param permissionNames Array of permission names to assign.
      */
     updateRolePermissions: async (roleId: number, permissionNames: string[]): Promise<Role> => {
-        const response = await api.put(`/auth/roles/${roleId}/permissions`, permissionNames);
+        const response = await api.put(`/admin/roles/${roleId}/permissions`, permissionNames);
         return response.data.data;
     },
 
