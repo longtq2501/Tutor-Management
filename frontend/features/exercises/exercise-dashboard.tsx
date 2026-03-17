@@ -79,6 +79,7 @@ export default function ExerciseDashboard() {
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="LIBRARY"
+                                    data-tour="exercises-library-tab"
                                     className="rounded-lg font-bold text-xs h-8 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
                                 >
                                     <div className="flex items-center gap-2">

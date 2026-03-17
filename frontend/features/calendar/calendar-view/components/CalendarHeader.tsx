@@ -61,8 +61,8 @@ export const CalendarActions = ({
         </div>
 
         {/* View Tabs — visible from md up */}
-        <Tabs value={currentView} onValueChange={(v) => onViewChange(v as CalendarViewType)} className="hidden md:flex shrink-0">
-          <TabsList className="bg-muted/50 p-0.5 sm:p-1 rounded-2xl border border-border/40 h-8 2xl:h-10">
+        <Tabs value={currentView} onValueChange={(v) => onViewChange(v as CalendarViewType)} className="hidden md:flex shrink-0" data-tour="calendar-view-controls">
+          <TabsList data-tour="calendar-view-filter" className="bg-muted/50 p-0.5 sm:p-1 rounded-2xl border border-border/40 h-8 2xl:h-10">
             <TabsTrigger value="month" className="rounded-xl px-1.5 2xl:px-3 font-black uppercase tracking-tighter text-[9px] xl:text-[8px] 2xl:text-[9px]">
               <CalendarIcon className="w-3.5 h-3.5 sm:hidden" />
               <span className="hidden sm:inline">Tháng</span>
