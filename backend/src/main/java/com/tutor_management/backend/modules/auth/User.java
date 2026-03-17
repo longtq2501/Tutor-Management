@@ -79,6 +79,13 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder.Default
+    @Column(name = "tour_completed", nullable = false)
+    private boolean tourCompleted = false;
+
+    @Column(name = "tour_completed_at")
+    private LocalDateTime tourCompletedAt;
+
     @Column(name = "google_access_token", length = 2048)
     private String googleAccessToken;
 

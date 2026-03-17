@@ -1,7 +1,6 @@
 'use client';
 
 import { useUI } from '@/contexts/UIContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { ChevronLeft, GraduationCap } from 'lucide-react';
@@ -48,6 +47,16 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarP
     // Responsive widths: Smaller for laptop/tablet, larger for big desktop
     const expandedWidth = isLargeDesktop ? 280 : 220; // 220px for laptop, 280px for 29" desktop
     const collapsedWidth = isLargeDesktop ? 80 : 64;  // 64px for laptop, 80px for 29" desktop
+
+    const getTourDataAttr = (view: View): string | undefined => {
+        if (view === 'calendar') return 'nav-calendar';
+        if (view === 'finance') return 'nav-finance';
+        if (view === 'live-room') return 'nav-live-teaching';
+        if (view === 'documents') return 'nav-materials';
+        if (view === 'lessons') return 'nav-lecture';
+        if (view === 'exercises') return 'nav-assessment';
+        return undefined;
+    };
 
     return (
         <>
@@ -116,7 +125,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarP
                     </div>
 
                     {/* Navigation Items */}
-                    <nav className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
+                    <nav data-tour="sidebar" className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
                         {navItems.map((item) => {
                             const isActive = currentView === item.id;
                             const Icon = item.icon;
@@ -126,6 +135,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarP
                                     key={item.id}
                                     layout
                                     onClick={() => handleNavClick(item.id)}
+                                    data-tour={getTourDataAttr(item.id)}
                                     className={cn(
                                         "relative flex items-center w-full rounded-2xl transition-colors group h-14",
                                         isActive ? "text-primary" : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",

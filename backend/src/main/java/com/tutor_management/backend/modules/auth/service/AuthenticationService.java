@@ -139,6 +139,8 @@ public class AuthenticationService {
                         .role(user.getRole().getName())
                         .avatarUrl(user.getAvatarUrl())
                         .studentId(user.getStudentId())
+                    .tourCompleted(user.isTourCompleted())
+                    .tourCompletedAt(user.getTourCompletedAt())
                         .build())
                 .build();
     }

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -34,5 +36,7 @@ public class AuthResponse {
         private String accountNumber;
         private String accountName;
         private String bankCode;
+        private boolean tourCompleted;
+        private LocalDateTime tourCompletedAt;
     }
 }
