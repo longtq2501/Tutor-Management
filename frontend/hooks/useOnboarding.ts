@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 
 export const useOnboarding = () => {
-  const { user } = useAuth();
+  const { user, markTourCompleted } = useAuth();
   const [showTour, setShowTour] = useState(false);
   const [dismissedInSession, setDismissedInSession] = useState(false);
 
@@ -23,7 +23,11 @@ export const useOnboarding = () => {
     return () => window.clearTimeout(timer);
   }, [dismissedInSession, user]);
 
-  const handleTourComplete = () => {
+  const handleTourComplete = (didPersist = true) => {
+    if (didPersist) {
+      markTourCompleted();
+    }
+
     setDismissedInSession(true);
     setShowTour(false);
   };

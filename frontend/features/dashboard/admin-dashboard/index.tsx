@@ -95,7 +95,7 @@ export default function AdminDashboard() {
       />
 
       {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+      <div data-tour="dashboard-stats" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
 
         {/* Total Students */}
         <StatCard
@@ -167,10 +167,12 @@ export default function AdminDashboard() {
       )}
 
       {/* Enhanced Revenue Chart */}
-      <EnhancedRevenueChart
-        data={chartData}
-        isLoading={isGlobalLoading}
-      />
+      <div data-tour="dashboard-revenue-chart">
+        <EnhancedRevenueChart
+          data={chartData}
+          isLoading={isGlobalLoading}
+        />
+      </div>
     </div>
   );
 }

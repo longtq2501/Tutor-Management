@@ -62,6 +62,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useAuth } from '@/contexts/AuthContext';
 import { HeaderSlot, UIProvider, useUI } from '@/contexts/UIContext';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import type { TourView } from '@/components/onboarding/useTour';
 import { type UserInfo } from '@/lib/services/auth';
 
 import ExerciseDashboard from '@/features/exercises/exercise-dashboard';
@@ -189,28 +190,60 @@ const MainContentSwitcher = React.memo(({ currentView, hasAnyRole }: {
                 className="p-4 min-h-full"
             >
                 {/* Dashboard */}
-                {currentView === 'dashboard' && hasAnyRole(['ADMIN', 'TUTOR']) && <AdminDashboard />}
+                {currentView === 'dashboard' && hasAnyRole(['ADMIN', 'TUTOR']) && (
+                    <section data-tour="module-dashboard">
+                        <AdminDashboard />
+                    </section>
+                )}
                 {currentView === 'dashboard' && hasAnyRole(['STUDENT']) && <StudentDashboard />}
 
                 {/* All feature-based views */}
-                {(currentView === 'students' || currentView === 'parents') && hasAnyRole(['ADMIN', 'TUTOR']) && <UnifiedStudentView />}
-                {(currentView === 'finance' || currentView === 'monthly') && hasAnyRole(['ADMIN', 'TUTOR']) && <FinanceDashboard />}
+                {(currentView === 'students' || currentView === 'parents') && hasAnyRole(['ADMIN', 'TUTOR']) && (
+                    <section data-tour="module-students">
+                        <UnifiedStudentView />
+                    </section>
+                )}
+                {(currentView === 'finance' || currentView === 'monthly') && hasAnyRole(['ADMIN', 'TUTOR']) && (
+                    <section data-tour="module-finance">
+                        <FinanceDashboard />
+                    </section>
+                )}
                 {/* {currentView === 'monthly' && hasAnyRole(['ADMIN', 'TUTOR']) && <MonthlyView />} */}
-                {currentView === 'calendar' && hasAnyRole(['ADMIN', 'TUTOR']) && <CalendarView />}
+                {currentView === 'calendar' && hasAnyRole(['ADMIN', 'TUTOR']) && (
+                    <section data-tour="module-calendar">
+                        <CalendarView />
+                    </section>
+                )}
 
                 {/* New Exercise Dashboard */}
-                {currentView === 'exercises' && <ExerciseDashboard />}
+                {currentView === 'exercises' && (
+                    <section data-tour="module-exercises">
+                        <ExerciseDashboard />
+                    </section>
+                )}
 
                 {/* Admin/Tutor Lesson Manager */}
-                {currentView === 'lessons' && hasAnyRole(['ADMIN', 'TUTOR']) && <AdminLessonManager />}
+                {currentView === 'lessons' && hasAnyRole(['ADMIN', 'TUTOR']) && (
+                    <section data-tour="module-lessons">
+                        <AdminLessonManager />
+                    </section>
+                )}
                 {/* Tutor Management */}
                 {currentView === 'tutors' && hasAnyRole(['ADMIN']) && <TutorsFeature />}
 
                 {/* Live Room */}
-                {currentView === 'live-room' && <LiveRoomFeature />}
+                {currentView === 'live-room' && (
+                    <section data-tour="module-live-room">
+                        <LiveRoomFeature />
+                    </section>
+                )}
 
                 {/* Settings */}
-                {currentView === 'settings' && <SettingsView />}
+                {currentView === 'settings' && (
+                    <section data-tour="module-settings">
+                        <SettingsView />
+                    </section>
+                )}
 
                 {/* Student Lesson View */}
                 {currentView === 'lessons' && hasAnyRole(['STUDENT']) && <LessonViewWrapper />}
@@ -218,7 +251,11 @@ const MainContentSwitcher = React.memo(({ currentView, hasAnyRole }: {
 
                 {/* Other views */}
                 {/* {currentView === 'unpaid' && hasAnyRole(['ADMIN', 'TUTOR']) && <UnpaidSessionsView />} */}
-                {currentView === 'documents' && <DocumentLibrary />}
+                {currentView === 'documents' && (
+                    <section data-tour="module-documents">
+                        <DocumentLibrary />
+                    </section>
+                )}
 
                 {/* Fallback */}
                 {currentView === 'dashboard' && !hasAnyRole(['ADMIN', 'TUTOR', 'STUDENT']) && (
@@ -279,6 +316,10 @@ function AppContent() {
 
     // Simple handler - just update state, let useEffect handle URL
     const handleSetCurrentView = useCallback((view: View | ((prev: View) => View)) => {
+        setCurrentView(view);
+    }, []);
+
+    const handleTourNavigateView = useCallback((view: TourView) => {
         setCurrentView(view);
     }, []);
 
@@ -355,6 +396,7 @@ function AppContent() {
                 navItems={navItems}
                 currentView={currentView === 'monthly' ? 'finance' : currentView}
                 setCurrentView={handleSetCurrentView}
+                isLocked={showTour}
             />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 bg-background">
@@ -373,7 +415,12 @@ function AppContent() {
 
             <FeedbackWidget />
 
-            {showTour && <TourOverlay onComplete={handleTourComplete} />}
+            {showTour && (
+                <TourOverlay
+                    onComplete={handleTourComplete}
+                    onNavigateView={handleTourNavigateView}
+                />
+            )}
         </div>
     );
 }
