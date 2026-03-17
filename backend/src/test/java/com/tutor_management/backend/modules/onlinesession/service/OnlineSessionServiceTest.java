@@ -751,7 +751,7 @@ class OnlineSessionServiceTest {
         // Then
         assertFalse(results.isEmpty());
         assertEquals("room-1", results.getContent().getFirst().getRoomId());
-        assertFalse(results.getContent().getFirst().isCanJoinNow());
+        assertTrue(results.getContent().getFirst().isCanJoinNow());  // ✅ UPDATED: Allow joining anytime (except ENDED)
     }
 
     @Test
@@ -827,10 +827,10 @@ class OnlineSessionServiceTest {
 
         org.springframework.data.domain.Window<OnlineSessionResponse> results = onlineSessionService.getMySessions(userId, null, 10);
 
-        // far future or just outside window should be false
-        assertFalse(results.getContent().get(0).isCanJoinNow()); // s1: WAITING (16m > 15m window)
-        assertTrue(results.getContent().get(1).isCanJoinNow()); // s2: WAITING
-        assertTrue(results.getContent().get(2).isCanJoinNow()); // s3: ACTIVE
-        assertFalse(results.getContent().get(3).isCanJoinNow()); // s4: ENDED
+        // ✅ UPDATED: New logic allows joining anytime except when ENDED
+        assertTrue(results.getContent().get(0).isCanJoinNow());  // s1: WAITING (allow join anytime)
+        assertTrue(results.getContent().get(1).isCanJoinNow());  // s2: WAITING (allow join anytime)
+        assertTrue(results.getContent().get(2).isCanJoinNow());  // s3: ACTIVE (allow rejoin)
+        assertFalse(results.getContent().get(3).isCanJoinNow()); // s4: ENDED (never)
     }
 }
