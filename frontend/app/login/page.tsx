@@ -26,10 +26,16 @@ function LoginForm() {
   const isRegistered = searchParams.get('registered') === 'true';
 
   useEffect(() => {
+    // After registration we intentionally keep users on login screen,
+    // even if a previous session still exists in memory/state.
+    if (isRegistered) {
+      return;
+    }
+
     if (isAuthenticated && user) {
       router.push(user.role === 'ADMIN' ? '/overview' : '/dashboard');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isRegistered]);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
