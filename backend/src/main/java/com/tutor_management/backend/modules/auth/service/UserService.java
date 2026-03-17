@@ -6,6 +6,7 @@ import com.tutor_management.backend.modules.auth.dto.request.ChangePasswordReque
 import com.tutor_management.backend.modules.auth.dto.request.UpdateUserRequest;
 import com.tutor_management.backend.modules.auth.dto.response.AuthResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,7 @@ public class UserService {
      *                                  and confirm password do not match.
      */
     @Transactional
+    @CacheEvict(value = "users", allEntries = true)
     public void changePassword(Long userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -77,6 +79,7 @@ public class UserService {
      * @throws RuntimeException if the user with the specified ID is not found.
      */
     @Transactional
+    @CacheEvict(value = "users", allEntries = true)
     public AuthResponse.UserInfo updateUserProfile(Long userId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -95,6 +98,7 @@ public class UserService {
      * This operation is idempotent: repeated calls keep the same completed state.
      */
     @Transactional
+    @CacheEvict(value = "users", allEntries = true)
     public void completeTour(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));

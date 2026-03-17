@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { authService } from '@/lib/services';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
 
     const router = useRouter();
+    const { isAuthenticated, logout } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +32,18 @@ export default function RegisterPage() {
 
         try {
             await authService.register({ email, password, fullName, role });
-            router.push('/login?registered=true');
+
+            // If there is an existing session, clear it so login page does not auto-redirect
+            // back to the previously authenticated account.
+            if (isAuthenticated) {
+                await logout();
+            } else {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
+            }
+
+            router.replace('/login?registered=true');
         } catch (err: unknown) {
             const errorResponse = err as { response?: { data?: { message?: string; data?: Record<string, string> } } };
             console.error('Registration error details:', errorResponse.response?.data);
