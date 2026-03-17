@@ -28,10 +28,10 @@ export const metadata: Metadata = {
         siteName: 'Tutor Pro',
         images: [
             {
-                url: '/screenshots/dashboard-overview.png',
+                url: '/new-thumbail.png',
                 width: 1200,
                 height: 630,
-                alt: 'Tutor Pro Dashboard',
+                alt: 'Tutor Pro - Hệ thống quản lý gia sư',
             },
         ],
     },
@@ -39,6 +39,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'Tutor Pro - Quản lý gia sư',
         description: 'Hệ thống quản lý gia sư chuyên nghiệp',
+        images: ['/new-thumbail.png'],
     },
     verification: {
         google: 'google-site-verification-placeholder',
