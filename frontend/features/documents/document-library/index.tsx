@@ -107,16 +107,20 @@ export default function DocumentLibrary() {
         />
 
         <div className="space-y-6 pb-20 sm:pb-32">
-          <StatsCards stats={stats} />
-          <CategoryGrid
-            categories={categories}
-            counts={stats.categoryCounts}
-            onCategoryClick={setSelectedCategory}
-            isLoading={isCategoriesLoading}
-            loadMoreCategories={loadMoreCategories}
-            hasMoreCategories={hasMoreCategories}
-            isFetchingMoreCategories={isFetchingMoreCategories}
-          />
+          <div data-tour="documents-stats">
+            <StatsCards stats={stats} />
+          </div>
+          <div data-tour="documents-grid">
+            <CategoryGrid
+              categories={categories}
+              counts={stats.categoryCounts}
+              onCategoryClick={setSelectedCategory}
+              isLoading={isCategoriesLoading}
+              loadMoreCategories={loadMoreCategories}
+              hasMoreCategories={hasMoreCategories}
+              isFetchingMoreCategories={isFetchingMoreCategories}
+            />
+          </div>
         </div>
 
         {showUploadModal && (

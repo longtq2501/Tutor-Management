@@ -12,7 +12,7 @@ export default function SettingsView() {
       />
 
       {/* Có thể mở rộng thêm nhiều tab cài đặt khác trong tương lai */}
-      <div className="w-full">
+      <div data-tour="settings-profile" className="w-full">
         <ProfilePage />
       </div>
     </div>

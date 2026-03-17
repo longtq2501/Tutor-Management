@@ -32,7 +32,7 @@ export function AdminLessonManager() {
           title="Quản Lý Bài Giảng"
           subtitle="Nền tảng quản lý kho học liệu và xây dựng lộ trình học tập chuyên nghiệp cho giáo viên."
           actions={
-            <TabsList className="h-10 p-1 bg-muted/50 rounded-xl border border-border/40 w-auto flex gap-2">
+            <TabsList data-tour="lessons-tabs" className="h-10 p-1 bg-muted/50 rounded-xl border border-border/40 w-auto flex gap-2">
               <TabsTrigger
                 value="library"
                 className="rounded-lg font-bold text-xs h-8 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
@@ -62,7 +62,7 @@ export function AdminLessonManager() {
           }
         />
 
-        <div className="flex-1 relative">
+        <div data-tour="lessons-content" className="flex-1 relative">
           <TabsContent value="library" className="h-full mt-0 focus-visible:outline-none focus-visible:ring-0">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
