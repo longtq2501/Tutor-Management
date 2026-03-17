@@ -138,11 +138,29 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'assessment-components',
+    title: 'Khu điều khiển khảo thí',
+    description:
+      'Đây là vùng thao tác chính của module Khảo thí: bạn có thể chuyển tab, chọn học sinh và quản lý thư viện bài tập.',
+    targetSelector: '[data-tour="exercises-content"]',
+    view: 'exercises',
+    position: 'right',
+  },
+  {
     id: 'materials-module',
     title: 'Module Tài liệu',
     description:
       'Kho tài liệu giúp bạn lưu trữ, phân loại và truy cập học liệu phục vụ giảng dạy trên một nơi tập trung.',
     targetSelector: '[data-tour="module-documents"]',
+    view: 'documents',
+    position: 'right',
+  },
+  {
+    id: 'materials-components',
+    title: 'Danh mục & thống kê tài liệu',
+    description:
+      'Tại đây bạn xem thống kê tài liệu và quản lý danh mục để tìm, lọc, tải lên học liệu nhanh hơn.',
+    targetSelector: '[data-tour="documents-grid"]',
     view: 'documents',
     position: 'right',
   },
@@ -156,6 +174,15 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'lesson-components',
+    title: 'Kho học liệu và khóa học',
+    description:
+      'Đây là vùng nội dung chính để xây dựng thư viện bài giảng và quản lý khóa học theo lộ trình.',
+    targetSelector: '[data-tour="lessons-content"]',
+    view: 'lessons',
+    position: 'right',
+  },
+  {
     id: 'live-module',
     title: 'Module Lớp học trực tuyến',
     description:
@@ -165,11 +192,29 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'live-components',
+    title: 'Sảnh chờ lớp học trực tuyến',
+    description:
+      'Đây là khu vực hiển thị các buổi học sắp diễn ra và điểm vào phòng học trực tuyến.',
+    targetSelector: '[data-tour="live-room-lobby"]',
+    view: 'live-room',
+    position: 'right',
+  },
+  {
     id: 'settings-module',
     title: 'Module Cài đặt',
     description:
       'Tại đây bạn cập nhật thông tin cá nhân, cấu hình tài khoản và các thiết lập hệ thống quan trọng.',
     targetSelector: '[data-tour="module-settings"]',
+    view: 'settings',
+    position: 'right',
+  },
+  {
+    id: 'settings-components',
+    title: 'Thông tin hồ sơ',
+    description:
+      'Đây là khu vực cập nhật thông tin cá nhân, ảnh đại diện và cấu hình tài khoản của bạn.',
+    targetSelector: '[data-tour="settings-profile"]',
     view: 'settings',
     position: 'right',
   },

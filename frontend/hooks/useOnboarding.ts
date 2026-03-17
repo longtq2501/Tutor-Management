@@ -5,23 +5,29 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 
 export const useOnboarding = () => {
-  const { user, markTourCompleted } = useAuth();
+  const { user, loading, markTourCompleted } = useAuth();
   const [showTour, setShowTour] = useState(false);
   const [dismissedInSession, setDismissedInSession] = useState(false);
 
   useEffect(() => {
-    if (!user || dismissedInSession) {
+    if (loading) {
       return;
     }
 
-    const shouldShowTour = user.role === 'TUTOR' && !getTourStatus(user.tourCompleted);
+    if (!user || dismissedInSession) {
+      setShowTour(false);
+      return;
+    }
+
+    const shouldShowTour = user.role === 'TUTOR' && getTourStatus(user.tourCompleted) === false;
     if (!shouldShowTour) {
+      setShowTour(false);
       return;
     }
 
     const timer = window.setTimeout(() => setShowTour(true), 800);
     return () => window.clearTimeout(timer);
-  }, [dismissedInSession, user]);
+  }, [dismissedInSession, loading, user]);
 
   const handleTourComplete = (didPersist = true) => {
     if (didPersist) {
