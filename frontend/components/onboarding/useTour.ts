@@ -102,10 +102,19 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'finance-debt',
+    title: 'Chế độ công nợ',
+    description:
+      'Dùng nút chuyển chế độ này để vào màn Công nợ, theo dõi các khoản chưa thanh toán và xử lý nhắc thu nhanh hơn.',
+    targetSelector: '[data-tour="finance-debt-view"]',
+    view: 'finance',
+    position: 'right',
+  },
+  {
     id: 'finance-content',
     title: 'Danh sách công nợ & phiên học',
     description:
-      'Tại đây bạn xử lý từng học sinh, cập nhật trạng thái đã thanh toán và thực hiện các thao tác tài chính chi tiết.',
+      'Tại đây bạn xử lý từng học sinh, xem chi tiết khoản công nợ, cập nhật trạng thái đã thanh toán và thực hiện các thao tác tài chính.',
     targetSelector: '[data-tour="finance-content"]',
     view: 'finance',
     position: 'right',
@@ -116,6 +125,42 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     description:
       'Lịch dạy là nơi bạn theo dõi toàn bộ buổi học, kéo thả lịch và xử lý xung đột lịch theo ngày/tuần/tháng.',
     targetSelector: '[data-tour="module-calendar"]',
+    view: 'calendar',
+    position: 'right',
+  },
+  {
+    id: 'calendar-auto-generate',
+    title: 'Tạo lịch tự động',
+    description:
+      'Nút này giúp tạo nhanh các buổi học từ lịch cố định của học sinh, giảm thao tác nhập tay khi lên kế hoạch tháng mới.',
+    targetSelector: '[data-tour="calendar-auto-generate"]',
+    view: 'calendar',
+    position: 'right',
+  },
+  {
+    id: 'calendar-filter',
+    title: 'Bộ lọc buổi dạy',
+    description:
+      'Mở bộ lọc để tìm buổi học theo trạng thái và từ khóa, giúp bạn tập trung xử lý đúng nhóm buổi cần theo dõi.',
+    targetSelector: '[data-tour="calendar-session-filter"]',
+    view: 'calendar',
+    position: 'right',
+  },
+  {
+    id: 'calendar-view-filter',
+    title: 'Chuyển chế độ Tuần/Tháng',
+    description:
+      'Bạn có thể đổi nhanh giữa chế độ Tháng, Tuần và Danh sách để kiểm soát lịch dạy theo từng góc nhìn.',
+    targetSelector: '[data-tour="calendar-view-filter"]',
+    view: 'calendar',
+    position: 'right',
+  },
+  {
+    id: 'calendar-add-session',
+    title: 'Thêm buổi học mới',
+    description:
+      'Nút này mở form tạo buổi học mới ngay trên lịch dạy để bạn thêm phiên học thủ công khi cần.',
+    targetSelector: '[data-tour="calendar-add-session"]',
     view: 'calendar',
     position: 'right',
   },
@@ -138,6 +183,15 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'assessment-library',
+    title: 'Kho thư viện bài tập',
+    description:
+      'Tab Thư viện bài tập là nơi bạn quản lý ngân hàng bài tập, thêm mới và tái sử dụng đề theo từng học sinh hoặc nhóm học.',
+    targetSelector: '[data-tour="exercises-library-tab"]',
+    view: 'exercises',
+    position: 'right',
+  },
+  {
     id: 'assessment-components',
     title: 'Khu điều khiển khảo thí',
     description:
@@ -156,6 +210,24 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'materials-add-category',
+    title: 'Thêm danh mục tài liệu',
+    description:
+      'Nút này giúp bạn tạo danh mục mới để sắp xếp tài liệu theo chủ đề và tìm lại nhanh hơn khi dạy học.',
+    targetSelector: '[data-tour="documents-add-category"]',
+    view: 'documents',
+    position: 'right',
+  },
+  {
+    id: 'materials-upload',
+    title: 'Tải tài liệu lên',
+    description:
+      'Dùng nút Tải lên để đưa file vào hệ thống và gán vào đúng danh mục trước khi chia sẻ cho học sinh.',
+    targetSelector: '[data-tour="documents-upload"]',
+    view: 'documents',
+    position: 'right',
+  },
+  {
     id: 'materials-components',
     title: 'Danh mục & thống kê tài liệu',
     description:
@@ -170,6 +242,15 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     description:
       'Đây là khu vực soạn và tổ chức bài giảng theo từng lớp học hoặc học sinh, giúp theo dõi tiến độ học tập xuyên suốt.',
     targetSelector: '[data-tour="module-lessons"]',
+    view: 'lessons',
+    position: 'right',
+  },
+  {
+    id: 'lesson-courses',
+    title: 'Quản lý khóa học',
+    description:
+      'Tab Khóa học dùng để tổ chức lộ trình học theo từng chương trình, giúp bạn quản lý nội dung theo cấu trúc rõ ràng.',
+    targetSelector: '[data-tour="lessons-courses-tab"]',
     view: 'lessons',
     position: 'right',
   },

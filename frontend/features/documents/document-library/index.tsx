@@ -88,6 +88,7 @@ export default function DocumentLibrary() {
           actions={!isStudent && (
             <div className="flex flex-row gap-2 sm:gap-3 w-full">
               <button
+                data-tour="documents-add-category"
                 onClick={() => {
                   setEditingCategory(null);
                   setIsCategoryFormOpen(true);
@@ -98,7 +99,7 @@ export default function DocumentLibrary() {
                 <span className="hidden sm:inline">Thêm danh mục</span>
                 <span className="sm:hidden">Thêm</span>
               </button>
-              <button onClick={() => setShowUploadModal(true)} className="flex-1 sm:flex-none sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-3 sm:px-4 lg:px-6 py-2.5 lg:py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 sm:gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 text-xs sm:text-base">
+              <button data-tour="documents-upload" onClick={() => setShowUploadModal(true)} className="flex-1 sm:flex-none sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-3 sm:px-4 lg:px-6 py-2.5 lg:py-3 rounded-xl font-medium flex items-center justify-center gap-1.5 sm:gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 text-xs sm:text-base">
                 <Upload size={16} className="sm:w-[18px] sm:h-[18px]" />
                 Tải lên
               </button>

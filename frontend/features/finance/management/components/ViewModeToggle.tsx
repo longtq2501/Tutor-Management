@@ -18,7 +18,7 @@ interface ViewModeToggleProps {
  */
 export function ViewModeToggle({ viewMode, setViewMode }: ViewModeToggleProps) {
     return (
-        <div className="w-full sm:w-auto md:w-auto">
+        <div data-tour="finance-view-toggle" className="w-full sm:w-auto md:w-auto">
             {/* Mobile Dropdown */}
             <div className="md:hidden w-full sm:min-w-[160px]">
                 <Select value={viewMode} onValueChange={(v) => setViewMode(v as 'MONTHLY' | 'DEBT')}>
@@ -50,6 +50,7 @@ export function ViewModeToggle({ viewMode, setViewMode }: ViewModeToggleProps) {
                         <button
                             key={mode}
                             onClick={() => setViewMode(mode)}
+                            data-tour={mode === 'DEBT' ? 'finance-debt-view' : undefined}
                             className={cn(
                                 "relative flex items-center justify-center gap-2 px-3 lg:px-5 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-bold transition-colors z-10",
                                 isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"

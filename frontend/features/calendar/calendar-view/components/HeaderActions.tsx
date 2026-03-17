@@ -27,7 +27,7 @@ export function HeaderActions({
 }: HeaderActionsProps) {
     return (
         <div className="flex items-center gap-1.5 min-w-0 flex-shrink-1">
-            <Button size="sm" className="h-8 2xl:h-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-tighter 2xl:tracking-widest text-[8px] 2xl:text-[10px] px-2 sm:px-3 2xl:px-6 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all" onClick={onAddSession}>
+            <Button data-tour="calendar-add-session" size="sm" className="h-8 2xl:h-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-tighter 2xl:tracking-widest text-[8px] 2xl:text-[10px] px-2 sm:px-3 2xl:px-6 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all" onClick={onAddSession}>
                 <Plus className="w-4 h-4 2xl:mr-1.5" strokeWidth={3} />
                 <span className="hidden sm:inline">Tiết học mới</span>
             </Button>
@@ -83,7 +83,7 @@ export function HeaderActions({
             </TooltipProvider>
 
             {sessionsCount === 0 && (
-                <Button size="sm" onClick={onAutoGenerate} disabled={isGenerating} className="h-8 2xl:h-10 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 font-bold text-[8px] 2xl:text-[10px] px-2 2xl:px-4 hidden sm:flex tracking-tighter 2xl:tracking-normal">
+                <Button data-tour="calendar-auto-generate" size="sm" onClick={onAutoGenerate} disabled={isGenerating} className="h-8 2xl:h-10 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 font-bold text-[8px] 2xl:text-[10px] px-2 2xl:px-4 hidden sm:flex tracking-tighter 2xl:tracking-normal">
                     <Sparkles size={14} className="2xl:mr-2" />
                     <span>{isGenerating ? "Đang tạo..." : "Tạo lịch tự động"}</span>
                 </Button>
