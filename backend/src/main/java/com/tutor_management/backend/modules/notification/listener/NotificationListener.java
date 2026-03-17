@@ -14,6 +14,7 @@ import com.tutor_management.backend.modules.notification.event.OnlineSessionEnde
 import com.tutor_management.backend.modules.notification.event.SessionConvertedToOnlineEvent;
 import com.tutor_management.backend.modules.notification.event.SessionCreatedEvent;
 import com.tutor_management.backend.modules.notification.event.SessionRescheduledEvent;
+import com.tutor_management.backend.modules.notification.event.SupportMessageReceivedEvent;
 import com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository;
 import com.tutor_management.backend.modules.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Event Listener for Notification module.
@@ -410,8 +413,39 @@ public class NotificationListener {
                     NotificationType.SESSION_CONVERTED_ONLINE
             );
         } catch (Exception e) {
-            log.error("Failed to notify student {} for session conversion {}: {}", 
+            log.error("Failed to notify student {} for session conversion {}: {}",
                     event.getStudentId(), event.getSessionId(), e.getMessage());
+        }
+    }
+
+    /**
+     * Handles when a TUTOR or STUDENT sends a message in the in-app support chat.
+     * Notifies all ADMIN users via SSE so they can see the unread badge update.
+     *
+     * @param event Details of the new support message
+     */
+    @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handleSupportMessageReceived(SupportMessageReceivedEvent event) {
+        log.info("Processing SupportMessageReceivedEvent: conversationId={}, sender={}",
+                event.getConversationId(), event.getSenderName());
+
+        List<User> admins = userRepository.findByRoleName("ADMIN");
+        if (admins.isEmpty()) {
+            log.warn("No admin users found to notify for support message in conversation {}", event.getConversationId());
+            return;
+        }
+
+        String title = "Tin nhắn hỗ trợ mới";
+        String content = String.format("[%s] %s: %s",
+                event.getSenderRole(), event.getSenderName(), event.getPreviewContent());
+
+        for (User admin : admins) {
+            try {
+                notificationService.createAndSend(admin, title, content, NotificationType.SUPPORT_MESSAGE);
+            } catch (Exception e) {
+                log.warn("Failed to notify admin {} for support message: {}", admin.getId(), e.getMessage());
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import {
     GraduationCap,
     Calendar,
     FolderClosed,
+    MessageSquare,
     Settings,
     ShieldCheck,
     History,
@@ -22,6 +23,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useQuery } from '@tanstack/react-query';
+import { supportApi } from '@/lib/services/support';
 
 interface NavItem {
     label: string;
@@ -49,6 +52,7 @@ const navSections: NavSection[] = [
             { label: 'Người Dùng', href: '/users', icon: UserCog },
             { label: 'Lịch Dạy', href: '/sessions', icon: Calendar },
             { label: 'Tài Liệu', href: '/documents', icon: FolderClosed },
+            { label: 'Phản Hồi', href: '/feedback', icon: MessageSquare },
         ]
     },
     {
@@ -75,6 +79,14 @@ export function AdminSidebar({
     onCloseMobile
 }: AdminSidebarProps) {
     const pathname = usePathname();
+
+    const { data: conversations = [] } = useQuery({
+        queryKey: ['support-conversations'],
+        queryFn: supportApi.getAllConversations,
+        refetchInterval: 60_000,
+        staleTime: 30_000,
+    });
+    const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCountAdmin, 0);
 
     const SidebarContent = (
         <div className="flex flex-col h-full bg-[var(--admin-surface)] border-r border-[var(--admin-border)] transition-all duration-300">
@@ -130,8 +142,18 @@ export function AdminSidebar({
                                                 >
                                                     <Icon className={`h-5 w-5 shrink-0 ${collapsed ? 'mx-auto' : ''}`} />
                                                     {!collapsed && (
-                                                        <span className="text-sm font-medium tracking-tight whitespace-nowrap overflow-hidden">
+                                                        <span className="flex-1 text-sm font-medium tracking-tight whitespace-nowrap overflow-hidden">
                                                             {item.label}
+                                                        </span>
+                                                    )}
+                                                    {!collapsed && item.href === '/feedback' && totalUnread > 0 && (
+                                                        <span className="ml-auto h-4 min-w-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold px-1">
+                                                            {totalUnread}
+                                                        </span>
+                                                    )}
+                                                    {collapsed && item.href === '/feedback' && totalUnread > 0 && (
+                                                        <span className="absolute top-1 right-1 h-3.5 min-w-3.5 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-0.5">
+                                                            {totalUnread}
                                                         </span>
                                                     )}
                                                     {isActive && collapsed && (

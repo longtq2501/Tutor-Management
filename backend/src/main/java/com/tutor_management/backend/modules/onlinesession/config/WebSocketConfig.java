@@ -1,5 +1,7 @@
 package com.tutor_management.backend.modules.onlinesession.config;
 
+import com.tutor_management.backend.modules.auth.UserRepository;
+import com.tutor_management.backend.modules.auth.service.JwtService;
 import com.tutor_management.backend.modules.onlinesession.security.RoomTokenService;
 import com.tutor_management.backend.modules.onlinesession.security.WebSocketAuthInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final RoomTokenService roomTokenService;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     public WebSocketAuthInterceptor webSocketAuthInterceptor() {
-        return new WebSocketAuthInterceptor(roomTokenService);
+        return new WebSocketAuthInterceptor(roomTokenService, jwtService, userRepository);
     }
 
     @Value("${app.online-session.websocket.allowed-origins}")
