@@ -12,6 +12,8 @@ import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessa
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
+import com.tutor_management.backend.modules.auth.UserRepository;
+import com.tutor_management.backend.modules.auth.service.JwtService;
 import com.tutor_management.backend.modules.onlinesession.security.RoomTokenService;
 
 @SpringBootTest(classes = {
@@ -25,6 +27,12 @@ class WebSocketConfigTest {
 
     @MockBean
     private RoomTokenService roomTokenService;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Autowired(required = false)
     private WebSocketConfig webSocketConfig;
