@@ -81,7 +81,7 @@ app:
     enabled: ${INIT_DATA_ENABLED:false} # ✅ DEPLOY: Disable by default for faster startup on Render
     default-password: password123
   online-session:
-    early-join-minutes: 15
+    early-join-minutes: ${EARLY_JOIN_MINUTES:0}  # ✅ FIX: Allow joining anytime (set via env var for flexibility)
     jwt:
       secret: ${ONLINE_SESSION_JWT_SECRET:your_online_session_random_secret_string}
       expiration: 300000 # 5 minutes
