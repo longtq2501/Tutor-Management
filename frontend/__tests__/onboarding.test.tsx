@@ -134,7 +134,7 @@ describe('TourStep', () => {
 
 describe('TourOverlay', () => {
   it('renders mocked first step content', () => {
-    render(<TourOverlay onComplete={vi.fn()} />);
+    render(<TourOverlay onComplete={vi.fn()} onNavigateView={vi.fn()} />);
 
     expect(screen.getByText('Chào mừng')).toBeInTheDocument();
     expect(screen.getByText('Mô tả test')).toBeInTheDocument();

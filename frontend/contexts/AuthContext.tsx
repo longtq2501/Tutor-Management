@@ -27,6 +27,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   hasRole: (role: 'ADMIN' | 'TUTOR' | 'STUDENT') => boolean;
   hasAnyRole: (roles: Array<'ADMIN' | 'TUTOR' | 'STUDENT'>) => boolean;
+  markTourCompleted: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -239,6 +240,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user ? roles.includes(user.role) : false;
   }, [user]);
 
+  const markTourCompleted = useCallback(() => {
+    if (!user) {
+      return;
+    }
+
+    const updatedUser: UserInfo = {
+      ...user,
+      tourCompleted: true,
+    };
+
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  }, [user]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -253,6 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         hasRole,
         hasAnyRole,
+        markTourCompleted,
       }}
     >
       {children}

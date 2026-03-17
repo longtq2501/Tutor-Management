@@ -28,6 +28,7 @@ function DashboardInner() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
+                    data-tour="finance-stats"
                 >
                     <FinanceStats />
                 </motion.div>
@@ -36,6 +37,7 @@ function DashboardInner() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
+                    data-tour="finance-content"
                 >
                     <FinanceContent />
                 </motion.div>

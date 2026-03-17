@@ -92,6 +92,21 @@ export const TourSpotlight = ({ targetSelector }: TourSpotlightProps) => {
           />
         )}
       </svg>
+
+      {rect && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed z-[999] flex items-center gap-1 text-[#9f8dff]"
+          style={{
+            left: Math.max(12, rect.left + 8),
+            top: Math.max(12, rect.top - 26),
+          }}
+        >
+          <span className="text-xs font-semibold tracking-wide">Vị trí đang giới thiệu</span>
+          <span className="text-lg leading-none">↘</span>
+        </motion.div>
+      )}
     </div>
   );
 };

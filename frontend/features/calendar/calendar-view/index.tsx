@@ -67,7 +67,7 @@ export default function CalendarView() {
       />
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEndInternal}>
-        <main className="transition-all duration-300">
+        <main data-tour="calendar-board" className="transition-all duration-300">
           <CalendarViewContent
             currentView={view.currentView}
             isInitialLoad={view.isInitialLoad}

@@ -14,12 +14,13 @@ interface SidebarProps {
     currentView: View;
     setCurrentView: (view: View) => void;
     navItems: NavItem[];
+    isLocked?: boolean;
 }
 
 // Cấu hình Spring Animation cho cảm giác "Premium"
 const SPRING_CONFIG = { type: "spring", stiffness: 300, damping: 30, mass: 1 } as const;
 
-export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarProps) => {
+export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked = false }: SidebarProps) => {
     const { isSidebarOpen, setSidebarOpen, isCollapsed, setIsCollapsed } = useUI();
     const [isMobile, setIsMobile] = useState(false);
     const [isLargeDesktop, setIsLargeDesktop] = useState(false);
@@ -38,6 +39,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarP
     }, [isSidebarOpen, setSidebarOpen]);
 
     const handleNavClick = (view: View) => {
+        if (isLocked) return;
         setCurrentView(view);
         if (isMobile) setSidebarOpen(false);
     };
@@ -92,8 +94,9 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarP
                     {!isMobile && (
                         <motion.button
                             layout
+                            disabled={isLocked}
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="absolute -right-3 top-10 h-6 w-6 flex items-center justify-center bg-primary text-primary-foreground rounded-full shadow-xl hover:scale-110 transition-transform z-50"
+                            className="absolute -right-3 top-10 h-6 w-6 flex items-center justify-center bg-primary text-primary-foreground rounded-full shadow-xl hover:scale-110 transition-transform z-50 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                             <motion.div animate={{ rotate: effectiveCollapsed ? 180 : 0 }} transition={SPRING_CONFIG}>
                                 <ChevronLeft size={14} strokeWidth={3} />
@@ -125,7 +128,14 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems }: SidebarP
                     </div>
 
                     {/* Navigation Items */}
-                    <nav data-tour="sidebar" className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
+                    <nav
+                        data-tour="sidebar"
+                        aria-disabled={isLocked}
+                        className={cn(
+                            'flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar',
+                            isLocked && 'pointer-events-none'
+                        )}
+                    >
                         {navItems.map((item) => {
                             const isActive = currentView === item.id;
                             const Icon = item.icon;

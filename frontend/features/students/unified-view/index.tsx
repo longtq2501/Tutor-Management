@@ -58,22 +58,26 @@ export default function UnifiedContactManagement() {
                 }
             />
 
-            <UnifiedContactStats
-                stats={stats}
-                isLoading={loading}
-                isError={isError}
-            />
+            <div data-tour="students-stats">
+                <UnifiedContactStats
+                    stats={stats}
+                    isLoading={loading}
+                    isError={isError}
+                />
+            </div>
 
-            <OptimizedStudentGrid
-                students={students}
-                isLoading={loading}
-                isError={isError}
-                onRetry={refetch}
-                onViewSchedule={handleViewSchedule}
-                onAddSession={handleAddSession}
-                onEdit={handleEditStudent}
-                onViewDetails={handleViewDetails}
-            />
+            <div data-tour="students-grid">
+                <OptimizedStudentGrid
+                    students={students}
+                    isLoading={loading}
+                    isError={isError}
+                    onRetry={refetch}
+                    onViewSchedule={handleViewSchedule}
+                    onAddSession={handleAddSession}
+                    onEdit={handleEditStudent}
+                    onViewDetails={handleViewDetails}
+                />
+            </div>
 
             {isModalOpen && (
                 <EnhancedAddStudentModal

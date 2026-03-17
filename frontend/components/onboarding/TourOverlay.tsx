@@ -1,15 +1,17 @@
 'use client';
 
 import { AnimatePresence } from 'framer-motion';
+import type { TourView } from './useTour';
 import { TourSpotlight } from './TourSpotlight';
 import { TourStep } from './TourStep';
 import { useTour } from './useTour';
 
 interface TourOverlayProps {
-  onComplete: () => void;
+  onComplete: (didPersist: boolean) => void;
+  onNavigateView: (view: TourView) => void;
 }
 
-export const TourOverlay = ({ onComplete }: TourOverlayProps) => {
+export const TourOverlay = ({ onComplete, onNavigateView }: TourOverlayProps) => {
   const {
     currentStep,
     currentStepData,
@@ -21,7 +23,7 @@ export const TourOverlay = ({ onComplete }: TourOverlayProps) => {
     prevStep,
     finishTour,
     skipTour,
-  } = useTour(onComplete);
+  } = useTour(onComplete, onNavigateView);
 
   return (
     <>
