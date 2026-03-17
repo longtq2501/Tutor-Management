@@ -39,7 +39,10 @@ public enum NotificationType {
     
     /** Critical system or security alerts */
     SYSTEM,
-    
+
     /** Miscellaneous notifications */
-    GENERAL
+    GENERAL,
+
+    /** A user (TUTOR or STUDENT) sent a message in the in-app support chat */
+    SUPPORT_MESSAGE
 }

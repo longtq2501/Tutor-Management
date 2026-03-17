@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // OPTIMIZED: Batch load users for multiple students
     List<User> findByStudentIdIn(List<Long> studentIds);
 
+    List<User> findByRoleName(String roleName);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE users SET role_id = 3 WHERE role = 'STUDENT' AND role_id != 3", nativeQuery = true)

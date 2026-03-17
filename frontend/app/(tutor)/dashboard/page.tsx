@@ -65,6 +65,7 @@ import { type UserInfo } from '@/lib/services/auth';
 import ExerciseDashboard from '@/features/exercises/exercise-dashboard';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
+import { FeedbackWidget } from '@/features/support/components/FeedbackWidget';
 
 // ============================================================================
 // MEMOIZED SUB-COMPONENTS FOR RENDERING ISOLATION
@@ -366,6 +367,8 @@ function AppContent() {
                     hasAnyRole={hasAnyRole}
                 />
             </div>
+
+            <FeedbackWidget />
         </div>
     );
 }
