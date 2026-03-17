@@ -4,4 +4,4 @@ Disallow: /dashboard/
 Disallow: /api/
 Disallow: /admin/
 
-Sitemap: https://tutor-management-e7zh.vercel.app/sitemap.xml
+Sitemap: https://tutorpro.id.vn/sitemap.xml
