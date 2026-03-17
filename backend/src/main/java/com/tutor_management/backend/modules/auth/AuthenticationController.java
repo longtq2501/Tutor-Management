@@ -94,6 +94,8 @@ public class AuthenticationController {
                 .role(user.getRole().getName())
                 .avatarUrl(user.getAvatarUrl())
                 .studentId(user.getStudentId())
+            .tourCompleted(user.isTourCompleted())
+            .tourCompletedAt(user.getTourCompletedAt())
                 .build();
         return ResponseEntity.ok(ApiResponse.success(userInfo));
     }

@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 /**
  * Service class for managing user-related operations such as retrieving user profiles,
  * changing passwords, and updating user information.
@@ -89,6 +91,22 @@ public class UserService {
     }
 
     /**
+     * Marks onboarding tour as completed for the given user.
+     * This operation is idempotent: repeated calls keep the same completed state.
+     */
+    @Transactional
+    public void completeTour(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        if (!user.isTourCompleted()) {
+            user.setTourCompleted(true);
+            user.setTourCompletedAt(LocalDateTime.now());
+            userRepository.save(user);
+        }
+    }
+
+    /**
      * Maps a User entity to an AuthResponse.UserInfo DTO.
      *
      * @param user The User entity to be mapped.
@@ -106,6 +124,8 @@ public class UserService {
                 .accountNumber(user.getAccountNumber())
                 .accountName(user.getAccountName())
                 .bankCode(user.getBankCode())
+                .tourCompleted(user.isTourCompleted())
+                .tourCompletedAt(user.getTourCompletedAt())
                 .build();
     }
 }

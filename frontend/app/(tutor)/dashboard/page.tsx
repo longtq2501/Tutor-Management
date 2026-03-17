@@ -55,11 +55,13 @@ const SettingsView = dynamic(() => import('@/features/settings'));
 import { ModeToggle } from '@/components/shared/ModeToggle';
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
 import { NavItem, Sidebar, View } from '@/components/tutor/Sidebar';
+import { TourOverlay } from '@/components/onboarding/TourOverlay';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { HeaderSlot, UIProvider, useUI } from '@/contexts/UIContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { type UserInfo } from '@/lib/services/auth';
 
 import ExerciseDashboard from '@/features/exercises/exercise-dashboard';
@@ -239,6 +241,7 @@ function AppContent() {
     const [currentView, setCurrentView] = useState<View>(initialView);
     const { isCollapsed, setIsCollapsed } = useUI();
     const { user, logout, hasAnyRole } = useAuth();
+    const { showTour, handleTourComplete } = useOnboarding();
     const roomId = searchParams.get('roomId');
 
     // Auto-collapse logic for tablets
@@ -369,6 +372,8 @@ function AppContent() {
             </div>
 
             <FeedbackWidget />
+
+            {showTour && <TourOverlay onComplete={handleTourComplete} />}
         </div>
     );
 }

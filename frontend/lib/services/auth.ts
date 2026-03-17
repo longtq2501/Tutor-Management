@@ -8,6 +8,7 @@ export interface UserInfo {
   role: 'ADMIN' | 'TUTOR' | 'STUDENT';
   avatarUrl?: string;
   studentId?: number;
+  tourCompleted?: boolean;
   bankName?: string;
   accountNumber?: string;
   accountName?: string;
