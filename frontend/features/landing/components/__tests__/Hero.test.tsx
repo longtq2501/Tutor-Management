@@ -2,9 +2,8 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Hero from '../Hero';
 
-// Mock SplineVisual as it depends on external Spline SDK
-vi.mock('../visuals/SplineVisual', () => ({
-    default: () => <div data-testid="spline-visual">Mock Spline</div>
+vi.mock('../visuals/HeroDashboardPreview', () => ({
+    default: () => <div data-testid="hero-dashboard-preview">Dashboard Preview</div>
 }));
 
 describe('Hero Component', () => {
@@ -20,14 +19,14 @@ describe('Hero Component', () => {
         expect(screen.getByText('KHÁM PHÁ')).toBeDefined();
     });
 
-    it('renders the SplineVisual component', () => {
+    it('renders the dashboard preview component', () => {
         render(<Hero />);
-        expect(screen.getByTestId('spline-visual')).toBeDefined();
+        expect(screen.getByTestId('hero-dashboard-preview')).toBeDefined();
     });
 
-    it('displays the statistics bar on desktop', () => {
+    it('does not render stats bar values', () => {
         render(<Hero />);
-        expect(screen.getByText('500+')).toBeDefined();
-        expect(screen.getByText('12K+')).toBeDefined();
+        expect(screen.queryByText('11')).not.toBeInTheDocument();
+        expect(screen.queryByText('Miễn phí')).not.toBeInTheDocument();
     });
 });

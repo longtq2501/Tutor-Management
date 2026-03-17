@@ -12,11 +12,12 @@ describe('FeatureShowcase Component', () => {
     it('renders all core features including Live Teaching', () => {
         render(<FeatureShowcase />);
         const features = [
-            'Lớp học Tương tác',
-            'Lịch dạy Thông minh',
-            'Khảo thí & Chấm điểm',
-            'Quản lý Tài chính',
-            'Kho tài liệu 3D'
+            'Live Teaching',
+            'Calendar',
+            'Lesson Lobby',
+            'Assessment',
+            'Finance',
+            'Storage'
         ];
 
         features.forEach(feature => {
@@ -26,8 +27,7 @@ describe('FeatureShowcase Component', () => {
 
     it('renders the visual mockups for each feature', () => {
         const { container } = render(<FeatureShowcase />);
-        // Select main feature items specifically by their structure
-        const visuals = container.querySelectorAll('#features .flex.flex-col.gap-32 > div');
-        expect(visuals.length).toBe(5);
+        const visuals = container.querySelectorAll('#features article, #features .grid.grid-cols-1.gap-6.rounded-3xl');
+        expect(visuals.length).toBe(6);
     });
 });

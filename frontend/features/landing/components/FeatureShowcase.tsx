@@ -2,69 +2,73 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import CalendarVisual from './visuals/CalendarVisual';
-import ExamVisual from './visuals/ExamVisual';
-import FinanceVisual from './visuals/FinanceVisual';
-import DocsVisual from './visuals/DocsVisual';
-import LiveTeachingVisual from './visuals/LiveTeachingVisual';
+import Image from 'next/image';
 
 interface FeatureData {
     id: string;
     title: string;
-    icon: string;
-    painPoint: string;
-    solution: string;
+    description: string;
     color: string;
-    visual: React.ReactNode;
+    screenshot: string;
+    screenshotAlt: string;
+    metrics: string[];
 }
 
 const FeatureShowcase: React.FC = () => {
-    // Dữ liệu Demo UI từ component LiveDemo cũ, được tinh chỉnh lại cho layout mới
     const features: FeatureData[] = [
         {
             id: 'live-teaching',
-            title: 'Lớp học Tương tác',
-            icon: '📽️',
+            title: 'Live Teaching',
             color: '#4a9eff',
-            painPoint: 'Dạy qua Zoom/Meet rời rạc, không có bảng viết chuyên dụng và khó kiểm soát thời gian dạy để thu phí?',
-            solution: 'Phòng học tích hợp Bảng trắng AI, Chat thời gian thực và hệ thống Tự động tính học phí chính xác đến từng giây.',
-            visual: <LiveTeachingVisual />
+            description: 'Tổ chức lớp học trực tuyến ngay trong Tutor Pro với đầy đủ công cụ tương tác.',
+            screenshot: '/screenshots/live-teaching.png',
+            screenshotAlt: 'Giao diện phòng học trực tuyến',
+            metrics: ['Độ trễ tải giao diện < 800ms', 'Giảm việc chuyển đổi qua lại giữa các nền tảng']
         },
         {
             id: 'calendar',
-            title: 'Lịch dạy Thông minh',
-            icon: '📅',
+            title: 'Calendar',
             color: '#6366f1',
-            painPoint: 'Bạn đau đầu vì lịch dạy chồng chéo, quên lịch hoặc phải nhắn tin nhắc từng học sinh?',
-            solution: 'Hệ thống tự động phát hiện trùng lịch, gợi ý giờ rảnh tối ưu và tự động gửi nhắc nhở qua Zalo/Email trước buổi học.',
-            visual: <CalendarVisual />
+            description: 'Xem và quản lý lịch dạy theo ngày/tuần để tránh trùng lịch và sót buổi học.',
+            screenshot: '/screenshots/calendar-view.png',
+            screenshotAlt: 'Giao diện lịch dạy',
+            metrics: ['Theo dõi lịch dạy trong một màn hình', 'Phát hiện xung đột lịch để xử lý sớm']
         },
         {
-            id: 'exam',
-            title: 'Khảo thí & Chấm điểm',
-            icon: '📝',
+            id: 'lesson-lobby',
+            title: 'Lesson Lobby',
+            color: '#f59e0b',
+            description: 'Quản lý bài giảng theo lộ trình, gồm nội dung và tài nguyên để dạy học liền mạch.',
+            screenshot: '/screenshots/lesson-lobby-view.png',
+            screenshotAlt: 'Giao diện bài giảng Lesson Lobby',
+            metrics: ['Sắp xếp bài giảng theo chapter/buổi học', 'Truy cập nhanh nội dung cần dạy trong một màn hình']
+        },
+        {
+            id: 'assessment',
+            title: 'Assessment',
             color: '#9d4edd',
-            painPoint: 'Mất hàng giờ đồng hồ mỗi tuần để soạn đề, trộn đề và chấm bài thủ công?',
-            solution: 'Ngân hàng đề thi thông minh với 50.000+ câu hỏi. Chấm điểm tự động và phân tích biểu đồ năng lực học sinh ngay lập tức.',
-            visual: <ExamVisual />
+            description: 'Tổng hợp kết quả học tập để đánh giá tiến độ và điều chỉnh lộ trình học phù hợp.',
+            screenshot: '/screenshots/assessment-view.png',
+            screenshotAlt: 'Giao diện khảo thí và đánh giá',
+            metrics: ['Cập nhật kết quả học tập nhanh cho từng học sinh', 'Hỗ trợ đánh giá theo buổi học và theo giai đoạn']
         },
         {
             id: 'finance',
-            title: 'Quản lý Tài chính',
-            icon: '💰',
+            title: 'Finance',
             color: '#06ffa5',
-            painPoint: 'Ngại ngùng khi phải nhắc phụ huynh đóng học phí? Khó theo dõi ai đã đóng, ai chưa?',
-            solution: 'Tự động gửi thông báo học phí tinh tế. Báo cáo doanh thu trực quan giúp bạn nắm bắt dòng tiền chỉ trong 1 cái liếc mắt.',
-            visual: <FinanceVisual />
+            description: 'Theo dõi học phí đã thu/chưa thu và doanh thu để quản lý dòng tiền minh bạch.',
+            screenshot: '/screenshots/finance-view.png',
+            screenshotAlt: 'Giao diện quản lý tài chính',
+            metrics: ['Theo dõi công nợ theo từng học sinh', 'Tổng hợp doanh thu theo chu kỳ dạy học']
         },
         {
-            id: 'docs',
-            title: 'Kho tài liệu 3D',
-            icon: '📁',
+            id: 'storage',
+            title: 'Storage',
             color: '#ff0055',
-            painPoint: 'Tài liệu lưu trữ rải rác trên Drive, Máy tính, USB... mỗi lần tìm lại rất mất thời gian?',
-            solution: 'Lưu trữ tập trung, phân loại theo thẻ (tag) thông minh. Chia sẻ cho học sinh chỉ với 1 cú click.',
-            visual: <DocsVisual />
+            description: 'Lưu trữ tài nguyên học tập tập trung để tìm lại và chia sẻ tài liệu nhanh hơn.',
+            screenshot: '/screenshots/storage-view.png',
+            screenshotAlt: 'Giao diện tổng quan lưu trữ và quản lý',
+            metrics: ['Tập trung dữ liệu trên một hệ thống duy nhất', 'Giảm thất lạc tài liệu trong quá trình dạy học']
         }
     ];
 
@@ -92,11 +96,11 @@ const FeatureShowcase: React.FC = () => {
     };
 
     return (
-        <section id="features" className="py-32 px-6 bg-[#050714] relative overflow-hidden">
+        <section id="features" className="relative overflow-hidden px-6 py-28 md:py-32">
 
             {/* Background Decor */}
-            <div className="absolute top-[20%] left-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none"></div>
-            <div className="absolute bottom-[20%] right-0 w-[500px] h-[500px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none"></div>
+            <div className="pointer-events-none absolute left-0 top-[20%] h-[500px] w-[500px] rounded-full bg-sky-200/35 blur-[120px]"></div>
+            <div className="pointer-events-none absolute bottom-[20%] right-0 h-[500px] w-[500px] rounded-full bg-indigo-200/25 blur-[120px]"></div>
 
             <div className="max-w-7xl mx-auto">
                 <motion.div
@@ -106,12 +110,12 @@ const FeatureShowcase: React.FC = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold tracking-widest uppercase text-white/50 mb-4">
+                    <div className="mb-4 inline-block rounded-full border border-slate-200 bg-white/90 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-slate-500 shadow-sm">
                         Feature Tour
                     </div>
-                    <h2 className="text-3xl md:text-6xl font-black mb-6 leading-[1.2] md:leading-[1.15]">
+                    <h2 className="mb-6 text-3xl font-black leading-[1.2] text-slate-900 md:text-6xl md:leading-[1.15]">
                         Mọi công cụ bạn cần <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4a9eff] to-[#06ffa5]">Trong một nền tảng duy nhất</span>
+                        <span className="bg-gradient-to-r from-sky-600 to-cyan-500 bg-clip-text text-transparent">Trong một nền tảng duy nhất</span>
                     </h2>
                 </motion.div>
 
@@ -122,71 +126,44 @@ const FeatureShowcase: React.FC = () => {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
                 >
-                    {/* Central Connecting Line */}
-                    <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent hidden md:block"></div>
-
-                    <div className="flex flex-col gap-32">
+                    <div className="flex flex-col gap-16 md:gap-20">
                         {features.map((feature, index) => (
                             <motion.div
                                 key={feature.id}
-                                className="relative flex flex-col md:flex-row items-center gap-10 md:gap-20 group"
+                                className="relative grid cursor-pointer grid-cols-1 gap-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_56px_rgba(14,116,144,0.16)] md:grid-cols-2 md:gap-10 md:p-8"
                                 variants={itemVariants}
                             >
-
-                                {/* Connector Dot (Desktop) */}
-                                <div
-                                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-[#050714] z-20 hidden md:block transition-all duration-500 group-hover:scale-150"
-                                    style={{ backgroundColor: feature.color, boxShadow: `0 0 20px ${feature.color}` }}
-                                ></div>
-
-                                {/* Left Side: UI Simulation */}
-                                <div className={`w-full md:w-1/2 relative ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
-                                    {/* Glowing Backlight behind visual */}
+                                <div className={`${index % 2 === 0 ? 'md:order-1' : 'md:order-2'} relative`}>
                                     <div
-                                        className="absolute inset-0 blur-[60px] opacity-20 transition-opacity duration-700 group-hover:opacity-40"
+                                        className="absolute inset-0 opacity-35 blur-[60px]"
                                         style={{ backgroundColor: feature.color }}
                                     ></div>
-
-                                    <div className="relative transform transition-transform duration-700 group-hover:scale-[1.02] group-hover:-translate-y-2">
-                                        {/* Window Controls Decoration */}
-                                        <div className="absolute top-4 left-4 z-20 flex gap-1.5">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
-                                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
-                                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
-                                        </div>
-                                        {feature.visual}
+                                    <div className="relative aspect-video overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-[0_10px_28px_rgba(15,23,42,0.08)]">
+                                        <Image
+                                            src={feature.screenshot}
+                                            alt={feature.screenshotAlt}
+                                            width={1400}
+                                            height={840}
+                                            className="h-full w-full object-cover object-top"
+                                        />
                                     </div>
                                 </div>
 
-                                {/* Right Side: Description */}
-                                <div className={`w-full md:w-1/2 ${index % 2 === 0 ? 'md:order-2 md:pl-10' : 'md:order-1 md:pr-10 md:text-right'}`}>
-                                    <div className={`flex items-center gap-3 mb-4 ${index % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
-                                        <div
-                                            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-premium border border-white/10 glass transition-transform group-hover:scale-110"
-                                        >
-                                            {feature.icon}
-                                        </div>
-                                        <h3 className="text-3xl font-black leading-tight">{feature.title}</h3>
+                                <div className={`${index % 2 === 0 ? 'md:order-2' : 'md:order-1'} flex flex-col justify-center`}>
+                                    <div className="mb-4 flex items-center gap-3">
+                                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: feature.color }}></span>
+                                        <h3 className="text-3xl font-black leading-tight text-slate-900">{feature.title}</h3>
                                     </div>
-
-                                    <div className="space-y-4 md:space-y-6">
-                                        <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl border border-red-500/10 bg-red-500/5 relative group/pain">
-                                            <div className="text-[10px] font-bold uppercase tracking-widest text-red-500/50 mb-1 flex items-center gap-2">
-                                                <span className="text-sm">😫</span> Vấn đề cũ
-                                            </div>
-                                            <p className="text-white/60 text-sm md:text-base leading-relaxed">{feature.painPoint}</p>
-                                        </div>
-
-                                        <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl border border-[#4a9eff]/20 bg-[#4a9eff]/5 relative overflow-hidden group/sol">
-                                            <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: feature.color }}></div>
-                                            <div className="text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-2" style={{ color: feature.color }}>
-                                                <span className="text-sm">✨</span> Giải pháp Tutor Pro
-                                            </div>
-                                            <p className="text-white text-base md:text-lg font-medium leading-[1.5] md:leading-[1.4]">{feature.solution}</p>
-                                        </div>
-                                    </div>
+                                    <p className="mb-5 text-slate-600 md:text-lg">{feature.description}</p>
+                                    <ul className="space-y-2 text-sm text-slate-700 md:text-base">
+                                        {feature.metrics.map((metric) => (
+                                            <li key={metric} className="flex items-start gap-2">
+                                                <span className="mt-1 text-emerald-500">✓</span>
+                                                <span>{metric}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
-
                             </motion.div>
                         ))}
                     </div>

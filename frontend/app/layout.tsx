@@ -14,20 +14,21 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    metadataBase: new URL('https://tutor-pro-app.vercel.app'),
-    title: 'Tutor Pro',
-    description: 'Hệ thống quản lý gia sư chuyên nghiệp, tối ưu hóa quy trình dạy và học.',
+    metadataBase: new URL('https://tutorpro.id.vn'),
+    title: 'Tutor Pro — Hệ thống quản lý gia sư 1-1',
+    description: 'Nền tảng quản lý gia sư toàn diện: lịch dạy, tài chính, lớp học trực tuyến, AI feedback. Dùng thử miễn phí.',
+    keywords: ['gia su', 'quan ly gia su', 'phan mem gia su', 'tutor management'],
     manifest: '/manifest.json',
     openGraph: {
         type: 'website',
         locale: 'vi_VN',
-        url: 'https://tutor-pro-app.vercel.app',
-        title: 'Tutor Pro - Hệ thống quản lý gia sư',
-        description: 'Giải pháp quản lý gia sư, học sinh và học phí hiệu quả.',
+        url: 'https://tutorpro.id.vn',
+        title: 'Tutor Pro',
+        description: 'Hệ thống quản lý gia sư 1-1 toàn diện',
         siteName: 'Tutor Pro',
         images: [
             {
-                url: '/thumbnail.jpg',
+                url: '/screenshots/dashboard-overview.png',
                 width: 1200,
                 height: 630,
                 alt: 'Tutor Pro Dashboard',
