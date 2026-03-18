@@ -48,6 +48,7 @@ const AdminLessonManager = dynamic(() => import('@/features/learning/lessons'));
 const TutorsFeature = dynamic(() => import('@/features/tutors'));
 const LiveRoomFeature = dynamic(() => import('@/features/live-room'));
 const SettingsView = dynamic(() => import('@/features/settings'));
+const ReportsFeature = dynamic(() => import('@/features/reports'));
 
 // ============================================================================
 // UI COMPONENTS (Keep in /components - not feature-specific)
@@ -208,6 +209,11 @@ const MainContentSwitcher = React.memo(({ currentView, hasAnyRole }: {
                         <FinanceDashboard />
                     </section>
                 )}
+                {currentView === 'reports' && hasAnyRole(['TUTOR']) && (
+                    <section data-tour="module-reports">
+                        <ReportsFeature />
+                    </section>
+                )}
                 {/* {currentView === 'monthly' && hasAnyRole(['ADMIN', 'TUTOR']) && <MonthlyView />} */}
                 {currentView === 'calendar' && hasAnyRole(['ADMIN', 'TUTOR']) && (
                     <section data-tour="module-calendar">
@@ -329,6 +335,7 @@ function AppContent() {
             { id: 'tutors', label: 'Gia Sư', icon: Users },
             { id: 'students', label: 'Học Sinh & PH', icon: GraduationCap },
             { id: 'finance', label: 'Tài Chính', icon: TrendingUp },
+            { id: 'reports', label: 'Báo Cáo', icon: FileText },
             { id: 'calendar', label: 'Lịch Dạy', icon: CalendarDays },
             { id: 'exercises', label: 'Khảo thí', icon: ClipboardList },
             { id: 'documents', label: 'Tài Liệu', icon: FileText },
@@ -340,6 +347,7 @@ function AppContent() {
         return allItems.filter(item => {
             if (item.id === 'students' && !hasAnyRole(['ADMIN', 'TUTOR'])) return false;
             if (item.id === 'finance' && !hasAnyRole(['ADMIN', 'TUTOR'])) return false;
+            if (item.id === 'reports' && !hasAnyRole(['TUTOR'])) return false;
             if (item.id === 'monthly' && !hasAnyRole(['ADMIN', 'TUTOR'])) return false;
             if (item.id === 'unpaid' && !hasAnyRole(['ADMIN', 'TUTOR'])) return false;
             if (item.id === 'calendar' && !hasAnyRole(['ADMIN', 'TUTOR'])) return false;

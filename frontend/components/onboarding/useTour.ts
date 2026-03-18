@@ -5,6 +5,7 @@ export type TourView =
   | 'dashboard'
   | 'students'
   | 'finance'
+  | 'reports'
   | 'calendar'
   | 'exercises'
   | 'documents'
@@ -117,6 +118,15 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
       'Tại đây bạn xử lý từng học sinh, xem chi tiết khoản công nợ, cập nhật trạng thái đã thanh toán và thực hiện các thao tác tài chính.',
     targetSelector: '[data-tour="finance-content"]',
     view: 'finance',
+    position: 'right',
+  },
+  {
+    id: 'reports-module',
+    title: 'Module Báo cáo tiến độ',
+    description:
+      'Bạn có thể tạo báo cáo tiến độ theo tháng cho từng học sinh, ghi nhận xét và xuất PDF/PNG trực tiếp.',
+    targetSelector: '[data-tour="module-reports"]',
+    view: 'reports',
     position: 'right',
   },
   {

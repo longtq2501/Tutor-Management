@@ -12,6 +12,7 @@ export * from './invoice';
 export * from './document';
 export * from './dashboard';
 export * from './auth';
+export * from './report';
 export * from './lesson-admin';
 export * from './lesson-category';
 export * from './course-admin';

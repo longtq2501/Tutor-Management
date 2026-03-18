@@ -2,6 +2,7 @@ package com.tutor_management.backend.modules.finance.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 import com.tutor_management.backend.modules.finance.entity.SessionRecord;
 import org.springframework.data.domain.Page;
@@ -195,6 +196,18 @@ public interface SessionRecordRepository extends JpaRepository<SessionRecord, Lo
            "WHERE sr.student.id = :studentId AND sr.month = :month " +
            "ORDER BY sr.sessionDate DESC")
     List<SessionRecord> findByStudentIdAndMonth(@Param("studentId") Long studentId, @Param("month") String month);
+
+    @Query("SELECT sr FROM SessionRecord sr " +
+           "LEFT JOIN FETCH sr.student " +
+           "WHERE sr.tutorId = :tutorId " +
+           "AND sr.student.id = :studentId " +
+           "AND sr.sessionDate BETWEEN :startDate AND :endDate " +
+           "ORDER BY sr.sessionDate ASC")
+    List<SessionRecord> findByTutorIdAndStudentIdAndSessionDateBetween(
+            @Param("tutorId") Long tutorId,
+            @Param("studentId") Long studentId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     /**
      * Retrieves detailed session records for a specific student and month, 

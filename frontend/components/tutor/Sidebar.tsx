@@ -7,7 +7,7 @@ import { ChevronLeft, GraduationCap } from 'lucide-react';
 import React, { memo, useEffect, useState } from 'react';
 
 // Types (Giữ nguyên)
-export type View = 'dashboard' | 'students' | 'monthly' | 'documents' | 'parents' | 'unpaid' | 'calendar' | 'homework' | 'lessons' | 'exercises' | 'finance' | 'tutors' | 'live-room' | 'settings';
+export type View = 'dashboard' | 'students' | 'monthly' | 'documents' | 'parents' | 'unpaid' | 'calendar' | 'homework' | 'lessons' | 'exercises' | 'finance' | 'reports' | 'tutors' | 'live-room' | 'settings';
 export type NavItem = { id: View; label: string; icon: React.ElementType };
 
 interface SidebarProps {
@@ -53,6 +53,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
     const getTourDataAttr = (view: View): string | undefined => {
         if (view === 'calendar') return 'nav-calendar';
         if (view === 'finance') return 'nav-finance';
+        if (view === 'reports') return 'nav-reports';
         if (view === 'live-room') return 'nav-live-teaching';
         if (view === 'documents') return 'nav-materials';
         if (view === 'lessons') return 'nav-lecture';
