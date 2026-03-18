@@ -22,6 +22,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+
 
 /**
  * RESTful interface for the Exercise Management System.
@@ -37,6 +41,7 @@ public class ExerciseController {
     
     private final ExerciseService exerciseService;
     private final com.tutor_management.backend.modules.tutor.repository.TutorRepository tutorRepository;
+    private final com.tutor_management.backend.modules.auth.UserRepository userRepository;
     
     /**
      * Dry-run parsing of raw text into structured exercise data.
@@ -139,8 +144,14 @@ public class ExerciseController {
             @AuthenticationPrincipal User user,
             @PageableDefault(size = 10, sort = "assignedAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         log.debug("Reading assigned materials for authenticated student {} (page: {})", user.getEmail(), pageable.getPageNumber());
-        // For students, we don't filter by teacherId
-        Page<ExerciseListItemResponse> exercises = exerciseService.listAssignedExercises(user.getId().toString(), null, pageable);
+
+        List<String> studentIdentityCandidates = new ArrayList<>(new LinkedHashSet<>(List.of(user.getId().toString())));
+        if (user.getStudentId() != null) {
+            studentIdentityCandidates.add(user.getStudentId().toString());
+        }
+
+        // For students, we don't filter by teacherId.
+        Page<ExerciseListItemResponse> exercises = exerciseService.listAssignedExercisesByStudentIds(studentIdentityCandidates, null, pageable);
         return ResponseEntity.ok(ApiResponse.success(exercises));
     }
 
@@ -162,8 +173,19 @@ public class ExerciseController {
                     .map(com.tutor_management.backend.modules.tutor.entity.Tutor::getId)
                     .orElse(null);
         }
-        
-        Page<ExerciseListItemResponse> exercises = exerciseService.listAssignedExercises(studentId, tutorId, pageable);
+
+        LinkedHashSet<String> studentIdentityCandidates = new LinkedHashSet<>();
+        studentIdentityCandidates.add(studentId);
+        try {
+            Long profileStudentId = Long.parseLong(studentId);
+            userRepository.findByStudentId(profileStudentId)
+                    .map(User::getId)
+                    .ifPresent(userId -> studentIdentityCandidates.add(userId.toString()));
+        } catch (NumberFormatException ignored) {
+            // Keep the raw path ID only when it is not numeric.
+        }
+
+        Page<ExerciseListItemResponse> exercises = exerciseService.listAssignedExercisesByStudentIds(new ArrayList<>(studentIdentityCandidates), tutorId, pageable);
         return ResponseEntity.ok(ApiResponse.success(exercises));
     }
 }

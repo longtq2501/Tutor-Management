@@ -214,14 +214,31 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Override
     @Transactional(readOnly = true)
     public Page<ExerciseListItemResponse> listAssignedExercises(String studentId, Long tutorId, Pageable pageable) {
-        log.debug("Synthesizing assigned exercises view for student {} (Filter TutorID: {}, Page: {})", studentId, tutorId, pageable.getPageNumber());
-        
-        // If tutorId is provided, filter assignments by that tutor via join (multi-tenancy)
-        Page<ExerciseAssignment> assignmentsPage = (tutorId != null) 
-                ? assignmentRepository.findByStudentIdAndTutorId(studentId, tutorId, pageable)
-                : assignmentRepository.findByStudentId(studentId, pageable);
-        
-        if (assignmentsPage.isEmpty()) return Page.empty();
+        return listAssignedExercisesByStudentIds(List.of(studentId), tutorId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ExerciseListItemResponse> listAssignedExercisesByStudentIds(List<String> studentIds, Long tutorId, Pageable pageable) {
+        List<String> normalizedStudentIds = (studentIds == null ? List.<String>of() : studentIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList());
+
+        if (normalizedStudentIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        log.debug("Synthesizing assigned exercises view for student identities {} (Filter TutorID: {}, Page: {})",
+                normalizedStudentIds, tutorId, pageable.getPageNumber());
+
+        Page<ExerciseAssignment> assignmentsPage = (tutorId != null)
+                ? assignmentRepository.findByStudentIdsAndTutorId(normalizedStudentIds, tutorId, pageable)
+                : assignmentRepository.findByStudentIdIn(normalizedStudentIds, pageable);
+
+        if (assignmentsPage.isEmpty()) return Page.empty(pageable);
 
         List<ExerciseAssignment> assignments = assignmentsPage.getContent();
         List<String> exerciseIds = assignments.stream()
@@ -229,17 +246,16 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .collect(Collectors.toList());
 
         List<ExerciseListItemResponse> responses = exerciseRepository.findAllByIdOptimized(exerciseIds);
-        
-        // Match order of assignmentsPage
+
         Map<String, ExerciseListItemResponse> respMap = responses.stream()
                 .collect(Collectors.toMap(ExerciseListItemResponse::getId, r -> r));
-        
+
         List<ExerciseListItemResponse> orderedResponses = assignments.stream()
                 .map(a -> respMap.get(a.getExerciseId()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        enrichWithStudentProgress(orderedResponses, studentId, assignments);
+        enrichWithStudentProgress(orderedResponses, normalizedStudentIds, assignments);
 
         return new PageImpl<>(orderedResponses, pageable, assignmentsPage.getTotalElements());
     }
@@ -265,9 +281,33 @@ public class ExerciseServiceImpl implements ExerciseService {
         
         if (studentsPage.isEmpty()) return Page.empty();
 
-        List<String> studentIds = studentsPage.getContent().stream()
+        List<String> profileStudentIds = studentsPage.getContent().stream()
                 .map(s -> s.getId().toString())
                 .collect(Collectors.toList());
+
+        Map<String, List<String>> identityKeyMap = new HashMap<>();
+        for (String profileId : profileStudentIds) {
+            identityKeyMap.put(profileId, new ArrayList<>(List.of(profileId)));
+        }
+
+        List<Long> studentProfileIds = studentsPage.getContent().stream().map(com.tutor_management.backend.modules.student.entity.Student::getId).toList();
+        for (User linkedUser : userRepository.findByStudentIdIn(studentProfileIds)) {
+            if (linkedUser.getStudentId() == null || linkedUser.getId() == null) {
+                continue;
+            }
+            String profileId = linkedUser.getStudentId().toString();
+            identityKeyMap.computeIfAbsent(profileId, ignored -> new ArrayList<>(List.of(profileId)));
+            identityKeyMap.get(profileId).add(linkedUser.getId().toString());
+        }
+
+        List<String> studentIds = identityKeyMap.values().stream()
+                .flatMap(List::stream)
+                .distinct()
+                .toList();
+
+        if (studentIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
 
         // Multi-tenancy count: only count assignments associated with exercises owned by this tutor
         // Uses LEFT JOIN with submissions to handle tasks without submission records
@@ -289,7 +329,11 @@ public class ExerciseServiceImpl implements ExerciseService {
         
         List<TutorStudentSummaryResponse> content = studentsPage.getContent().stream().map(student -> {
             String sId = student.getId().toString();
-            var counts = statsMap.getOrDefault(sId, Collections.emptyMap());
+            Map<com.tutor_management.backend.modules.submission.entity.SubmissionStatus, Integer> counts = new HashMap<>();
+            for (String key : identityKeyMap.getOrDefault(sId, List.of(sId))) {
+                var keyCounts = statsMap.getOrDefault(key, Collections.emptyMap());
+                keyCounts.forEach((status, count) -> counts.merge(status, count, Integer::sum));
+            }
             
             int pending = counts.getOrDefault(com.tutor_management.backend.modules.submission.entity.SubmissionStatus.PENDING, 0);
             int submitted = counts.getOrDefault(com.tutor_management.backend.modules.submission.entity.SubmissionStatus.SUBMITTED, 0) + 
@@ -386,14 +430,30 @@ public class ExerciseServiceImpl implements ExerciseService {
         questionRepository.deleteByExerciseId(exerciseId);
     }
 
-    private void enrichWithStudentProgress(List<ExerciseListItemResponse> responses, String studentId, List<ExerciseAssignment> assignments) {
+    private void enrichWithStudentProgress(List<ExerciseListItemResponse> responses, List<String> studentIds, List<ExerciseAssignment> assignments) {
         List<String> ids = responses.stream().map(ExerciseListItemResponse::getId).collect(Collectors.toList());
-        
-        var submissions = submissionRepository.findByStudentIdAndExerciseIdIn(studentId, ids);
-        log.info("Enriching {} exercises for student {}. Found {} submissions in DB.", responses.size(), studentId, submissions.size());
 
-        var subMap = submissions.stream()
-                .collect(Collectors.toMap(com.tutor_management.backend.modules.submission.entity.Submission::getExerciseId, s -> s, (s1, s2) -> s1));
+        List<Submission> submissions = studentIds.stream()
+                .distinct()
+                .flatMap(sid -> submissionRepository.findByStudentIdAndExerciseIdIn(sid, ids).stream())
+                .toList();
+
+        log.info("Enriching {} exercises for student identities {}. Found {} submissions in DB.", responses.size(), studentIds, submissions.size());
+
+        var subMap = submissions.stream().collect(Collectors.toMap(
+                Submission::getExerciseId,
+                s -> s,
+                (s1, s2) -> {
+                    // Prefer graded over submitted over draft/pending when duplicates exist across legacy IDs.
+                    if (s1.getStatus() == SubmissionStatus.GRADED) return s1;
+                    if (s2.getStatus() == SubmissionStatus.GRADED) return s2;
+                    if (s1.getStatus() == SubmissionStatus.SUBMITTED) return s1;
+                    if (s2.getStatus() == SubmissionStatus.SUBMITTED) return s2;
+                    if (s1.getStatus() == SubmissionStatus.DRAFT) return s1;
+                    if (s2.getStatus() == SubmissionStatus.DRAFT) return s2;
+                    return s1;
+                }
+        ));
 
         var deadlineMap = assignments.stream()
                 .collect(Collectors.toMap(ExerciseAssignment::getExerciseId, 
