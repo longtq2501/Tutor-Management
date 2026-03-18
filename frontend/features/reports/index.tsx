@@ -96,20 +96,24 @@ export default function ReportsFeature() {
           <CardTitle>BÁO CÁO TIẾN ĐỘ HỌC SINH</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ReportForm
-            students={students}
-            selectedStudentId={selectedStudentId}
-            monthValue={monthValue}
-            isLoading={loadingReport}
-            onStudentChange={setSelectedStudentId}
-            onMonthChange={setMonthValue}
-            onGenerate={generateReport}
-          />
+          <div data-tour="reports-form">
+            <ReportForm
+              students={students}
+              selectedStudentId={selectedStudentId}
+              monthValue={monthValue}
+              isLoading={loadingReport}
+              onStudentChange={setSelectedStudentId}
+              onMonthChange={setMonthValue}
+              onGenerate={generateReport}
+            />
+          </div>
 
           <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
             <div>
               {previewData ? (
-                <ReportPreview data={previewData} />
+                <div data-tour="reports-preview">
+                  <ReportPreview data={previewData} />
+                </div>
               ) : (
                 <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
                   Chọn học sinh và tháng, sau đó bấm "Tạo báo cáo" để xem preview.
@@ -118,23 +122,27 @@ export default function ReportsFeature() {
             </div>
 
             <div className="space-y-4">
-              <TutorCommentBox
-                key={`${selectedStudentId ?? 'none'}-${monthValue}`}
-                value={comment}
-                disabled={!previewData}
-                onChange={setComment}
-                onSave={handleSaveComment}
-              />
+              <div data-tour="reports-comment">
+                <TutorCommentBox
+                  key={`${selectedStudentId ?? 'none'}-${monthValue}`}
+                  value={comment}
+                  disabled={!previewData}
+                  onChange={setComment}
+                  onSave={handleSaveComment}
+                />
+              </div>
 
               <SessionFeedbackList feedbacks={previewData?.sessionFeedbacks || []} />
             </div>
           </div>
 
-          <ReportExportButtons
-            disabled={!previewData || !selectedStudentId}
-            studentId={selectedStudentId}
-            data={previewData}
-          />
+          <div data-tour="reports-export-actions">
+            <ReportExportButtons
+              disabled={!previewData || !selectedStudentId}
+              studentId={selectedStudentId}
+              data={previewData}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>

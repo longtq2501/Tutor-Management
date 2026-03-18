@@ -130,6 +130,42 @@ const TUTOR_TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'reports-form',
+    title: 'Chọn học sinh và tháng báo cáo',
+    description:
+      'Tại đây bạn chọn học sinh, chọn tháng và bấm Tạo báo cáo để lấy dữ liệu chuyên cần, điểm số, học phí và nhận xét theo kỳ.',
+    targetSelector: '[data-tour="reports-form"]',
+    view: 'reports',
+    position: 'right',
+  },
+  {
+    id: 'reports-preview',
+    title: 'Xem trước báo cáo',
+    description:
+      'Khu vực này hiển thị bản preview tổng hợp toàn bộ dữ liệu tháng để bạn kiểm tra nhanh trước khi chia sẻ cho phụ huynh/học sinh.',
+    targetSelector: '[data-tour="reports-preview"]',
+    view: 'reports',
+    position: 'right',
+  },
+  {
+    id: 'reports-comment',
+    title: 'Nhận xét của gia sư',
+    description:
+      'Bạn nhập đánh giá tổng kết tại đây, hệ thống tự động lưu để tránh mất nội dung khi thao tác sang module khác.',
+    targetSelector: '[data-tour="reports-comment"]',
+    view: 'reports',
+    position: 'right',
+  },
+  {
+    id: 'reports-export',
+    title: 'Xuất báo cáo PDF/PNG',
+    description:
+      'Sau khi kiểm tra xong preview, dùng các nút này để xuất báo cáo thành file PDF hoặc PNG gửi nhanh cho phụ huynh/học sinh.',
+    targetSelector: '[data-tour="reports-export-actions"]',
+    view: 'reports',
+    position: 'right',
+  },
+  {
     id: 'calendar-module',
     title: 'Module Lịch dạy',
     description:
