@@ -86,15 +86,6 @@ public class User implements UserDetails {
     @Column(name = "tour_completed_at")
     private LocalDateTime tourCompletedAt;
 
-    @Column(name = "google_access_token", length = 2048)
-    private String googleAccessToken;
-
-    @Column(name = "google_refresh_token", length = 512)
-    private String googleRefreshToken;
-
-    @Column(name = "google_token_expiry")
-    private LocalDateTime googleTokenExpiry;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
