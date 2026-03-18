@@ -21,6 +21,11 @@ public interface ExerciseAssignmentRepository extends JpaRepository<ExerciseAssi
      */
     org.springframework.data.domain.Page<ExerciseAssignment> findByStudentId(String studentId, org.springframework.data.domain.Pageable pageable);
 
+       /**
+        * Lists assignments for any of the provided student identity keys (legacy/userId or profile/studentId).
+        */
+       org.springframework.data.domain.Page<ExerciseAssignment> findByStudentIdIn(List<String> studentIds, org.springframework.data.domain.Pageable pageable);
+
     /**
      * Lists assignments for a specific student filtered by tutor with pagination.
      */
@@ -28,6 +33,17 @@ public interface ExerciseAssignmentRepository extends JpaRepository<ExerciseAssi
            "WHERE ea.exerciseId = e.id AND ea.studentId = :studentId " +
            "AND (:tutorId IS NULL OR e.tutorId = :tutorId)")
     org.springframework.data.domain.Page<ExerciseAssignment> findByStudentIdAndTutorId(@Param("studentId") String studentId, @Param("tutorId") Long tutorId, org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * Lists assignments for any provided student identity keys, with optional tutor filter.
+     */
+    @Query(value = "SELECT ea FROM ExerciseAssignment ea, Exercise e " +
+           "WHERE ea.exerciseId = e.id AND ea.studentId IN :studentIds " +
+           "AND (:tutorId IS NULL OR e.tutorId = :tutorId)",
+           countQuery = "SELECT COUNT(ea) FROM ExerciseAssignment ea, Exercise e " +
+                   "WHERE ea.exerciseId = e.id AND ea.studentId IN :studentIds " +
+                   "AND (:tutorId IS NULL OR e.tutorId = :tutorId)")
+    org.springframework.data.domain.Page<ExerciseAssignment> findByStudentIdsAndTutorId(@Param("studentIds") List<String> studentIds, @Param("tutorId") Long tutorId, org.springframework.data.domain.Pageable pageable);
 
     /**
      * Lists all assignments for a specific student.

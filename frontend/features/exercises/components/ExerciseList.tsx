@@ -42,10 +42,16 @@ const EmptyState = () => (
  */
 export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExercise, onCreateNew }) => {
     const l = useExerciseListLogic(role);
+    const getSubmissionStatus = (submissionStatus?: string) => (submissionStatus || '').toUpperCase();
+
     const studentExerciseGroups = {
-        pending: l.exercises.filter(ex => !ex.submissionStatus),
-        submitted: l.exercises.filter(ex => ex.submissionStatus === 'SUBMITTED'),
-        graded: l.exercises.filter(ex => ex.submissionStatus === 'GRADED')
+        // Any status that is not explicitly submitted/graded should remain visible in pending.
+        pending: l.exercises.filter(ex => {
+            const status = getSubmissionStatus(ex.submissionStatus);
+            return !status || (status !== 'SUBMITTED' && status !== 'GRADED');
+        }),
+        submitted: l.exercises.filter(ex => getSubmissionStatus(ex.submissionStatus) === 'SUBMITTED'),
+        graded: l.exercises.filter(ex => getSubmissionStatus(ex.submissionStatus) === 'GRADED')
     };
 
     if (l.isExercisesLoading) {

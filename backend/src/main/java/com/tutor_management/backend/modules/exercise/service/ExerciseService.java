@@ -89,6 +89,16 @@ public interface ExerciseService {
     Page<ExerciseListItemResponse> listAssignedExercises(String studentId, Long tutorId, Pageable pageable);
 
     /**
+     * Retrieves assigned materials for one logical student represented by multiple identity keys
+     * (for compatibility between user.id and student.id based records).
+     *
+     * @param studentIds candidate identity keys for the same student.
+     * @param tutorId optional filter by tutor ownership (multi-tenancy).
+     * @param pageable pagination metadata.
+     */
+    Page<ExerciseListItemResponse> listAssignedExercisesByStudentIds(List<String> studentIds, Long tutorId, Pageable pageable);
+
+    /**
      * Aggregates completion statistics for students with pagination support.
      * 
      * @param tutorId Optional filter for tutor-specific isolation. Null for ADMIN.
