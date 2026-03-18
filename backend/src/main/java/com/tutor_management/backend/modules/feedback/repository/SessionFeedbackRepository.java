@@ -51,4 +51,15 @@ public interface SessionFeedbackRepository extends JpaRepository<SessionFeedback
            "FROM SessionFeedback sf " +
            "GROUP BY sf.sessionRecord.tutorId")
     List<Object[]> findAverageRatingsByTutor();
+
+        @EntityGraph(attributePaths = {"sessionRecord", "student"})
+        @Query("SELECT sf FROM SessionFeedback sf " +
+            "WHERE sf.sessionRecord.tutorId = :tutorId " +
+            "AND sf.student.id = :studentId " +
+            "AND sf.sessionRecord.month = :month " +
+            "ORDER BY sf.sessionRecord.sessionDate ASC, sf.updatedAt DESC")
+        List<SessionFeedback> findByTutorIdAndStudentIdAndMonth(
+             @Param("tutorId") Long tutorId,
+             @Param("studentId") Long studentId,
+             @Param("month") String month);
 }

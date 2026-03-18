@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 /**
  * Data access interface for {@link Submission} entities.
@@ -76,4 +77,18 @@ public interface SubmissionRepository extends JpaRepository<Submission, String> 
            "AND (:tutorId IS NULL OR e.tutorId = :tutorId) " +
            "GROUP BY s.studentId, s.status")
     List<Object[]> countByStudentIdInAndTutorId(@Param("studentIds") List<String> studentIds, @Param("tutorId") Long tutorId);
+
+        @Query("SELECT e.title, s.totalScore, e.totalPoints, COALESCE(s.gradedAt, s.updatedAt) " +
+            "FROM Submission s, com.tutor_management.backend.modules.exercise.domain.Exercise e " +
+            "WHERE e.id = s.exerciseId " +
+            "AND s.studentId = :studentId " +
+            "AND e.tutorId = :tutorId " +
+            "AND s.status = com.tutor_management.backend.modules.submission.entity.SubmissionStatus.GRADED " +
+            "AND COALESCE(s.gradedAt, s.updatedAt) BETWEEN :startDateTime AND :endDateTime " +
+            "ORDER BY COALESCE(s.gradedAt, s.updatedAt) ASC")
+        List<Object[]> findGradedSummariesForMonthlyReport(
+             @Param("studentId") String studentId,
+             @Param("tutorId") Long tutorId,
+             @Param("startDateTime") LocalDateTime startDateTime,
+             @Param("endDateTime") LocalDateTime endDateTime);
 }

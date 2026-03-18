@@ -15,6 +15,7 @@ import com.tutor_management.backend.modules.finance.dto.response.InvoiceItem;
 import com.tutor_management.backend.modules.finance.dto.response.InvoiceResponse;
 import com.tutor_management.backend.modules.finance.dto.response.MonthlyStats;
 import com.tutor_management.backend.modules.dashboard.dto.response.DashboardStats;
+import com.tutor_management.backend.modules.report.dto.MonthlyReportDataDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -94,6 +95,141 @@ public class PDFGeneratorService {
         document.close();
         return baos.toByteArray();
     }
+
+        /**
+         * Generates a monthly learning progress report PDF for one student.
+         */
+        public byte[] generateMonthlyProgressReportPDF(MonthlyReportDataDTO report) throws Exception {
+        log.info("Generating monthly report PDF for student: {}, month: {}/{}",
+            report.getStudentName(), report.getMonth(), report.getYear());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf);
+
+        loadVietnameseFonts();
+        document.setMargins(30, 40, 30, 40);
+        document.setFont(getRegularFont());
+
+        document.add(new Paragraph("BÁO CÁO TIẾN ĐỘ HỌC TẬP")
+            .setFont(getBoldFont())
+            .setFontSize(22)
+            .setTextAlignment(TextAlignment.CENTER)
+            .setMarginBottom(4));
+
+        document.add(new Paragraph(String.format("Tháng %d/%d • Học sinh: %s", report.getMonth(), report.getYear(), report.getStudentName()))
+            .setFont(getRegularFont())
+            .setFontSize(11)
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontColor(new DeviceRgb(90, 90, 90))
+            .setMarginBottom(12));
+
+        document.add(new Paragraph("Gia sư: " + nvl(report.getTutorName()))
+            .setFont(getRegularFont())
+            .setFontSize(10)
+            .setMarginBottom(12));
+
+        addHorizontalLine(document);
+
+        Table summary = new Table(new float[]{2, 2, 2, 2}).useAllAvailableWidth().setMarginTop(8).setMarginBottom(12);
+        summary.addCell(createSummaryCell("Tổng buổi", String.valueOf(nvlInt(report.getTotalSessions())), new DeviceRgb(59, 130, 246)));
+        summary.addCell(createSummaryCell("Có mặt", String.valueOf(nvlInt(report.getAttendedSessions())), new DeviceRgb(34, 197, 94)));
+        summary.addCell(createSummaryCell("Vắng", String.valueOf(nvlInt(report.getAbsentSessions())), new DeviceRgb(239, 68, 68)));
+        summary.addCell(createSummaryCell("Chuyên cần", String.format("%.1f%%", nvlDouble(report.getAttendanceRate())), new DeviceRgb(147, 51, 234)));
+        document.add(summary);
+
+        document.add(new Paragraph("KẾT QUẢ KIỂM TRA")
+            .setFont(getBoldFont())
+            .setFontSize(13)
+            .setMarginBottom(8));
+
+        document.add(new Paragraph(String.format("Điểm trung bình: %.1f", nvlDouble(report.getAverageScore())))
+            .setFont(getRegularFont())
+            .setFontSize(10));
+        document.add(new Paragraph(String.format("So với tháng trước: %s", formatImprovement(report.getScoreImprovement())))
+            .setFont(getRegularFont())
+            .setFontSize(10)
+            .setMarginBottom(8));
+
+        Table assessmentTable = new Table(new float[]{4.2f, 1.2f, 1.4f, 2.0f}).useAllAvailableWidth().setMarginBottom(14);
+        assessmentTable.addHeaderCell(createHeaderCell("Bài kiểm tra"));
+        assessmentTable.addHeaderCell(createHeaderCell("Điểm"));
+        assessmentTable.addHeaderCell(createHeaderCell("Tối đa"));
+        assessmentTable.addHeaderCell(createHeaderCell("Ngày"));
+
+        if (report.getAssessments() == null || report.getAssessments().isEmpty()) {
+            assessmentTable.addCell(new Cell(1, 4)
+                .add(new Paragraph("Không có dữ liệu kiểm tra trong tháng").setFont(getRegularFont()).setFontSize(10))
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPadding(8));
+        } else {
+            for (MonthlyReportDataDTO.AssessmentSummary assessment : report.getAssessments()) {
+            assessmentTable.addCell(createTableCell(nvl(assessment.getTitle())));
+            assessmentTable.addCell(createTableCellRight(String.format("%.1f", nvlDouble(assessment.getScore()))));
+            assessmentTable.addCell(createTableCellRight(String.format("%.1f", nvlDouble(assessment.getMaxScore()))));
+            assessmentTable.addCell(createTableCellCenter(assessment.getDate() == null
+                ? ""
+                : assessment.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+            }
+        }
+        document.add(assessmentTable);
+
+        document.add(new Paragraph("AI FEEDBACK THAM KHẢO")
+            .setFont(getBoldFont())
+            .setFontSize(13)
+            .setMarginBottom(8));
+
+        if (report.getSessionFeedbacks() == null || report.getSessionFeedbacks().isEmpty()) {
+            document.add(new Paragraph("Không có feedback trong tháng")
+                .setFont(getRegularFont())
+                .setFontSize(10)
+                .setMarginBottom(10));
+        } else {
+            int limit = Math.min(report.getSessionFeedbacks().size(), 8);
+            for (int i = 0; i < limit; i++) {
+            MonthlyReportDataDTO.SessionFeedback feedback = report.getSessionFeedbacks().get(i);
+            String date = feedback.getSessionDate() == null
+                ? ""
+                : feedback.getSessionDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            document.add(new Paragraph("• " + date + " - " + nvl(feedback.getFeedback()))
+                .setFont(getRegularFont())
+                .setFontSize(9)
+                .setMarginBottom(4));
+            }
+        }
+
+        addVerticalSpacing(document, 8);
+
+        document.add(new Paragraph("NHẬN XÉT CỦA GIA SƯ")
+            .setFont(getBoldFont())
+            .setFontSize(13)
+            .setMarginBottom(6));
+        document.add(new Paragraph(nvl(report.getTutorComment()).isBlank()
+            ? "(Chưa có nhận xét)"
+            : report.getTutorComment())
+            .setFont(getRegularFont())
+            .setFontSize(10)
+            .setMarginBottom(12));
+
+        document.add(new Paragraph("TÀI CHÍNH")
+            .setFont(getBoldFont())
+            .setFontSize(13)
+            .setMarginBottom(6));
+        document.add(new Paragraph("Tổng học phí: " + formatCurrency(report.getTotalFee())).setFont(getRegularFont()).setFontSize(10));
+        document.add(new Paragraph("Đã thanh toán: " + formatCurrency(report.getPaidAmount())).setFont(getRegularFont()).setFontSize(10));
+        document.add(new Paragraph("Còn lại: " + formatCurrency(report.getRemainingAmount())).setFont(getRegularFont()).setFontSize(10));
+        document.add(new Paragraph("Trạng thái: " + nvl(report.getPaymentStatus())).setFont(getBoldFont()).setFontSize(10));
+
+        document.add(new Paragraph("\nTutor Pro Management System - Báo cáo tiến độ tháng")
+            .setFont(getRegularFont())
+            .setFontSize(8)
+            .setFontColor(new DeviceRgb(156, 163, 175))
+            .setTextAlignment(TextAlignment.CENTER));
+
+        document.close();
+        return baos.toByteArray();
+        }
 
     // --- Dashboard Private Components ---
 
@@ -365,6 +501,14 @@ public class PDFGeneratorService {
         return new Cell().add(new Paragraph(text != null ? text : "").setFont(getRegularFont()).setFontSize(10)).setPadding(4);
     }
 
+    private Cell createHeaderCell(String text) {
+        return new Cell()
+                .add(new Paragraph(text).setFont(getBoldFont()).setFontSize(10).setFontColor(ColorConstants.WHITE))
+                .setBackgroundColor(new DeviceRgb(75, 85, 99))
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPadding(7);
+    }
+
     private Cell createTableCellCenter(String text) {
         return createTableCell(text).setTextAlignment(TextAlignment.CENTER);
     }
@@ -389,5 +533,24 @@ public class PDFGeneratorService {
         if (month == null || !month.contains("-")) return "N/A";
         String[] parts = month.split("-");
         return parts.length < 2 ? month : String.format("Tháng %s/%s", parts[1], parts[0]);
+    }
+
+    private String formatImprovement(Double improvement) {
+        if (improvement == null) {
+            return "Không có dữ liệu tháng trước";
+        }
+        return String.format("%+.1f%%", improvement);
+    }
+
+    private String nvl(String value) {
+        return value == null ? "" : value;
+    }
+
+    private int nvlInt(Integer value) {
+        return value == null ? 0 : value;
+    }
+
+    private double nvlDouble(Double value) {
+        return value == null ? 0.0 : value;
     }
 }
