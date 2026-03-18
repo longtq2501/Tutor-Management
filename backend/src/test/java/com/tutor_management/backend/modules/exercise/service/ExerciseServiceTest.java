@@ -5,6 +5,7 @@ import com.tutor_management.backend.util.SecurityContextUtils;
 import com.tutor_management.backend.modules.exercise.domain.AssignmentStatus;
 import com.tutor_management.backend.modules.exercise.dto.response.TutorStudentSummaryResponse;
 import com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository;
+import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,9 @@ class ExerciseServiceTest {
 
     @Mock
     private ExerciseAssignmentRepository assignmentRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private com.tutor_management.backend.modules.submission.repository.SubmissionRepository submissionRepository;
@@ -64,6 +68,7 @@ class ExerciseServiceTest {
         stats.add(new Object[]{student.getId().toString(), com.tutor_management.backend.modules.submission.entity.SubmissionStatus.PENDING, 2L});
         
         when(assignmentRepository.countAssignmentsWithSubmissionStatus(anyList(), anyLong())).thenReturn(stats);
+        when(userRepository.findByStudentIdIn(anyList())).thenReturn(List.of());
 
         // Act
         Page<TutorStudentSummaryResponse> result = exerciseService.getStudentSummaries(tutorId, pageable);
