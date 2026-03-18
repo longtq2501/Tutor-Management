@@ -1,6 +1,5 @@
 'use client';
 
-import { Progress } from '@/components/ui/progress';
 import type { MonthlyReportData } from '@/lib/types';
 
 interface ReportPreviewProps {
@@ -14,6 +13,8 @@ function formatCurrency(value: number) {
 }
 
 export function ReportPreview({ data }: ReportPreviewProps) {
+  const attendancePercent = Math.max(0, Math.min(100, data.attendanceRate || 0));
+
   return (
     <div id="report-preview" className="rounded-lg border bg-white p-6 text-black">
       <div className="mb-5 border-b pb-4">
@@ -27,8 +28,13 @@ export function ReportPreview({ data }: ReportPreviewProps) {
       <section className="mb-5 border-b pb-4">
         <h3 className="mb-2 text-lg font-semibold">CHUYÊN CẦN</h3>
         <div className="mb-2 flex items-center gap-4">
-          <Progress className="h-3" value={data.attendanceRate || 0} />
-          <span className="text-sm font-semibold">{(data.attendanceRate || 0).toFixed(1)}%</span>
+          <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${attendancePercent}%`, backgroundColor: '#10b981' }}
+            />
+          </div>
+          <span className="text-sm font-semibold">{attendancePercent.toFixed(1)}%</span>
         </div>
         <p className="text-sm text-gray-700">
           {data.attendedSessions}/{data.totalSessions} buổi có mặt • Vắng: {data.absentSessions}

@@ -58,18 +58,37 @@ export function ReportExportButtons({ disabled, studentId, data }: ReportExportB
       const canvas = await html2canvas(reportEl, {
         scale: 2,
         useCORS: true,
+        logging: false,
+        removeContainer: true,
+        imageTimeout: 0,
         backgroundColor: '#ffffff',
+        onclone: (_doc, clonedRoot) => {
+          if (clonedRoot instanceof HTMLElement) {
+            clonedRoot.style.backgroundColor = '#ffffff';
+            clonedRoot.style.color = '#111827';
+          }
+        },
       });
 
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((result) => {
+          if (result) {
+            resolve(result);
+            return;
+          }
+          reject(new Error('Không tạo được ảnh PNG'));
+        }, 'image/png');
+      });
+
+      const url = URL.createObjectURL(blob);
+      try {
         const anchor = document.createElement('a');
         anchor.href = url;
         anchor.download = `${fileBaseName}.png`;
         anchor.click();
+      } finally {
         URL.revokeObjectURL(url);
-      }, 'image/png');
+      }
 
       toast.success('Xuất PNG thành công');
     } catch (error) {

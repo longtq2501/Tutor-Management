@@ -9,6 +9,8 @@ import com.tutor_management.backend.modules.finance.repository.SessionRecordRepo
 import com.tutor_management.backend.modules.report.dto.MonthlyReportDataDTO;
 import com.tutor_management.backend.modules.report.entity.MonthlyReport;
 import com.tutor_management.backend.modules.report.repository.MonthlyReportRepository;
+import com.tutor_management.backend.modules.schedule.entity.RecurringSchedule;
+import com.tutor_management.backend.modules.schedule.repository.RecurringScheduleRepository;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import com.tutor_management.backend.modules.submission.repository.SubmissionRepository;
@@ -37,6 +39,7 @@ public class ReportService {
     private final SessionRecordRepository sessionRecordRepository;
     private final SessionFeedbackRepository sessionFeedbackRepository;
     private final SubmissionRepository submissionRepository;
+    private final RecurringScheduleRepository recurringScheduleRepository;
     private final StudentRepository studentRepository;
     private final TutorRepository tutorRepository;
 
@@ -69,6 +72,11 @@ public class ReportService {
                 .mapToInt(s -> nvlInt(s.getSessions()))
                 .sum();
         int attendedSessions = Math.max(totalSessions - absentSessions, 0);
+
+        int plannedSessions = calculatePlannedSessionsForMonth(tutor.getId(), studentId, currentYearMonth);
+        if (plannedSessions > 0) {
+            totalSessions = Math.max(plannedSessions, attendedSessions + absentSessions);
+        }
         double attendanceRate = totalSessions > 0 ? (attendedSessions * 100.0) / totalSessions : 0.0;
 
         List<Object[]> currentAssessmentRows = submissionRepository.findGradedSummariesForMonthlyReport(
@@ -263,5 +271,63 @@ public class ReportService {
             }
         }
         return "";
+    }
+
+    private int calculatePlannedSessionsForMonth(Long tutorId, Long studentId, YearMonth targetMonth) {
+        List<RecurringSchedule> schedules = recurringScheduleRepository
+                .findByStudentIdAndTutorIdAndActiveTrue(studentId, tutorId);
+
+        int planned = 0;
+        for (RecurringSchedule schedule : schedules) {
+            if (!isScheduleActiveInMonth(schedule, targetMonth)) {
+                continue;
+            }
+            for (Integer day : schedule.getDaysOfWeekArray()) {
+                planned += countWeekdayOccurrences(targetMonth, day);
+            }
+        }
+        return planned;
+    }
+
+    private boolean isScheduleActiveInMonth(RecurringSchedule schedule, YearMonth targetMonth) {
+        YearMonth startMonth = parseYearMonth(schedule.getStartMonth());
+        if (startMonth != null && targetMonth.isBefore(startMonth)) {
+            return false;
+        }
+
+        YearMonth endMonth = parseYearMonth(schedule.getEndMonth());
+        return endMonth == null || !targetMonth.isAfter(endMonth);
+    }
+
+    private YearMonth parseYearMonth(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return YearMonth.parse(value.trim());
+        } catch (Exception ex) {
+            log.warn("Invalid year-month format in recurring schedule: {}", value);
+            return null;
+        }
+    }
+
+    private int countWeekdayOccurrences(YearMonth month, Integer dayValue) {
+        if (dayValue == null || dayValue < 1 || dayValue > 7) {
+            return 0;
+        }
+
+        int occurrences = 0;
+        LocalDate cursor = month.atDay(1);
+        LocalDate last = month.atEndOfMonth();
+
+        while (!cursor.isAfter(last)) {
+            int currentIsoDay = cursor.getDayOfWeek().getValue();
+            if (currentIsoDay == dayValue) {
+                occurrences++;
+            }
+            cursor = cursor.plusDays(1);
+        }
+
+        return occurrences;
     }
 }

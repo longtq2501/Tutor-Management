@@ -7,6 +7,7 @@ import com.tutor_management.backend.modules.finance.repository.SessionRecordRepo
 import com.tutor_management.backend.modules.report.dto.MonthlyReportDataDTO;
 import com.tutor_management.backend.modules.report.entity.MonthlyReport;
 import com.tutor_management.backend.modules.report.repository.MonthlyReportRepository;
+import com.tutor_management.backend.modules.schedule.repository.RecurringScheduleRepository;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
 import com.tutor_management.backend.modules.submission.repository.SubmissionRepository;
@@ -42,6 +43,8 @@ class ReportServiceTest {
     private SessionFeedbackRepository sessionFeedbackRepository;
     @Mock
     private SubmissionRepository submissionRepository;
+        @Mock
+        private RecurringScheduleRepository recurringScheduleRepository;
     @Mock
     private StudentRepository studentRepository;
     @Mock
@@ -86,6 +89,8 @@ class ReportServiceTest {
         when(submissionRepository.findGradedSummariesForMonthlyReport(eq("20"), eq(10L), any(), any()))
                 .thenReturn(List.of());
         when(sessionFeedbackRepository.findByTutorIdAndStudentIdAndMonth(10L, 20L, "2026-03"))
+                .thenReturn(List.of());
+        when(recurringScheduleRepository.findByStudentIdAndTutorIdAndActiveTrue(20L, 10L))
                 .thenReturn(List.of());
         when(monthlyReportRepository.findByTutorIdAndStudentIdAndReportMonthAndReportYear(10L, 20L, 3, 2026))
                 .thenReturn(Optional.empty());
