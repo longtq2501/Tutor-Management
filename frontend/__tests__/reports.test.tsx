@@ -49,7 +49,14 @@ describe('TutorCommentBox', () => {
   });
 
   it('shows saving indicator when typing', async () => {
-    const onSave = vi.fn().mockResolvedValue(undefined);
+    let resolveSave: (() => void) | null = null;
+    const onSave = vi.fn().mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSave = resolve;
+        }),
+    );
+
     const Wrapper = () => {
       const [value, setValue] = React.useState('');
       return <TutorCommentBox value={value} onChange={setValue} onSave={onSave} />;
@@ -67,6 +74,12 @@ describe('TutorCommentBox', () => {
       },
       { timeout: 1800 },
     );
+
+    resolveSave?.();
+
+    await waitFor(() => {
+      expect(screen.getByText('Đã lưu ✓')).toBeInTheDocument();
+    });
   });
 });
 
