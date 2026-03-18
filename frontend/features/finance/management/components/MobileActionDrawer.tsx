@@ -3,16 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'; // Shadcn Sheet as Drawer
 import { motion } from 'framer-motion';
-import { CheckCircle2, Download, Mail } from 'lucide-react';
+import { CheckCircle2, Download } from 'lucide-react';
 import { useFinanceContext } from '../context/FinanceContext';
 
 interface MobileActionDrawerProps {
     actions: {
         markSelectedPaid: () => void;
         generateBulkInvoice: () => void;
-        sendBulkEmail: () => void;
         generatingInvoice: boolean;
-        sendingEmail: boolean;
     }
 }
 
@@ -21,9 +19,7 @@ export function MobileActionDrawer({ actions }: MobileActionDrawerProps) {
     const {
         markSelectedPaid,
         generateBulkInvoice,
-        sendBulkEmail,
         generatingInvoice,
-        sendingEmail
     } = actions;
 
     // If no selection, maybe show "Quick Add"? Or just hide?
@@ -59,26 +55,15 @@ export function MobileActionDrawer({ actions }: MobileActionDrawerProps) {
                             Đánh dấu đã thanh toán
                         </Button>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <Button
-                                className="h-12 rounded-xl font-bold"
-                                variant="secondary"
-                                onClick={generateBulkInvoice}
-                                disabled={generatingInvoice}
-                            >
-                                <Download className="w-5 h-5 mr-2" />
-                                Báo Giá
-                            </Button>
-                            <Button
-                                className="h-12 rounded-xl font-bold"
-                                variant="secondary"
-                                onClick={sendBulkEmail}
-                                disabled={sendingEmail}
-                            >
-                                <Mail className="w-5 h-5 mr-2" />
-                                Gửi Email
-                            </Button>
-                        </div>
+                        <Button
+                            className="w-full h-12 rounded-xl font-bold"
+                            variant="secondary"
+                            onClick={generateBulkInvoice}
+                            disabled={generatingInvoice}
+                        >
+                            <Download className="w-5 h-5 mr-2" />
+                            Báo Giá
+                        </Button>
 
                         <Button
                             variant="ghost"

@@ -1,7 +1,6 @@
 'use client';
 
 import { invoicesApi, sessionsApi } from '@/lib/services';
-import { buildGmailConnectUrl, gmailApi } from '@/lib/services/gmail';
 import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -21,7 +20,6 @@ export function useFinanceActions({ confirm }: UseFinanceActionsProps = {}) {
   const queryClient = useQueryClient();
 
   const [generatingInvoice, setGeneratingInvoice] = useState(false);
-  const [sendingEmail, setSendingEmail] = useState(false);
 
   // Helper to safely execute confirmation
   const safeConfirm = async (message: string) => {
@@ -126,7 +124,7 @@ export function useFinanceActions({ confirm }: UseFinanceActionsProps = {}) {
           try {
             const text = await error.response.data.text();
             if (text) message = text;
-          } catch (e: unknown) {
+          } catch {
             // Fallback to generic
           }
         } else if (error.response?.data?.message) {
@@ -141,61 +139,9 @@ export function useFinanceActions({ confirm }: UseFinanceActionsProps = {}) {
     }
   };
 
-  const sendBulkEmail = async () => {
-    const sessionIds = getSelectedSessionIds();
-    if (selectedStudentIds.length === 0) {
-      toast.error('Vui lòng chọn ít nhất một học sinh!');
-      return;
-    }
-
-    try {
-      const gmailStatus = await gmailApi.getStatus();
-      if (!gmailStatus.connected) {
-        toast.error('Bạn cần kết nối Gmail trước khi gửi báo giá.', {
-          action: {
-            label: 'Kết nối ngay',
-            onClick: () => {
-              window.location.href = buildGmailConnectUrl();
-            },
-          },
-        });
-        return;
-      }
-    } catch {
-      toast.error('Không kiểm tra được trạng thái Gmail. Vui lòng thử lại.');
-      return;
-    }
-
-    const isConfirmed = await safeConfirm(`Gửi email báo giá cho ${selectedStudentIds.length} học sinh đã chọn?`);
-    if (!isConfirmed) return;
-
-    try {
-      setSendingEmail(true);
-      await invoicesApi.sendInvoiceEmailBatch({
-        selectedStudentIds: selectedStudentIds,
-        sessionRecordIds: sessionIds,
-        month: '' // Backend likely deduces or ignores if session IDs provided
-      });
-      toast.success('Gửi email thành công!');
-      clearSelection();
-    } catch (error: unknown) {
-      let message = 'Lỗi khi gửi email';
-      if (axios.isAxiosError(error)) {
-        message = error.response?.data?.message || error.response?.data?.error || message;
-      } else if (error instanceof Error) {
-        message = error.message;
-      }
-      toast.error(message);
-    } finally {
-      setSendingEmail(false);
-    }
-  };
-
   return {
     generatingInvoice,
-    sendingEmail,
     markSelectedPaid,
     generateBulkInvoice,
-    sendBulkEmail
   };
 }

@@ -10,16 +10,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +24,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final OAuth2AuthorizedClientService authorizedClientService;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -40,26 +35,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ServletException("User not found after successful OAuth2 authentication"));
-
-        // Persist Google tokens for tutor Gmail sending flow.
-        try {
-            OAuth2AuthorizedClient authorizedClient = authorizedClientService
-                    .loadAuthorizedClient("google", authentication.getName());
-            if (authorizedClient != null) {
-                user.setGoogleAccessToken(authorizedClient.getAccessToken().getTokenValue());
-                if (authorizedClient.getRefreshToken() != null) {
-                    user.setGoogleRefreshToken(authorizedClient.getRefreshToken().getTokenValue());
-                }
-                user.setGoogleTokenExpiry(
-                        authorizedClient.getAccessToken().getExpiresAt() != null
-                                ? LocalDateTime.ofInstant(authorizedClient.getAccessToken().getExpiresAt(), ZoneId.systemDefault())
-                                : LocalDateTime.now().plusHours(1)
-                );
-                userRepository.save(user);
-            }
-        } catch (Exception e) {
-            log.warn("Could not save Google token for user {}: {}", user.getEmail(), e.getMessage());
-        }
 
         String token = jwtService.generateToken(user);
 

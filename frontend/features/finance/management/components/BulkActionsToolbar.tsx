@@ -2,16 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle2, Download, Loader2, Mail } from 'lucide-react';
+import { CheckCircle2, Download, Loader2 } from 'lucide-react';
 import { useFinanceContext } from '../context/FinanceContext';
 
 interface BulkActionsToolbarProps {
     actions: {
         markSelectedPaid: () => void;
         generateBulkInvoice: () => void;
-        sendBulkEmail: () => void;
         generatingInvoice: boolean;
-        sendingEmail: boolean;
     }
 }
 
@@ -20,9 +18,7 @@ export function BulkActionsToolbar({ actions }: BulkActionsToolbarProps) {
     const {
         markSelectedPaid,
         generateBulkInvoice,
-        sendBulkEmail,
         generatingInvoice,
-        sendingEmail
     } = actions;
 
     if (selectedStudentIds.length === 0) return null;
@@ -64,17 +60,6 @@ export function BulkActionsToolbar({ actions }: BulkActionsToolbarProps) {
                         >
                             {generatingInvoice ? <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin mr-2" /> : <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" />}
                             <span className="text-xs md:text-sm">Báo Giá</span>
-                        </Button>
-
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="rounded-xl font-bold h-9 md:h-10 px-3 md:px-4 shrink-0 transition-transform active:scale-95"
-                            onClick={sendBulkEmail}
-                            disabled={sendingEmail}
-                        >
-                            {sendingEmail ? <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin mr-2" /> : <Mail className="w-3 h-3 md:w-4 md:h-4 mr-2" />}
-                            <span className="text-xs md:text-sm">Email</span>
                         </Button>
 
                         <Button

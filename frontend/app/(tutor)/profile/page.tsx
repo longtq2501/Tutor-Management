@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { GmailSection } from './GmailSection';
 import { AvatarUpload } from '@/components/shared/AvatarUpload';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -470,10 +469,6 @@ export default function ProfilePage() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            )}
-
-                                            {user.role === 'TUTOR' && (
-                                            <GmailSection user={user} />
                                             )}
 
                                             <div className="pt-4">

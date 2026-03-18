@@ -15,10 +15,6 @@ spring:
             scope:
               - email
               - profile
-              - https://www.googleapis.com/auth/gmail.send
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -73,8 +69,6 @@ app:
     url: ${FRONTEND_URL:https://tutor-pro-app.vercel.app}
   backend:
     url: ${BACKEND_URL:http://localhost:8080}
-  gmail:
-    enabled: ${GOOGLE_GMAIL_ENABLED:true}
   mail:
     from: ${APP_MAIL_FROM:tonquynhlong@gmail.com}
     from-name: ${APP_MAIL_FROM_NAME:Thầy Quỳnh Long}
