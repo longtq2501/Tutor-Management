@@ -16,6 +16,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +33,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
 
+    @Value("${cors.allowed-origins:http://localhost:3000}")
+    private String allowedOrigins;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
@@ -38,10 +46,72 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String token = jwtService.generateToken(user);
 
-        String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/auth/success")
+        String redirectBaseUrl = resolveRedirectBaseUrl(request);
+
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectBaseUrl + "/auth/success")
                 .queryParam("token", token)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private String resolveRedirectBaseUrl(HttpServletRequest request) {
+        Optional<String> redirectUri = CookieUtils
+                .getCookie(request, HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
+                .map(jakarta.servlet.http.Cookie::getValue)
+                .filter(this::isAllowedRedirectUri);
+
+        if (redirectUri.isPresent()) {
+            return normalizeBaseUrl(redirectUri.get());
+        }
+
+        return normalizeBaseUrl(frontendUrl);
+    }
+
+    private boolean isAllowedRedirectUri(String uri) {
+        URI clientRedirect;
+        try {
+            clientRedirect = new URI(uri);
+        } catch (URISyntaxException e) {
+            return false;
+        }
+
+        if (clientRedirect.getHost() == null || clientRedirect.getScheme() == null) {
+            return false;
+        }
+
+        List<String> allowed = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
+
+        for (String allowedOrigin : allowed) {
+            try {
+                URI allowedUri = new URI(allowedOrigin);
+                boolean sameHost = clientRedirect.getHost().equalsIgnoreCase(allowedUri.getHost());
+                boolean sameScheme = clientRedirect.getScheme().equalsIgnoreCase(allowedUri.getScheme());
+                int clientPort = clientRedirect.getPort() == -1 ? defaultPort(clientRedirect.getScheme()) : clientRedirect.getPort();
+                int allowedPort = allowedUri.getPort() == -1 ? defaultPort(allowedUri.getScheme()) : allowedUri.getPort();
+                if (sameHost && sameScheme && clientPort == allowedPort) {
+                    return true;
+                }
+            } catch (URISyntaxException ignored) {
+                // Ignore invalid configured origin entries
+            }
+        }
+
+        return false;
+    }
+
+    private String normalizeBaseUrl(String rawUrl) {
+        String trimmed = rawUrl == null ? "" : rawUrl.trim();
+        if (trimmed.endsWith("/")) {
+            return trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed;
+    }
+
+    private int defaultPort(String scheme) {
+        return "https".equalsIgnoreCase(scheme) ? 443 : 80;
     }
 }
