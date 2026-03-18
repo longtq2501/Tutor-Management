@@ -7,15 +7,16 @@ import type { CalendarStats } from '../types';
  */
 export const getCalendarStats = (sessions: SessionRecord[]): CalendarStats => {
   const activeSessions = sessions.filter(s => s.status !== 'CANCELLED_BY_STUDENT' && s.status !== 'CANCELLED_BY_TUTOR');
+  const completedStatuses = new Set(['COMPLETED', 'PAID', 'PENDING_PAYMENT']);
 
   return {
-    total: activeSessions.reduce((sum, s) => sum + s.sessions, 0),
+    total: sessions.length,
     completed: activeSessions
-      .filter(s => s.completed || s.status === 'COMPLETED' || s.status === 'PAID' || s.status === 'PENDING_PAYMENT')
-      .reduce((sum, s) => sum + s.sessions, 0),
+      .filter(s => s.completed || (s.status ? completedStatuses.has(s.status) : false))
+      .length,
     scheduled: activeSessions
-      .filter(s => !s.completed && s.status !== 'COMPLETED' && s.status !== 'PAID' && s.status !== 'PENDING_PAYMENT')
-      .reduce((sum, s) => sum + s.sessions, 0),
+      .filter(s => !s.completed && (!s.status || !completedStatuses.has(s.status)))
+      .length,
     revenue: activeSessions.reduce((sum, s) => sum + s.totalAmount, 0),
     pending: activeSessions.filter(s => !s.paid && s.status !== 'PAID').length
   };
