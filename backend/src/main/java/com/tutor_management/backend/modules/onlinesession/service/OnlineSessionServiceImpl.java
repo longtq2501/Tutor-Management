@@ -440,7 +440,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
 
     // Core My Sessions Logic with Cursor-Based Pagination
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public OnlineSessionResponse getCurrentSession(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -449,10 +449,12 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         if ("TUTOR".equals(user.getRole().getName())) {
             Tutor tutor = tutorRepository.findByUserId(userId)
                     .orElseThrow(() -> new TutorProfileNotFoundException(userId));
+            expireStaleWaitingSessionsForTutor(tutor.getId());
             session = onlineSessionRepository.findFirstByTutorIdAndRoomStatusNotOrderByScheduledStartAsc(
                     tutor.getId(), RoomStatus.ENDED);
         } else if ("STUDENT".equals(user.getRole().getName())) {
             if (user.getStudentId() != null) {
+                expireStaleWaitingSessionsForStudent(user.getStudentId());
                 session = onlineSessionRepository.findFirstByStudentIdAndRoomStatusNotOrderByScheduledStartAsc(
                         user.getStudentId(), RoomStatus.ENDED);
             }
@@ -463,7 +465,7 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
 
     // Core My Sessions Logic with Cursor-Based Pagination
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Window<OnlineSessionResponse> getMySessions(Long userId, String continuationToken, int size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -476,16 +478,32 @@ public class OnlineSessionServiceImpl implements OnlineSessionService {
         if ("TUTOR".equals(user.getRole().getName())) {
             Tutor tutor = tutorRepository.findByUserId(userId)
                     .orElseThrow(() -> new TutorProfileNotFoundException(userId));
+            expireStaleWaitingSessionsForTutor(tutor.getId());
             window = onlineSessionRepository.findAllByTutorIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(
                     tutor.getId(), RoomStatus.ENDED, scrollPosition, limit);
         } else if ("STUDENT".equals(user.getRole().getName())) {
             if (user.getStudentId() != null) {
+                expireStaleWaitingSessionsForStudent(user.getStudentId());
                 window = onlineSessionRepository.findAllByStudentIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(
                         user.getStudentId(), RoomStatus.ENDED, scrollPosition, limit);
             }
         }
 
         return window.map(this::mapToResponse);
+    }
+
+    private void expireStaleWaitingSessionsForTutor(Long tutorId) {
+        int expired = onlineSessionRepository.expireWaitingSessionsByTutorId(tutorId, LocalDateTime.now(clock));
+        if (expired > 0) {
+            log.info("Expired {} stale WAITING online session(s) for tutor {}", expired, tutorId);
+        }
+    }
+
+    private void expireStaleWaitingSessionsForStudent(Long studentId) {
+        int expired = onlineSessionRepository.expireWaitingSessionsByStudentId(studentId, LocalDateTime.now(clock));
+        if (expired > 0) {
+            log.info("Expired {} stale WAITING online session(s) for student {}", expired, studentId);
+        }
     }
 
     private ScrollPosition decodeContinuationToken(String token) {

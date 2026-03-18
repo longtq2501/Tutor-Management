@@ -57,11 +57,13 @@ public class DashboardService {
             stats = new DashboardStats(0, 0L, 0L, 0L, 0L);
         }
 
-        // Fix: Query actual active students count instead of relying on aggregation
+        // Student counters: total includes all students, active includes only currently studying
         if (tutorId != null) {
-            stats.setTotalStudents((int) studentRepository.countByTutorIdAndActiveTrue(tutorId));
+            stats.setTotalStudents((int) studentRepository.countByTutorId(tutorId));
+            stats.setActiveStudents((int) studentRepository.countByTutorIdAndActiveTrue(tutorId));
         } else {
-            stats.setTotalStudents((int) studentRepository.countByActiveTrue());
+            stats.setTotalStudents((int) studentRepository.count());
+            stats.setActiveStudents((int) studentRepository.countByActiveTrue());
         }
 
         // 2. Format currencies for display

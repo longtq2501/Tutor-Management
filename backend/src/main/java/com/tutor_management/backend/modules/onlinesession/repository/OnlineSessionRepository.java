@@ -6,6 +6,7 @@ import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -59,6 +60,28 @@ public interface OnlineSessionRepository extends JpaRepository<OnlineSession, Lo
 
     @EntityGraph(attributePaths = {"tutor.user", "student"})
     Window<OnlineSession> findAllByStudentIdAndRoomStatusNotOrderByScheduledStartAscIdAsc(Long studentId, RoomStatus status, ScrollPosition scrollPosition, Limit limit);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+                    UPDATE OnlineSession s
+                    SET s.roomStatus = com.tutor_management.backend.modules.onlinesession.enums.RoomStatus.ENDED,
+                            s.actualEnd = :now
+                    WHERE s.tutor.id = :tutorId
+                        AND s.roomStatus = com.tutor_management.backend.modules.onlinesession.enums.RoomStatus.WAITING
+                        AND s.scheduledEnd < :now
+                    """)
+    int expireWaitingSessionsByTutorId(Long tutorId, LocalDateTime now);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+                    UPDATE OnlineSession s
+                    SET s.roomStatus = com.tutor_management.backend.modules.onlinesession.enums.RoomStatus.ENDED,
+                            s.actualEnd = :now
+                    WHERE s.student.id = :studentId
+                        AND s.roomStatus = com.tutor_management.backend.modules.onlinesession.enums.RoomStatus.WAITING
+                        AND s.scheduledEnd < :now
+                    """)
+    int expireWaitingSessionsByStudentId(Long studentId, LocalDateTime now);
 
     /**
      * Checks if an online session already exists for a specific session record.

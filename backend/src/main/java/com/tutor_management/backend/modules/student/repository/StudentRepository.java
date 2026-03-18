@@ -99,6 +99,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("SELECT COUNT(s) FROM Student s WHERE s.active = true")
     long countByActiveTrue();
 
+       long countByTutorId(Long tutorId);
+
     @Query(value = "SELECT s FROM Student s " +
             "LEFT JOIN FETCH s.parent " +
             "WHERE (:search IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +

@@ -14,6 +14,9 @@ public class DashboardStats {
     /** Total number of students registered in the system */
     private Integer totalStudents;
 
+    /** Number of students currently active (đang học) */
+    private Integer activeStudents;
+
     /** Total revenue collected across all time, formatted as currency */
     private String totalPaidAllTime;
     
@@ -55,6 +58,7 @@ public class DashboardStats {
      */
     public DashboardStats(Integer totalStudents, Long totalPaidRaw, Long totalUnpaidRaw, Long currentMonthTotalRaw, Long currentMonthUnpaid) {
         this.totalStudents = totalStudents;
+        this.activeStudents = 0;
         this.totalPaidRaw = totalPaidRaw != null ? totalPaidRaw : 0L;
         this.totalUnpaidRaw = totalUnpaidRaw != null ? totalUnpaidRaw : 0L;
         this.currentMonthTotalRaw = currentMonthTotalRaw != null ? currentMonthTotalRaw : 0L;
