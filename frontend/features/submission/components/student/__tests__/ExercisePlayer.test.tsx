@@ -7,6 +7,7 @@ import { ExercisePlayer } from '../ExercisePlayer';
 import { exerciseService } from '@/features/exercise-import/services/exerciseService';
 import { submissionService } from '@/features/submission/services/submissionService';
 import { Exercise, QuestionType } from '@/features/exercise-import/types/exercise.types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // mocks of services
 vi.mock('@/features/exercise-import/services/exerciseService');
@@ -30,6 +31,20 @@ const fakeExercise = {
 } as unknown as Exercise;
 
 describe('ExercisePlayer', () => {
+  const renderWithQueryClient = (ui: React.ReactElement) => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {ui}
+      </QueryClientProvider>
+    );
+  };
+
   beforeEach(() => {
     ((exerciseService.getById) as any).mockResolvedValue(fakeExercise);
     ((submissionService.getByExerciseAndStudent) as any).mockResolvedValue(null);
@@ -43,7 +58,7 @@ describe('ExercisePlayer', () => {
   });
 
   it('renders scrollable container with proper utility classes', async () => {
-    render(<ExercisePlayer exerciseId="ex1" />);
+    renderWithQueryClient(<ExercisePlayer exerciseId="ex1" />);
     // wait for exercise to load
     await waitFor(() => expect(exerciseService.getById).toHaveBeenCalled());
     const scroll = screen.getByTestId('scroll-container');
@@ -52,7 +67,7 @@ describe('ExercisePlayer', () => {
   });
 
   it('does not show essay-waiting message when status is GRADED', async () => {
-    render(<ExercisePlayer exerciseId="ex1" studentId="student1" />);
+    renderWithQueryClient(<ExercisePlayer exerciseId="ex1" studentId="student1" />);
     await waitFor(() => expect(exerciseService.getById).toHaveBeenCalled());
     // simulate submitting
     const submit = screen.getByRole('button', { name: /nộp bài/i });
