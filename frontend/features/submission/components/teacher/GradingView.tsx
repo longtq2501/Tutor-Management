@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/hooks/useQueryKeys';
 
 interface GradingViewProps {
     submissionId: string;
@@ -26,6 +28,7 @@ interface GradingViewProps {
 }
 
 export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, isReviewMode = false }) => {
+    const queryClient = useQueryClient();
     const [submission, setSubmission] = useState<SubmissionResponse | null>(null);
     const [exercise, setExercise] = useState<Exercise | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -111,6 +114,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
 
             console.log("Saving grades payload:", request);
             await submissionService.gradeSubmission(submissionId, request);
+            await queryClient.invalidateQueries({ queryKey: queryKeys.exercises.all });
             toast.success("Đã lưu điểm!", { description: "Điểm số đã được cập nhật chính xác." });
             onBack();
         } catch (e) {

@@ -21,6 +21,7 @@ import { ExerciseRowCard } from './ExerciseRowCard';
 import { PerformanceSection } from './PerformanceSection';
 import { toast } from 'sonner';
 import { useConfirm } from '@/hooks/useConfirm';
+import axios from 'axios';
 
 interface StudentDetailViewProps {
     studentSummary: TutorStudentSummaryResponse;
@@ -43,6 +44,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
     const { data: exercisesData, isLoading } = useQuery({
         queryKey: ['exercises', 'student', studentSummary.studentId],
         queryFn: () => exerciseService.getAssignedByStudentId(studentSummary.studentId, 0, 100),
+        refetchOnMount: 'always',
     });
 
     const exercises: ExerciseListItemResponse[] = (exercisesData as PageResponse<ExerciseListItemResponse>)?.content || [];
@@ -72,7 +74,11 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
             await queryClient.invalidateQueries({ queryKey: ['exercises', 'student', studentSummary.studentId] });
             await queryClient.invalidateQueries({ queryKey: ['exercises'] });
         } catch (error) {
-            toast.error('Không thể thu hồi bài kiểm tra');
+            let message = 'Không thể thu hồi bài kiểm tra';
+            if (axios.isAxiosError(error)) {
+                message = error.response?.data?.message || error.message || message;
+            }
+            toast.error(message);
         } finally {
             setRevokingExerciseId(null);
         }
@@ -87,7 +93,13 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
                 </Button>
             </div>
 
-            <StudentProfileHeader studentSummary={studentSummary} />
+            <StudentProfileHeader
+                studentSummary={studentSummary}
+                pendingCount={pending.length}
+                inProgressCount={inProgress.length}
+                gradedCount={graded.length}
+                totalAssigned={exercises.length}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-0 mt-8">
                 <div className="lg:pr-8 lg:border-r lg:border-dashed lg:border-muted-foreground/20">
@@ -129,9 +141,21 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
     );
 };
 
-const StudentProfileHeader = ({ studentSummary }: { studentSummary: TutorStudentSummaryResponse }) => {
-    const completionRate = studentSummary.totalAssigned > 0
-        ? Math.round((studentSummary.gradedCount / studentSummary.totalAssigned) * 100)
+const StudentProfileHeader = ({
+    studentSummary,
+    pendingCount,
+    inProgressCount,
+    gradedCount,
+    totalAssigned,
+}: {
+    studentSummary: TutorStudentSummaryResponse;
+    pendingCount: number;
+    inProgressCount: number;
+    gradedCount: number;
+    totalAssigned: number;
+}) => {
+    const completionRate = totalAssigned > 0
+        ? Math.round((gradedCount / totalAssigned) * 100)
         : 0;
 
     return (
@@ -154,15 +178,15 @@ const StudentProfileHeader = ({ studentSummary }: { studentSummary: TutorStudent
                                     Lớp: {studentSummary.grade || 'N/A'}
                                 </Badge>
                                 <span className="text-sm flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-lg">
-                                    <FileText className="h-4 w-4 text-primary/60" /> {studentSummary.totalAssigned} Tài liệu & Bài tập
+                                    <FileText className="h-4 w-4 text-primary/60" /> {totalAssigned} Tài liệu & Bài tập
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-12 w-full lg:w-auto overflow-x-auto pb-4 lg:pb-0 scrollbar-hide">
-                        <StatItem iconColor="bg-orange-500" value={studentSummary.pendingCount} label="Chờ làm" />
-                        <StatItem iconColor="bg-sky-500" value={studentSummary.submittedCount} label="Đang làm" />
-                        <StatItem iconColor="bg-green-500" value={studentSummary.gradedCount} label="Đã chấm" />
+                        <StatItem iconColor="bg-orange-500" value={pendingCount} label="Chờ làm" />
+                        <StatItem iconColor="bg-sky-500" value={inProgressCount} label="Đang làm" />
+                        <StatItem iconColor="bg-green-500" value={gradedCount} label="Đã chấm" />
                         <ProgressRing percentage={completionRate} />
                     </div>
                 </div>

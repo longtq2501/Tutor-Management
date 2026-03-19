@@ -17,6 +17,8 @@ import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn, formatExerciseTitle } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/hooks/useQueryKeys';
 
 interface ExercisePlayerProps {
     exerciseId: string;
@@ -25,6 +27,7 @@ interface ExercisePlayerProps {
 }
 
 export const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exerciseId, studentId, onExit }) => {
+    const queryClient = useQueryClient();
     const [exercise, setExercise] = useState<Exercise | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Map<string, { selectedOption?: string; essayText?: string }>>(new Map());
@@ -152,6 +155,7 @@ export const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exerciseId, stud
             };
             const result = await submissionService.submit(request);
             setSubmissionResult(result);
+            await queryClient.invalidateQueries({ queryKey: queryKeys.exercises.all });
             toast.success("Nộp bài thành công!", {
                 description: result.status === 'GRADED'
                     ? `Bạn đạt ${result.totalScore} điểm.`

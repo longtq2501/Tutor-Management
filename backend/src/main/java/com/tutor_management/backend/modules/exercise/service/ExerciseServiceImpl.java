@@ -228,36 +228,56 @@ public class ExerciseServiceImpl implements ExerciseService {
         Exercise exercise = exerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài tập gốc"));
 
-        verifyExerciseOwnership(exercise, tutorId);
+        List<ExerciseAssignment> matchedAssignments = normalizedStudentIds.stream()
+                .map(candidateId -> assignmentRepository.findByExerciseIdAndStudentId(exerciseId, candidateId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
-        List<Submission> relatedSubmissions = normalizedStudentIds.stream()
+        if (matchedAssignments.isEmpty()) {
+            throw new ResourceNotFoundException("Bài tập chưa được giao cho học sinh này");
+        }
+
+        boolean isAdmin = securityContextUtils.getCurrentUser()
+                .map(user -> "ADMIN".equals(user.getRole().getName()))
+                .orElse(false);
+
+        List<ExerciseAssignment> revocableAssignments;
+        if (isAdmin || exercise.getCreatedBy().equals(tutorId)) {
+            revocableAssignments = matchedAssignments;
+        } else {
+            revocableAssignments = matchedAssignments.stream()
+                    .filter(assignment -> tutorId.equals(assignment.getAssignedBy()))
+                    .toList();
+            if (revocableAssignments.isEmpty()) {
+                throw new SecurityException("Bạn không có quyền thu hồi bài tập này");
+            }
+        }
+
+        List<String> revocableStudentIds = revocableAssignments.stream()
+                .map(ExerciseAssignment::getStudentId)
+                .distinct()
+                .toList();
+
+        List<Submission> relatedSubmissions = revocableStudentIds.stream()
                 .map(candidateId -> submissionRepository.findByExerciseIdAndStudentId(exerciseId, candidateId))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
 
         boolean hasFinalizedSubmission = relatedSubmissions.stream()
-                .anyMatch(submission -> submission.getStatus() == SubmissionStatus.SUBMITTED || submission.getStatus() == SubmissionStatus.GRADED);
+                .anyMatch(submission -> submission.getStatus() == SubmissionStatus.DRAFT
+                        || submission.getStatus() == SubmissionStatus.SUBMITTED
+                        || submission.getStatus() == SubmissionStatus.GRADED);
         if (hasFinalizedSubmission) {
-            throw new IllegalStateException("Không thể thu hồi vì học sinh đã nộp/chấm bài");
+            throw new IllegalStateException("Chỉ có thể thu hồi bài ở trạng thái chờ làm");
         }
 
         relatedSubmissions.forEach(submissionRepository::delete);
 
-        int removedAssignments = 0;
-        for (String candidateId : normalizedStudentIds) {
-            Optional<ExerciseAssignment> assignmentOpt = assignmentRepository.findByExerciseIdAndStudentId(exerciseId, candidateId);
-            if (assignmentOpt.isPresent()) {
-                assignmentRepository.delete(assignmentOpt.get());
-                removedAssignments++;
-            }
-        }
+        revocableAssignments.forEach(assignmentRepository::delete);
 
-        if (removedAssignments == 0) {
-            throw new ResourceNotFoundException("Bài tập chưa được giao cho học sinh này");
-        }
-
-        log.info("Revoked {} assignment(s) for exercise {} and student identities {}", removedAssignments, exerciseId, normalizedStudentIds);
+        log.info("Revoked {} assignment(s) for exercise {} and student identities {}", revocableAssignments.size(), exerciseId, revocableStudentIds);
     }
 
     @Override
