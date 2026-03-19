@@ -242,12 +242,24 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .map(user -> "ADMIN".equals(user.getRole().getName()))
                 .orElse(false);
 
+        LinkedHashSet<String> tutorIdentityCandidates = new LinkedHashSet<>();
+        tutorIdentityCandidates.add(tutorId);
+        Long tutorProfileId = getTutorId(tutorId);
+        if (tutorProfileId != null) {
+            tutorIdentityCandidates.add(tutorProfileId.toString());
+        }
+
+        boolean canManageByOwnership = isAdmin
+                || tutorIdentityCandidates.contains(exercise.getCreatedBy())
+                || (tutorProfileId != null && Objects.equals(exercise.getTutorId(), tutorProfileId));
+
         List<ExerciseAssignment> revocableAssignments;
-        if (isAdmin || exercise.getCreatedBy().equals(tutorId)) {
+        if (canManageByOwnership) {
             revocableAssignments = matchedAssignments;
         } else {
             revocableAssignments = matchedAssignments.stream()
-                    .filter(assignment -> tutorId.equals(assignment.getAssignedBy()))
+                    .filter(assignment -> assignment.getAssignedBy() != null
+                            && tutorIdentityCandidates.contains(assignment.getAssignedBy()))
                     .toList();
             if (revocableAssignments.isEmpty()) {
                 throw new SecurityException("Bạn không có quyền thu hồi bài tập này");
