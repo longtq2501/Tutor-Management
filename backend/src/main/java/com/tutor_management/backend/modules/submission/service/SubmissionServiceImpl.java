@@ -195,14 +195,27 @@ public class SubmissionServiceImpl implements SubmissionService {
     private void applyManualGrades(Submission s, GradeSubmissionRequest r) {
         if (r.getEssayGrades() == null) return;
 
+        int appliedCount = 0;
+
         for (EssayGradeRequest g : r.getEssayGrades()) {
-            StudentAnswer answer = s.getAnswers().stream()
+            Optional<StudentAnswer> answerOpt = s.getAnswers().stream()
                 .filter(a -> a.getQuestionId().equals(g.getQuestionId()))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy câu trả lời cho câu hỏi: " + g.getQuestionId()));
-            
+                .findFirst();
+
+            if (answerOpt.isEmpty()) {
+                log.warn("Skipping essay grade for question {} because no matching student answer was found in submission {}",
+                        g.getQuestionId(), s.getId());
+                continue;
+            }
+
+            StudentAnswer answer = answerOpt.get();
             answer.setPoints(g.getPoints());
             answer.setFeedback(g.getFeedback());
+            appliedCount++;
+        }
+
+        if (!r.getEssayGrades().isEmpty() && appliedCount == 0) {
+            throw new ResourceNotFoundException("Không thể áp điểm tự luận: không khớp câu trả lời của học sinh");
         }
     }
 
@@ -211,13 +224,36 @@ public class SubmissionServiceImpl implements SubmissionService {
         Map<String, QuestionType> typeMap = questions.stream()
             .collect(Collectors.toMap(Question::getId, Question::getType));
 
+        double previousMcq = Optional.ofNullable(s.getMcqScore()).orElse(0.0);
+        double previousEssay = Optional.ofNullable(s.getEssayScore()).orElse(0.0);
+
         double mcq = 0.0;
         double essay = 0.0;
+        int mappedMcqAnswers = 0;
+        int mappedEssayAnswers = 0;
+
         for (StudentAnswer a : s.getAnswers()) {
             QuestionType type = typeMap.get(a.getQuestionId());
             double pts = Optional.ofNullable(a.getPoints()).orElse(0.0);
-            if (type == QuestionType.MCQ) mcq += pts;
-            else if (type == QuestionType.ESSAY) essay += pts;
+            if (type == QuestionType.MCQ) {
+                mcq += pts;
+                mappedMcqAnswers++;
+            } else if (type == QuestionType.ESSAY) {
+                essay += pts;
+                mappedEssayAnswers++;
+            }
+        }
+
+        if (mappedMcqAnswers == 0 && previousMcq > 0) {
+            log.warn("No mappable MCQ answers found while grading submission {}. Preserving previous MCQ score {}",
+                    s.getId(), previousMcq);
+            mcq = previousMcq;
+        }
+
+        if (mappedEssayAnswers == 0 && previousEssay > 0) {
+            log.warn("No mappable essay answers found while grading submission {}. Preserving previous essay score {}",
+                    s.getId(), previousEssay);
+            essay = previousEssay;
         }
 
         s.setMcqScore(roundTwoDecimals(mcq));

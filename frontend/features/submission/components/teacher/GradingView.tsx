@@ -100,16 +100,32 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
         return Math.min(totalCalculated, exercise.totalPoints);
     }, [totalCalculated, exercise]);
 
+    // In review mode, trust persisted scores from backend instead of recomputing from local form state.
+    const displayedMcqScore = submission?.mcqScore || 0;
+    const displayedEssayScore = isReviewMode ? (submission?.essayScore || 0) : calculateEssayScore();
+    const displayedTotalScore = isReviewMode
+        ? Math.min(submission?.totalScore || (displayedMcqScore + displayedEssayScore), exercise?.totalPoints || Infinity)
+        : finalTotal;
+
     const handleSaveGrade = async () => {
-        if (!submission) return;
+        if (!submission || !exercise) return;
         setIsSubmitting(true);
         try {
+            const answerByQuestionId = new Map(submission.answers.map(a => [a.questionId, a]));
+            const essayGradesPayload = (exercise.questions || [])
+                .filter(q => q.type === QuestionType.ESSAY)
+                .map(q => {
+                    const edited = essayGrades.get(q.id!);
+                    const existing = answerByQuestionId.get(q.id!);
+                    return {
+                        questionId: q.id!,
+                        points: edited?.points ?? existing?.points ?? 0,
+                        feedback: edited?.feedback ?? existing?.feedback ?? '',
+                    };
+                });
+
             const request: GradeSubmissionRequest = {
-                essayGrades: Array.from(essayGrades.entries()).map(([qId, val]) => ({
-                    questionId: qId,
-                    points: val.points,
-                    feedback: val.feedback
-                })),
+                essayGrades: essayGradesPayload,
                 teacherComment
             };
 
@@ -184,19 +200,19 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                             <div className="flex gap-2 shrink-0 self-end md:self-center">
                                 <div className="flex flex-col items-center bg-secondary/30 px-2 py-0.5 rounded border border-border min-w-[60px]">
                                     <span className="text-[8px] text-muted-foreground uppercase font-semibold">MCQ</span>
-                                    <span className="text-xs font-bold text-primary">{submission.mcqScore || 0}</span>
+                                    <span className="text-xs font-bold text-primary">{displayedMcqScore}</span>
                                 </div>
                                 <div className="flex flex-col items-center bg-secondary/30 px-2 py-0.5 rounded border border-border min-w-[60px]">
                                     <span className="text-[8px] text-muted-foreground uppercase font-semibold">Tự luận</span>
-                                    <span className="text-xs font-bold text-yellow-600 dark:text-yellow-500">{calculateEssayScore()}</span>
+                                    <span className="text-xs font-bold text-yellow-600 dark:text-yellow-500">{displayedEssayScore}</span>
                                 </div>
                                 <div className="flex flex-col items-center bg-primary/10 px-3 py-0.5 rounded border border-primary/20 min-w-[70px]">
                                     <span className="text-[8px] text-primary/70 uppercase font-semibold">Tổng</span>
-                                    <span className="text-sm font-black text-primary">{finalTotal}/{exercise.totalPoints}</span>
+                                    <span className="text-sm font-black text-primary">{displayedTotalScore}/{exercise.totalPoints}</span>
                                 </div>
                             </div>
                         </div>
-                        {totalCalculated > exercise.totalPoints && (
+                        {!isReviewMode && totalCalculated > exercise.totalPoints && (
                             <div className="mt-1.5 flex items-center gap-2 text-[9px] text-red-600 bg-red-500/10 p-1 rounded border border-red-500/20">
                                 <AlertCircle className="h-3 w-3" />
                                 <span>Giới hạn điểm tối đa {exercise.totalPoints}</span>
