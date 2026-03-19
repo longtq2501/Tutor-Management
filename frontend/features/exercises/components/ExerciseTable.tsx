@@ -125,7 +125,7 @@ export const ExerciseTable: React.FC<ExerciseTableProps> = ({
                                                     <FileText className="h-4 w-4" />
                                                 </Button>
                                             </ActionTooltip>
-                                            <ActionTooltip label="Xóa bài tập">
+                                            <ActionTooltip label="Xóa vĩnh viễn bài tập và toàn bộ bài nộp liên quan">
                                                 <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors" onClick={(e) => { e.stopPropagation(); handleDelete(ex.id, e); }}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

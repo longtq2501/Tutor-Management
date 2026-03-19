@@ -112,7 +112,7 @@ export const ExerciseMobileCard: React.FC<ExerciseMobileCardProps> = ({
                                     <FileText className="mr-2 h-4 w-4" /> Chấm điểm
                                 </Button>
                             </ActionTooltip>
-                            <ActionTooltip label="Xóa bài tập" side="left">
+                            <ActionTooltip label="Xóa vĩnh viễn bài tập và toàn bộ bài nộp liên quan" side="left">
                                 <Button variant="ghost" size="sm" className="text-red-500 h-9 w-9 p-0 rounded-xl hover:bg-red-50 transition-colors" onClick={(e) => { e.stopPropagation(); handleDelete(ex.id, e); }}>
                                     <Trash2 className="h-4 w-4" />
                                 </Button>

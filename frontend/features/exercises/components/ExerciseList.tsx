@@ -192,6 +192,8 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                 assignDeadline={l.assignDeadline} setAssignDeadline={l.setAssignDeadline}
                 isAssigning={l.isAssigning} handleAssign={l.handleAssign}
             />
+
+            <l.ConfirmationDialog />
         </Card>
     );
 };

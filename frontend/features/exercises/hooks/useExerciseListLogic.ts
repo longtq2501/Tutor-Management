@@ -11,12 +11,15 @@ import { useExercises, useInfiniteAssignedExercises } from '../hooks/useExercise
 import { ExerciseListItemResponse } from '@/features/exercise-import/types/exercise.types';
 import { PageResponse } from '@/lib/types';
 import { LessonCategoryDTO } from '@/features/learning/lessons/types';
+import { useConfirm } from '@/hooks/useConfirm';
+import axios from 'axios';
 
 /**
  * Orchestrates state and side effects for the exercise library.
  */
 export const useExerciseListLogic = (role: string) => {
     const queryClient = useQueryClient();
+    const { confirm, ConfirmationDialog } = useConfirm();
     const isStudent = role === 'STUDENT';
 
     const [page, setPage] = useState(0);
@@ -80,13 +83,26 @@ export const useExerciseListLogic = (role: string) => {
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!confirm("Are you sure you want to delete this exercise?")) return;
+
+        const confirmed = await confirm({
+            title: 'Xóa bài kiểm tra?',
+            description: 'Bài kiểm tra và toàn bộ dữ liệu nộp/chấm liên quan sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.',
+            confirmText: 'Xóa',
+            cancelText: 'Hủy',
+            variant: 'destructive',
+        });
+        if (!confirmed) return;
+
         try {
             await exerciseService.delete(id);
-            toast.success("Exercise deleted");
-            queryClient.invalidateQueries({ queryKey: queryKeys.exercises.all });
+            toast.success('Đã xóa bài kiểm tra');
+            await queryClient.invalidateQueries({ queryKey: queryKeys.exercises.all });
         } catch (error) {
-            toast.error("Failed to delete exercise");
+            let message = 'Không thể xóa bài kiểm tra';
+            if (axios.isAxiosError(error)) {
+                message = error.response?.data?.message || error.message || message;
+            }
+            toast.error(message);
         }
     };
 
@@ -133,6 +149,7 @@ export const useExerciseListLogic = (role: string) => {
         assignStudentId, setAssignStudentId,
         assignDeadline, setAssignDeadline,
         isAssigning,
+        ConfirmationDialog,
         handleDelete, handleOpenAssign, handleAssign
     };
 };

@@ -439,8 +439,26 @@ public class ExerciseServiceImpl implements ExerciseService {
     // --- Private Business Helpers ---
 
     private void verifyExerciseOwnership(Exercise exercise, String teacherId) {
-        if (!exercise.getCreatedBy().equals(teacherId)) {
-            log.error("Security violation: Teacher {} attempted to modify exercise owned by {}", teacherId, exercise.getCreatedBy());
+        boolean isAdmin = securityContextUtils.getCurrentUser()
+                .map(user -> "ADMIN".equals(user.getRole().getName()))
+                .orElse(false);
+        if (isAdmin) {
+            return;
+        }
+
+        LinkedHashSet<String> tutorIdentityCandidates = new LinkedHashSet<>();
+        tutorIdentityCandidates.add(teacherId);
+        Long tutorProfileId = getTutorId(teacherId);
+        if (tutorProfileId != null) {
+            tutorIdentityCandidates.add(tutorProfileId.toString());
+        }
+
+        boolean isOwner = tutorIdentityCandidates.contains(exercise.getCreatedBy())
+                || (tutorProfileId != null && Objects.equals(exercise.getTutorId(), tutorProfileId));
+
+        if (!isOwner) {
+            log.error("Security violation: Teacher {} attempted to modify exercise owned by createdBy={} tutorId={}",
+                    teacherId, exercise.getCreatedBy(), exercise.getTutorId());
             throw new SecurityException("Bạn không có quyền thực hiện thao tác này trên bài tập này");
         }
     }
