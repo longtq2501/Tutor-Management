@@ -14,11 +14,11 @@ public interface AutoGradingService {
      * @param submissionId Unique identifier of the attempt record.
      * @return The calculated score for MCQ items.
      */
-    int gradeSubmission(String submissionId);
+    double gradeSubmission(String submissionId);
 
     /**
      * Executes auto-grading logic on a hydrated submission entity.
      * Avoids redundant database lookups when called from a parent transaction.
      */
-    int gradeSubmission(Submission submission);
+    double gradeSubmission(Submission submission);
 }

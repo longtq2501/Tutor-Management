@@ -21,7 +21,7 @@ public class QuestionPreview {
     
     private QuestionType type;
     private String questionText;
-    private Integer points;
+    private Double points;
     private Integer orderIndex;
     private String rubric;
     private List<OptionPreview> options;

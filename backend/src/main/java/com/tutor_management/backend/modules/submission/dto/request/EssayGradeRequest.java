@@ -1,8 +1,9 @@
 package com.tutor_management.backend.modules.submission.dto.request;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +22,9 @@ public class EssayGradeRequest {
     private String questionId;
     
     @NotNull(message = "Điểm số không được để trống")
-    @Min(value = 0, message = "Điểm số không được nhỏ hơn 0")
-    private Integer points;
+    @DecimalMin(value = "0.0", inclusive = true, message = "Điểm số không được nhỏ hơn 0")
+    @Digits(integer = 8, fraction = 2, message = "Điểm số tối đa 2 chữ số thập phân")
+    private Double points;
     
     /**
      * Specific feedback for this specific answer.

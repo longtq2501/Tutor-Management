@@ -68,23 +68,23 @@ public class Submission implements Persistable<String> {
     /**
      * Points earned from auto-graded MCQ/Question items.
      */
-    @Column(name = "mcq_score")
+    @Column(name = "mcq_score", precision = 10, scale = 2)
     @Builder.Default
-    private Integer mcqScore = 0;
+    private Double mcqScore = 0.0;
     
     /**
      * Points awarded manually for written/open-ended items.
      */
-    @Column(name = "essay_score")
+    @Column(name = "essay_score", precision = 10, scale = 2)
     @Builder.Default
-    private Integer essayScore = 0;
+    private Double essayScore = 0.0;
     
     /**
      * Aggregate score (mcqScore + essayScore).
      */
-    @Column(name = "total_score")
+    @Column(name = "total_score", precision = 10, scale = 2)
     @Builder.Default
-    private Integer totalScore = 0;
+    private Double totalScore = 0.0;
     
     /**
      * Official submission timestamp (transition from DRAFT to SUBMITTED).
@@ -142,7 +142,11 @@ public class Submission implements Persistable<String> {
      * Synchonizes the total score from individual component scores.
      */
     public void calculateTotalScore() {
-        this.totalScore = (mcqScore != null ? mcqScore : 0) + (essayScore != null ? essayScore : 0);
+        this.totalScore = roundTwoDecimals((mcqScore != null ? mcqScore : 0.0) + (essayScore != null ? essayScore : 0.0));
+    }
+
+    private double roundTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
     
     @PrePersist

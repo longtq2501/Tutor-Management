@@ -22,7 +22,7 @@ public class QuestionResponse {
     private String id;
     private QuestionType type;
     private String questionText;
-    private Integer points;
+    private Double points;
     private Integer orderIndex;
     
     /**

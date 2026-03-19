@@ -1,6 +1,8 @@
 package com.tutor_management.backend.modules.exercise.dto.request;
 
 import com.tutor_management.backend.modules.exercise.domain.QuestionType;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,8 +38,9 @@ public class QuestionRequest {
      * Scoring weight for this item.
      */
     @NotNull(message = "Điểm số không được để trống")
-    @Min(value = 1, message = "Điểm số tối thiểu là 1")
-    private Integer points;
+    @DecimalMin(value = "0.01", message = "Điểm số phải lớn hơn 0")
+    @Digits(integer = 8, fraction = 2, message = "Điểm số tối đa 2 chữ số thập phân")
+    private Double points;
     
     /**
      * Visual sequence index.

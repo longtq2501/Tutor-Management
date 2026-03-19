@@ -25,9 +25,9 @@ public class SubmissionResponse {
     private String studentId;
     private String studentName;
     private SubmissionStatus status;
-    private Integer mcqScore;
-    private Integer essayScore;
-    private Integer totalScore;
+    private Double mcqScore;
+    private Double essayScore;
+    private Double totalScore;
     private LocalDateTime submittedAt;
     private LocalDateTime gradedAt;
     private String teacherComment;

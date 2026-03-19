@@ -54,7 +54,7 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
         Pattern.compile("ANSWER:\\s*([A-D])", Pattern.CASE_INSENSITIVE);
     
     private static final Pattern POINTS_PATTERN = 
-        Pattern.compile("POINTS:\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("POINTS:\\s*(\\d+(?:\\.\\d+)?)", Pattern.CASE_INSENSITIVE);
     
     private static final Pattern ESSAY_QUESTION_PATTERN = 
         Pattern.compile("\\[ESSAY-(\\d+)\\]\\s*(.+?)(?=POINTS:)", Pattern.DOTALL);
@@ -186,10 +186,10 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
             verifyCorrectAnswerMapping(questionRef, options, correctAnswer, errors);
         }
         
-        Integer points = extractIntField(block, POINTS_PATTERN);
+        Double points = extractDoubleField(block, POINTS_PATTERN);
         if (points == null || points <= 0) {
             errors.add("MCQ-" + questionRef + ": Điểm số phải là số dương");
-            points = 0;
+            points = 0.0;
         }
         
         if (options.size() != 4) {
@@ -269,11 +269,11 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
         
         String questionRef = questionMatcher.group(1);
         String questionText = questionMatcher.group(2).trim();
-        Integer points = extractIntField(block, POINTS_PATTERN);
+        Double points = extractDoubleField(block, POINTS_PATTERN);
         
         if (points == null || points <= 0) {
             errors.add("ESSAY-" + questionRef + ": Điểm số phải là số dương");
-            points = 0;
+            points = 0.0;
         }
         
         String rubric = extractField(block, RUBRIC_PATTERN);
@@ -296,13 +296,13 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
             return;
         }
         
-        int calculatedPoints = questions.stream()
-            .mapToInt(q -> q.getPoints() != null ? q.getPoints() : 0)
+        double calculatedPoints = questions.stream()
+            .mapToDouble(q -> q.getPoints() != null ? q.getPoints() : 0.0)
             .sum();
         
-        if (metadata.getTotalPoints() != null && calculatedPoints != metadata.getTotalPoints()) {
+        if (metadata.getTotalPoints() != null && Math.abs(calculatedPoints - metadata.getTotalPoints()) > 0.0001) {
             errors.add("Tổng điểm không khớp: Thông tin chung là " + metadata.getTotalPoints() + 
-                      " nhưng tổng điểm các câu hỏi là " + calculatedPoints);
+                      " nhưng tổng điểm các câu hỏi là " + formatPoints(calculatedPoints));
         }
     }
     
@@ -328,5 +328,24 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
             }
         }
         return null;
+    }
+
+    private Double extractDoubleField(String content, Pattern pattern) {
+        String value = extractField(content, pattern);
+        if (StringUtils.hasText(value)) {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                log.warn("Regex matched non-decimal value: {}", value);
+            }
+        }
+        return null;
+    }
+
+    private String formatPoints(double value) {
+        if (Math.abs(value - Math.rint(value)) < 0.0001) {
+            return String.valueOf((int) Math.rint(value));
+        }
+        return String.format(java.util.Locale.ROOT, "%.2f", value);
     }
 }

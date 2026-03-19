@@ -24,5 +24,5 @@ public class ExamGradedEvent {
     private final String exerciseTitle;
     
     /** The actual score given to the student */
-    private final Integer score;
+    private final Double score;
 }

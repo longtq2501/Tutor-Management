@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Event Listener for Notification module.
@@ -85,8 +86,8 @@ public class NotificationListener {
             notificationService.createAndSend(
                     student,
                     "Bài tập đã được chấm điểm",
-                    String.format("Bài tập '%s' của bạn đã được chấm điểm. Điểm số: %d/%s", 
-                            event.getExerciseTitle(), event.getScore(), "100"),
+                            String.format(Locale.ROOT, "Bài tập '%s' của bạn đã được chấm điểm. Điểm số: %.2f/%s",
+                                    event.getExerciseTitle(), event.getScore() != null ? event.getScore() : 0.0, "100"),
                     NotificationType.EXAM_GRADED
             );
         } catch (Exception e) {

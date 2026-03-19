@@ -70,9 +70,9 @@ public class StudentAnswer implements Persistable<String> {
     /**
      * Points awarded for this specific answer.
      */
-    @Column(name = "points")
+    @Column(name = "points", precision = 10, scale = 2)
     @Builder.Default
-    private Integer points = 0;
+    private Double points = 0.0;
     
     /**
      * Specific feedback/annotation for this answer from the tutor.

@@ -68,8 +68,8 @@ public class Question implements Persistable<String> {
     /**
      * Scoring weight for this question.
      */
-    @Column(nullable = false)
-    private Integer points;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private Double points;
     
     /**
      * Sequence number defining the flow of the exercise.

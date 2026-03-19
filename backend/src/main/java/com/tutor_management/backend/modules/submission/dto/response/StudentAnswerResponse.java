@@ -21,6 +21,6 @@ public class StudentAnswerResponse {
     private String selectedOption;
     private String essayText;
     private Boolean isCorrect;
-    private Integer points;
+    private Double points;
     private String feedback;
 }

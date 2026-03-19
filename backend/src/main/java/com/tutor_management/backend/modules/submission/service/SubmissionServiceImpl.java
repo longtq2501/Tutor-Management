@@ -211,21 +211,29 @@ public class SubmissionServiceImpl implements SubmissionService {
         Map<String, QuestionType> typeMap = questions.stream()
             .collect(Collectors.toMap(Question::getId, Question::getType));
 
-        int mcq = 0; int essay = 0;
+        double mcq = 0.0;
+        double essay = 0.0;
         for (StudentAnswer a : s.getAnswers()) {
             QuestionType type = typeMap.get(a.getQuestionId());
-            int pts = Optional.ofNullable(a.getPoints()).orElse(0);
+            double pts = Optional.ofNullable(a.getPoints()).orElse(0.0);
             if (type == QuestionType.MCQ) mcq += pts;
             else if (type == QuestionType.ESSAY) essay += pts;
         }
 
-        s.setMcqScore(mcq);
-        s.setEssayScore(essay);
+        s.setMcqScore(roundTwoDecimals(mcq));
+        s.setEssayScore(roundTwoDecimals(essay));
         s.calculateTotalScore();
 
         exerciseRepository.findById(s.getExerciseId()).ifPresent(ex -> {
-            if (s.getTotalScore() > ex.getTotalPoints()) s.setTotalScore(ex.getTotalPoints());
+            if (s.getTotalScore() > ex.getTotalPoints()) {
+                s.setTotalScore(ex.getTotalPoints().doubleValue());
+            }
+            s.setTotalScore(roundTwoDecimals(s.getTotalScore()));
         });
+    }
+
+    private double roundTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     private void publishSubmissionEvent(Submission s, String studentId) {

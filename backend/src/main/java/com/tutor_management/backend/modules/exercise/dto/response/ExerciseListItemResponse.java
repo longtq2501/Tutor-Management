@@ -43,7 +43,7 @@ public class ExerciseListItemResponse {
     /**
      * Earned score if the submission has been graded.
      */
-    private Integer studentTotalScore;
+    private Double studentTotalScore;
 
     /**
      * Manual projection constructor used for optimized JPQL Repository queries.

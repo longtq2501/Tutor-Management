@@ -80,14 +80,14 @@ class SubmissionServiceTest {
 
         // exercise has one MCQ question only
         when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId)))
-                .thenReturn(List.of(Question.builder().id("q1").type(QuestionType.MCQ).points(5).build()));
+            .thenReturn(List.of(Question.builder().id("q1").type(QuestionType.MCQ).points(5.0).build()));
 
         // auto grader just returns 5 points and mutates submission
         doAnswer(inv -> {
             Submission sub = inv.getArgument(0);
-            sub.setMcqScore(5);
-            sub.setTotalScore(5);
-            return 5;
+            sub.setMcqScore(5.0);
+            sub.setTotalScore(5.0);
+            return 5.0;
         }).when(autoGradingService).gradeSubmission(any(Submission.class));
 
         // Act
@@ -95,8 +95,8 @@ class SubmissionServiceTest {
 
         // Assert
         assertEquals(SubmissionStatus.GRADED, response.getStatus(), "Status should be GRADED when only MCQ");
-        assertEquals(5, response.getMcqScore());
-        assertEquals(5, response.getTotalScore());
+        assertEquals(5.0, response.getMcqScore());
+        assertEquals(5.0, response.getTotalScore());
     }
 
     @Test
@@ -106,13 +106,13 @@ class SubmissionServiceTest {
         request.setAnswers(List.of(new AnswerRequest("q1", null, "some text")));
 
         when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId)))
-                .thenReturn(List.of(Question.builder().id("q1").type(QuestionType.ESSAY).points(10).build()));
+            .thenReturn(List.of(Question.builder().id("q1").type(QuestionType.ESSAY).points(10.0).build()));
 
         doAnswer(inv -> {
             Submission sub = inv.getArgument(0);
-            sub.setMcqScore(0);
-            sub.setTotalScore(0);
-            return 0;
+            sub.setMcqScore(0.0);
+            sub.setTotalScore(0.0);
+            return 0.0;
         }).when(autoGradingService).gradeSubmission(any(Submission.class));
 
         var response = submissionService.submit(request, studentId);

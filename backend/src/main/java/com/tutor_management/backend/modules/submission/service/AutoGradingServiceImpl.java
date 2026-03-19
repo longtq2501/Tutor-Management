@@ -33,7 +33,7 @@ public class AutoGradingServiceImpl implements AutoGradingService {
     
     // Auto-grades a submission by its ID, returning the total MCQ score.
     @Override
-    public int gradeSubmission(String submissionId) {
+    public double gradeSubmission(String submissionId) {
         log.info("🤖 Auto-grading submission: {}", submissionId);
         Submission submission = submissionRepository.findById(submissionId)
             .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài nộp với ID: " + submissionId));
@@ -43,13 +43,13 @@ public class AutoGradingServiceImpl implements AutoGradingService {
 
     // Core grading logic that processes the submission and updates scores.
     @Override
-    public int gradeSubmission(Submission submission) {
+    public double gradeSubmission(Submission submission) {
         log.debug("Auto-grading entity attempt for ID: {}", submission.getId());
 
         List<Question> questions = questionRepository.findByExerciseIdWithDetails(submission.getExerciseId());
         
         Map<String, String> correctMap = new HashMap<>();
-        Map<String, Integer> pointMap = new HashMap<>();
+        Map<String, Double> pointMap = new HashMap<>();
         
         for (Question q : questions) {
             if (q.getType() == QuestionType.MCQ && q.getOptions() != null) {
@@ -63,7 +63,7 @@ public class AutoGradingServiceImpl implements AutoGradingService {
             }
         }
         
-        int mcqTotal = 0;
+        double mcqTotal = 0.0;
         for (StudentAnswer ans : submission.getAnswers()) {
             if (correctMap.containsKey(ans.getQuestionId())) {
                 String correct = correctMap.get(ans.getQuestionId());
@@ -76,23 +76,27 @@ public class AutoGradingServiceImpl implements AutoGradingService {
 
                 if (isMatch) {
                     ans.setIsCorrect(true);
-                    int pts = pointMap.getOrDefault(ans.getQuestionId(), 0);
+                    double pts = pointMap.getOrDefault(ans.getQuestionId(), 0.0);
                     ans.setPoints(pts);
                     mcqTotal += pts;
                 } else {
                     ans.setIsCorrect(false);
-                    ans.setPoints(0);
+                    ans.setPoints(0.0);
                 }
             }
         }
-        
-        submission.setMcqScore(mcqTotal);
+
+        submission.setMcqScore(roundTwoDecimals(mcqTotal));
         submission.calculateTotalScore();
         
         // Finalize state
         submissionRepository.save(submission);
         log.info("Auto-grading complete for {}. Score: {}", submission.getId(), mcqTotal);
         return mcqTotal;
+    }
+
+    private double roundTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     private String safeTrim(String s) {
