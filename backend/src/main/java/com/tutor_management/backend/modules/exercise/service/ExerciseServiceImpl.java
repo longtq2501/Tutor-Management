@@ -212,6 +212,55 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
+    @Transactional
+    public void revokeAssignment(String exerciseId, List<String> studentIds, String tutorId) {
+        List<String> normalizedStudentIds = (studentIds == null ? List.<String>of() : studentIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList());
+
+        if (normalizedStudentIds.isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy học sinh để thu hồi bài tập");
+        }
+
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài tập gốc"));
+
+        verifyExerciseOwnership(exercise, tutorId);
+
+        List<Submission> relatedSubmissions = normalizedStudentIds.stream()
+                .map(candidateId -> submissionRepository.findByExerciseIdAndStudentId(exerciseId, candidateId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
+        boolean hasFinalizedSubmission = relatedSubmissions.stream()
+                .anyMatch(submission -> submission.getStatus() == SubmissionStatus.SUBMITTED || submission.getStatus() == SubmissionStatus.GRADED);
+        if (hasFinalizedSubmission) {
+            throw new IllegalStateException("Không thể thu hồi vì học sinh đã nộp/chấm bài");
+        }
+
+        relatedSubmissions.forEach(submissionRepository::delete);
+
+        int removedAssignments = 0;
+        for (String candidateId : normalizedStudentIds) {
+            Optional<ExerciseAssignment> assignmentOpt = assignmentRepository.findByExerciseIdAndStudentId(exerciseId, candidateId);
+            if (assignmentOpt.isPresent()) {
+                assignmentRepository.delete(assignmentOpt.get());
+                removedAssignments++;
+            }
+        }
+
+        if (removedAssignments == 0) {
+            throw new ResourceNotFoundException("Bài tập chưa được giao cho học sinh này");
+        }
+
+        log.info("Revoked {} assignment(s) for exercise {} and student identities {}", removedAssignments, exerciseId, normalizedStudentIds);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Page<ExerciseListItemResponse> listAssignedExercises(String studentId, Long tutorId, Pageable pageable) {
         return listAssignedExercisesByStudentIds(List.of(studentId), tutorId, pageable);

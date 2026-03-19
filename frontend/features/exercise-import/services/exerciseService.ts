@@ -75,6 +75,14 @@ export const exerciseService = {
     },
 
     /**
+     * Revoke an assigned exercise from a specific student (For Tutors/Admins)
+     */
+    revokeAssignment: async (exerciseId: string, studentId: string): Promise<void> => {
+        const response = await api.delete<ApiResponse<void>>(`/exercises/${exerciseId}/assigned/${studentId}`);
+        return response.data.data;
+    },
+
+    /**
      * Get exercises assigned to the current student
      */
     getAssigned: async (page = 0, size = 10): Promise<PageResponse<ExerciseListItemResponse>> => {

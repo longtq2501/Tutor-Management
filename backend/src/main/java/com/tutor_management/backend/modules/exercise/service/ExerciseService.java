@@ -80,6 +80,16 @@ public interface ExerciseService {
     void assignToStudent(String exerciseId, String studentId, String tutorId, LocalDateTime deadline);
 
     /**
+     * Revokes an assignment from a student using one or more candidate identity keys
+     * (for compatibility between user.id and student.id).
+     *
+     * @param exerciseId source exercise UUID.
+     * @param studentIds candidate student identity keys.
+     * @param tutorId authorizing staff member.
+     */
+    void revokeAssignment(String exerciseId, List<String> studentIds, String tutorId);
+
+    /**
      * Retrieves assigned materials for a student with pagination support.
      * 
      * @param studentId target student.

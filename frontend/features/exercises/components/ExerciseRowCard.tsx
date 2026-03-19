@@ -3,6 +3,8 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Calendar, Clock, Trophy, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -15,6 +17,12 @@ interface ExerciseRowCardProps {
     label?: string;
     showScore?: boolean;
     disabled?: boolean;
+    action?: {
+        label: string;
+        onClick: () => void;
+        disabled?: boolean;
+        tooltip?: string;
+    };
 }
 
 /**
@@ -26,7 +34,8 @@ export const ExerciseRowCard: React.FC<ExerciseRowCardProps> = ({
     onClick,
     label,
     showScore,
-    disabled
+    disabled,
+    action
 }) => {
     const isOverdue = exercise.deadline && new Date(exercise.deadline) < new Date() && !exercise.submissionStatus;
 
@@ -99,6 +108,33 @@ export const ExerciseRowCard: React.FC<ExerciseRowCardProps> = ({
                                     <div className="hidden sm:flex h-8 w-8 rounded-full items-center justify-center bg-muted group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                                         <ChevronRight className="h-4 w-4" />
                                     </div>
+                                )}
+
+                                {action && (
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    disabled={action.disabled}
+                                                    className="h-8 text-xs font-semibold"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        action.onClick();
+                                                    }}
+                                                >
+                                                    {action.label}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            {action.tooltip && (
+                                                <TooltipContent side="top" variant="destructive">
+                                                    {action.tooltip}
+                                                </TooltipContent>
+                                            )}
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 )}
 
                                 {disabled && (

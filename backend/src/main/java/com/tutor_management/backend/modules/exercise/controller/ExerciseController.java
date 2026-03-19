@@ -136,6 +136,32 @@ public class ExerciseController {
     }
 
     /**
+     * Revokes an assigned exercise from a student.
+     */
+    @DeleteMapping("/{id}/assigned/{studentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
+    public ResponseEntity<ApiResponse<Void>> revokeAssignment(
+            @PathVariable String id,
+            @PathVariable String studentId,
+            @AuthenticationPrincipal User user) {
+        log.info("Staff {} revoking exercise {} from student {}", user.getEmail(), id, studentId);
+
+        LinkedHashSet<String> studentIdentityCandidates = new LinkedHashSet<>();
+        studentIdentityCandidates.add(studentId);
+        try {
+            Long profileStudentId = Long.parseLong(studentId);
+            userRepository.findByStudentId(profileStudentId)
+                    .map(User::getId)
+                    .ifPresent(userId -> studentIdentityCandidates.add(userId.toString()));
+        } catch (NumberFormatException ignored) {
+            // keep raw id only
+        }
+
+        exerciseService.revokeAssignment(id, new ArrayList<>(studentIdentityCandidates), user.getId().toString());
+        return ResponseEntity.ok(ApiResponse.success("Đã thu hồi bài tập đã giao", null));
+    }
+
+    /**
      * Showing list of assigned exercises to students
      */
     @GetMapping("/assigned")

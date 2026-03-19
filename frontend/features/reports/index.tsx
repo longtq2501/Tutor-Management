@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ReportExportButtons } from '@/features/reports/components/ReportExportButtons';
 import { ReportForm } from '@/features/reports/components/ReportForm';
 import { ReportPreview } from '@/features/reports/components/ReportPreview';
@@ -8,6 +8,7 @@ import { SessionFeedbackList } from '@/features/reports/components/SessionFeedba
 import { TutorCommentBox } from '@/features/reports/components/TutorCommentBox';
 import { reportApi, studentsApi } from '@/lib/services';
 import type { MonthlyReportData, Student } from '@/lib/types';
+import { DashboardHeader } from '@/contexts/UIContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -91,10 +92,12 @@ export default function ReportsFeature() {
 
   return (
     <div className="space-y-4">
+      <DashboardHeader
+        title="Báo Cáo"
+        subtitle="Tạo và xuất báo cáo tiến độ học sinh theo tháng."
+      />
+
       <Card>
-        <CardHeader>
-          <CardTitle>BÁO CÁO TIẾN ĐỘ HỌC SINH</CardTitle>
-        </CardHeader>
         <CardContent className="space-y-4">
           <div data-tour="reports-form">
             <ReportForm

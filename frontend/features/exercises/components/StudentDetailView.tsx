@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { exerciseService } from '@/features/exercise-import/services/exerciseService';
 import { ExerciseListItemResponse, TutorStudentSummaryResponse } from '@/features/exercise-import/types/exercise.types';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ import { motion } from 'framer-motion';
 import { PageResponse } from '@/lib/types';
 import { ExerciseRowCard } from './ExerciseRowCard';
 import { PerformanceSection } from './PerformanceSection';
+import { toast } from 'sonner';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface StudentDetailViewProps {
     studentSummary: TutorStudentSummaryResponse;
@@ -34,17 +36,47 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
     onBack,
     onViewExercise
 }) => {
+    const queryClient = useQueryClient();
+    const { confirm, ConfirmationDialog } = useConfirm();
+    const [revokingExerciseId, setRevokingExerciseId] = React.useState<string | null>(null);
+
     const { data: exercisesData, isLoading } = useQuery({
         queryKey: ['exercises', 'student', studentSummary.studentId],
         queryFn: () => exerciseService.getAssignedByStudentId(studentSummary.studentId, 0, 100),
     });
 
     const exercises: ExerciseListItemResponse[] = (exercisesData as PageResponse<ExerciseListItemResponse>)?.content || [];
+    const statusOf = (value?: string) => (value || '').toUpperCase();
 
     // Categorization
-    const pending = exercises.filter(ex => !ex.submissionStatus || ex.submissionStatus === 'PENDING' || ex.submissionStatus === 'OVERDUE');
-    const inProgress = exercises.filter(ex => ['DRAFT', 'SUBMITTED', 'STARTED'].includes(ex.submissionStatus || ''));
-    const graded = exercises.filter(ex => ex.submissionStatus === 'GRADED');
+    const pending = exercises.filter(ex => ['PENDING', 'OVERDUE'].includes(statusOf(ex.submissionStatus)) || !statusOf(ex.submissionStatus));
+    const inProgress = exercises.filter(ex => ['DRAFT', 'SUBMITTED', 'STARTED'].includes(statusOf(ex.submissionStatus)));
+    const graded = exercises.filter(ex => statusOf(ex.submissionStatus) === 'GRADED');
+
+    const handleRevokeAssignment = async (exercise: ExerciseListItemResponse) => {
+        const confirmed = await confirm({
+            title: 'Thu hồi bài kiểm tra?',
+            description: `Bài "${exercise.title}" sẽ bị gỡ khỏi học sinh ${studentSummary.studentName}. Hành động này không thể hoàn tác.`,
+            confirmText: 'Thu hồi',
+            cancelText: 'Hủy',
+            variant: 'destructive',
+        });
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setRevokingExerciseId(exercise.id);
+            await exerciseService.revokeAssignment(exercise.id, studentSummary.studentId);
+            toast.success('Đã thu hồi bài kiểm tra');
+            await queryClient.invalidateQueries({ queryKey: ['exercises', 'student', studentSummary.studentId] });
+            await queryClient.invalidateQueries({ queryKey: ['exercises'] });
+        } catch (error) {
+            toast.error('Không thể thu hồi bài kiểm tra');
+        } finally {
+            setRevokingExerciseId(null);
+        }
+    };
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: 'easeOut' }} className="space-y-8 pb-24 w-full">
@@ -60,7 +92,20 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-0 mt-8">
                 <div className="lg:pr-8 lg:border-r lg:border-dashed lg:border-muted-foreground/20">
                     <PerformanceSection title="Chờ làm" icon={<Clock className="h-5 w-5 text-orange-500" />} count={pending.length} isLoading={isLoading}>
-                        {pending.map(ex => <ExerciseRowCard key={ex.id} exercise={ex} disabled onClick={() => { }} />)}
+                        {pending.map(ex => (
+                            <ExerciseRowCard
+                                key={ex.id}
+                                exercise={ex}
+                                disabled
+                                onClick={() => { }}
+                                action={{
+                                    label: revokingExerciseId === ex.id ? 'Đang thu hồi...' : 'Thu hồi',
+                                    onClick: () => handleRevokeAssignment(ex),
+                                    disabled: revokingExerciseId === ex.id,
+                                    tooltip: 'Thu hồi bài kiểm tra đã giao (chỉ áp dụng khi học sinh chưa nộp)',
+                                }}
+                            />
+                        ))}
                     </PerformanceSection>
                 </div>
 
@@ -78,6 +123,8 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
                     </PerformanceSection>
                 </div>
             </div>
+
+            <ConfirmationDialog />
         </motion.div>
     );
 };
