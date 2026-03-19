@@ -70,7 +70,7 @@ public class StudentAnswer implements Persistable<String> {
     /**
      * Points awarded for this specific answer.
      */
-    @Column(name = "points", precision = 10, scale = 2)
+    @Column(name = "points")
     @Builder.Default
     private Double points = 0.0;
     

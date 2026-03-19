@@ -68,21 +68,21 @@ public class Submission implements Persistable<String> {
     /**
      * Points earned from auto-graded MCQ/Question items.
      */
-    @Column(name = "mcq_score", precision = 10, scale = 2)
+    @Column(name = "mcq_score")
     @Builder.Default
     private Double mcqScore = 0.0;
     
     /**
      * Points awarded manually for written/open-ended items.
      */
-    @Column(name = "essay_score", precision = 10, scale = 2)
+    @Column(name = "essay_score")
     @Builder.Default
     private Double essayScore = 0.0;
     
     /**
      * Aggregate score (mcqScore + essayScore).
      */
-    @Column(name = "total_score", precision = 10, scale = 2)
+    @Column(name = "total_score")
     @Builder.Default
     private Double totalScore = 0.0;
     
