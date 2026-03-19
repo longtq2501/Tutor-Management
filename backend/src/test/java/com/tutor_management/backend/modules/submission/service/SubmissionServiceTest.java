@@ -7,6 +7,9 @@ import com.tutor_management.backend.modules.exercise.repository.QuestionReposito
 import com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository;
 import com.tutor_management.backend.modules.submission.dto.request.CreateSubmissionRequest;
 import com.tutor_management.backend.modules.submission.dto.request.AnswerRequest;
+import com.tutor_management.backend.modules.submission.dto.request.EssayGradeRequest;
+import com.tutor_management.backend.modules.submission.dto.request.GradeSubmissionRequest;
+import com.tutor_management.backend.modules.submission.entity.StudentAnswer;
 import com.tutor_management.backend.modules.submission.entity.Submission;
 import com.tutor_management.backend.modules.submission.entity.SubmissionStatus;
 import com.tutor_management.backend.modules.submission.repository.SubmissionRepository;
@@ -18,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,14 +63,14 @@ class SubmissionServiceTest {
     @BeforeEach
     void setUp() {
         // common stubs
-        when(submissionRepository.findByExerciseIdAndStudentId(eq(exerciseId), eq(studentId)))
+        lenient().when(submissionRepository.findByExerciseIdAndStudentId(eq(exerciseId), eq(studentId)))
                 .thenReturn(Optional.empty());
-        when(submissionRepository.save(any(Submission.class)))
+        lenient().when(submissionRepository.save(any(Submission.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
-        when(exerciseRepository.findById(eq(exerciseId)))
+        lenient().when(exerciseRepository.findById(eq(exerciseId)))
                 .thenReturn(Optional.of(new com.tutor_management.backend.modules.exercise.domain.Exercise()));
         // mock assignment repository to avoid null pointer
-        when(assignmentRepository.findByExerciseIdAndStudentId(any(), any()))
+        lenient().when(assignmentRepository.findByExerciseIdAndStudentId(any(), any()))
                 .thenReturn(Optional.empty());
     }
 
@@ -117,5 +120,151 @@ class SubmissionServiceTest {
 
         var response = submissionService.submit(request, studentId);
         assertEquals(SubmissionStatus.SUBMITTED, response.getStatus());
+    }
+
+    @Test
+    void gradeSubmission_withDecimalEssayPoints_shouldClampPerQuestionAndRecalculateTotals() {
+        Submission submission = Submission.builder()
+            .id("sub-1")
+            .exerciseId(exerciseId)
+            .studentId(studentId)
+            .status(SubmissionStatus.SUBMITTED)
+            .mcqScore(5.0)
+            .essayScore(0.0)
+            .totalScore(5.0)
+            .answers(new ArrayList<>())
+            .build();
+
+        submission.addAnswer(StudentAnswer.builder().questionId("qEssay1").essayText("Essay 1").points(0.0).build());
+        submission.addAnswer(StudentAnswer.builder().questionId("qEssay2").essayText("Essay 2").points(0.0).build());
+
+        when(submissionRepository.findByIdWithAnswers(eq("sub-1"))).thenReturn(Optional.of(submission));
+        when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId))).thenReturn(List.of(
+            Question.builder().id("qEssay1").type(QuestionType.ESSAY).points(2.5).build(),
+            Question.builder().id("qEssay2").type(QuestionType.ESSAY).points(3.0).build()
+        ));
+
+        com.tutor_management.backend.modules.exercise.domain.Exercise ex = new com.tutor_management.backend.modules.exercise.domain.Exercise();
+        ex.setTotalPoints(10);
+        ex.setId(exerciseId);
+        ex.setTitle("Exercise 1");
+        when(exerciseRepository.findById(eq(exerciseId))).thenReturn(Optional.of(ex));
+
+        GradeSubmissionRequest request = GradeSubmissionRequest.builder()
+            .essayGrades(List.of(
+                EssayGradeRequest.builder().questionId("qEssay1").points(2.25).feedback("Good").build(),
+                EssayGradeRequest.builder().questionId("qEssay2").points(4.75).feedback("Too high").build()
+            ))
+            .teacherComment("Well done")
+            .build();
+
+        var response = submissionService.gradeSubmission("sub-1", request);
+
+        assertEquals(SubmissionStatus.GRADED, response.getStatus());
+        assertEquals(5.0, response.getMcqScore());
+        assertEquals(5.25, response.getEssayScore());
+        assertEquals(10.0, response.getTotalScore());
+
+        StudentAnswer essay1 = submission.getAnswers().stream()
+            .filter(a -> "qEssay1".equals(a.getQuestionId()))
+            .findFirst()
+            .orElseThrow();
+        StudentAnswer essay2 = submission.getAnswers().stream()
+            .filter(a -> "qEssay2".equals(a.getQuestionId()))
+            .findFirst()
+            .orElseThrow();
+
+        assertEquals(2.25, essay1.getPoints());
+        assertEquals(3.0, essay2.getPoints());
+    }
+
+    @Test
+    void gradeSubmission_withFourEssayAnswersEach12_shouldTotal48() {
+        Submission submission = Submission.builder()
+            .id("sub-48")
+            .exerciseId(exerciseId)
+            .studentId(studentId)
+            .status(SubmissionStatus.SUBMITTED)
+            .mcqScore(0.0)
+            .essayScore(0.0)
+            .totalScore(0.0)
+            .answers(new ArrayList<>())
+            .build();
+
+        submission.addAnswer(StudentAnswer.builder().questionId("q1").essayText("a1").points(0.0).build());
+        submission.addAnswer(StudentAnswer.builder().questionId("q2").essayText("a2").points(0.0).build());
+        submission.addAnswer(StudentAnswer.builder().questionId("q3").essayText("a3").points(0.0).build());
+        submission.addAnswer(StudentAnswer.builder().questionId("q4").essayText("a4").points(0.0).build());
+
+        when(submissionRepository.findByIdWithAnswers(eq("sub-48"))).thenReturn(Optional.of(submission));
+        when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId))).thenReturn(List.of(
+            Question.builder().id("q1").type(QuestionType.ESSAY).points(12.0).build(),
+            Question.builder().id("q2").type(QuestionType.ESSAY).points(12.0).build(),
+            Question.builder().id("q3").type(QuestionType.ESSAY).points(12.0).build(),
+            Question.builder().id("q4").type(QuestionType.ESSAY).points(12.0).build()
+        ));
+
+        com.tutor_management.backend.modules.exercise.domain.Exercise ex = new com.tutor_management.backend.modules.exercise.domain.Exercise();
+        ex.setTotalPoints(100);
+        ex.setId(exerciseId);
+        ex.setTitle("Exercise 48");
+        when(exerciseRepository.findById(eq(exerciseId))).thenReturn(Optional.of(ex));
+
+        GradeSubmissionRequest request = GradeSubmissionRequest.builder()
+            .essayGrades(List.of(
+                EssayGradeRequest.builder().questionId("q1").points(12.0).build(),
+                EssayGradeRequest.builder().questionId("q2").points(12.0).build(),
+                EssayGradeRequest.builder().questionId("q3").points(12.0).build(),
+                EssayGradeRequest.builder().questionId("q4").points(12.0).build()
+            ))
+            .teacherComment("ok")
+            .build();
+
+        var response = submissionService.gradeSubmission("sub-48", request);
+
+        assertEquals(48.0, response.getEssayScore());
+        assertEquals(48.0, response.getTotalScore());
+    }
+
+    @Test
+    void gradeSubmission_shouldSumMcqAndEssayScores() {
+        Submission submission = Submission.builder()
+            .id("sub-mix")
+            .exerciseId(exerciseId)
+            .studentId(studentId)
+            .status(SubmissionStatus.SUBMITTED)
+            .mcqScore(0.0)
+            .essayScore(0.0)
+            .totalScore(0.0)
+            .answers(new ArrayList<>())
+            .build();
+
+        submission.addAnswer(StudentAnswer.builder().questionId("qMcq").selectedOption("A").points(7.0).build());
+        submission.addAnswer(StudentAnswer.builder().questionId("qEssay").essayText("essay").points(0.0).build());
+
+        when(submissionRepository.findByIdWithAnswers(eq("sub-mix"))).thenReturn(Optional.of(submission));
+        when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId))).thenReturn(List.of(
+            Question.builder().id("qMcq").type(QuestionType.MCQ).points(10.0).build(),
+            Question.builder().id("qEssay").type(QuestionType.ESSAY).points(10.0).build()
+        ));
+
+        com.tutor_management.backend.modules.exercise.domain.Exercise ex = new com.tutor_management.backend.modules.exercise.domain.Exercise();
+        ex.setTotalPoints(100);
+        ex.setId(exerciseId);
+        ex.setTitle("Mixed Exercise");
+        when(exerciseRepository.findById(eq(exerciseId))).thenReturn(Optional.of(ex));
+
+        GradeSubmissionRequest request = GradeSubmissionRequest.builder()
+            .essayGrades(List.of(
+                EssayGradeRequest.builder().questionId("qEssay").points(8.0).feedback("Good").build()
+            ))
+            .teacherComment("mixed")
+            .build();
+
+        var response = submissionService.gradeSubmission("sub-mix", request);
+
+        assertEquals(7.0, response.getMcqScore());
+        assertEquals(8.0, response.getEssayScore());
+        assertEquals(15.0, response.getTotalScore());
     }
 }

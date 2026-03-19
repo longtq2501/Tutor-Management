@@ -136,8 +136,11 @@ public class SubmissionServiceImpl implements SubmissionService {
         
         Submission submission = submissionRepository.findByIdWithAnswers(id)
             .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài nộp với ID: " + id));
-        
-        applyManualGrades(submission, request);
+
+        List<Question> questions = questionRepository.findByExerciseIdOrderByOrderIndex(submission.getExerciseId());
+        Map<String, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, q -> q));
+
+        applyManualGrades(submission, request, questionMap);
         recalculateAndCapScores(submission);
         
         submission.setTeacherComment(request.getTeacherComment());
@@ -192,12 +195,23 @@ public class SubmissionServiceImpl implements SubmissionService {
         return submissionRepository.save(submission);
     }
 
-    private void applyManualGrades(Submission s, GradeSubmissionRequest r) {
+    private void applyManualGrades(Submission s, GradeSubmissionRequest r, Map<String, Question> questionMap) {
         if (r.getEssayGrades() == null) return;
 
         int appliedCount = 0;
 
         for (EssayGradeRequest g : r.getEssayGrades()) {
+            Question question = questionMap.get(g.getQuestionId());
+            if (question == null) {
+                log.warn("Skipping essay grade for unknown question {} in submission {}", g.getQuestionId(), s.getId());
+                continue;
+            }
+
+            if (question.getType() != QuestionType.ESSAY) {
+                log.warn("Skipping non-essay question {} while grading submission {}", g.getQuestionId(), s.getId());
+                continue;
+            }
+
             Optional<StudentAnswer> answerOpt = s.getAnswers().stream()
                 .filter(a -> a.getQuestionId().equals(g.getQuestionId()))
                 .findFirst();
@@ -209,7 +223,11 @@ public class SubmissionServiceImpl implements SubmissionService {
             }
 
             StudentAnswer answer = answerOpt.get();
-            answer.setPoints(g.getPoints());
+            double rawPoints = Optional.ofNullable(g.getPoints()).orElse(0.0);
+            double maxPoints = Optional.ofNullable(question.getPoints()).orElse(0.0);
+            double normalizedPoints = Math.max(0.0, Math.min(rawPoints, maxPoints));
+
+            answer.setPoints(roundTwoDecimals(normalizedPoints));
             answer.setFeedback(g.getFeedback());
             appliedCount++;
         }
@@ -221,6 +239,8 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private void recalculateAndCapScores(Submission s) {
         List<Question> questions = questionRepository.findByExerciseIdOrderByOrderIndex(s.getExerciseId());
+        Map<String, Question> questionMap = questions.stream()
+            .collect(Collectors.toMap(Question::getId, q -> q));
         Map<String, QuestionType> typeMap = questions.stream()
             .collect(Collectors.toMap(Question::getId, Question::getType));
 
@@ -233,8 +253,13 @@ public class SubmissionServiceImpl implements SubmissionService {
         int mappedEssayAnswers = 0;
 
         for (StudentAnswer a : s.getAnswers()) {
+            Question question = questionMap.get(a.getQuestionId());
             QuestionType type = typeMap.get(a.getQuestionId());
-            double pts = Optional.ofNullable(a.getPoints()).orElse(0.0);
+            double rawPoints = Optional.ofNullable(a.getPoints()).orElse(0.0);
+            double maxPoints = question != null ? Optional.ofNullable(question.getPoints()).orElse(0.0) : rawPoints;
+            double pts = Math.max(0.0, Math.min(rawPoints, maxPoints));
+            a.setPoints(roundTwoDecimals(pts));
+
             if (type == QuestionType.MCQ) {
                 mcq += pts;
                 mappedMcqAnswers++;

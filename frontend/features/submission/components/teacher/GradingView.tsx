@@ -76,7 +76,10 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
 
         if (field === 'points') {
             const parsed = parseFloat(value);
-            current.points = Number.isFinite(parsed) ? parsed : 0;
+            const questionMax = exercise?.questions?.find(q => q.id === questionId)?.points ?? Infinity;
+            const sanitized = Number.isFinite(parsed) ? parsed : 0;
+            const clamped = Math.max(0, Math.min(sanitized, questionMax));
+            current.points = Math.round(clamped * 100) / 100;
         } else {
             current.feedback = value;
         }
@@ -351,7 +354,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                                     type="number"
                                                                     min={0}
                                                                     max={q.points}
-                                                                    step="0.1"
+                                                                    step="0.01"
                                                                     className="pr-12"
                                                                     value={grade.points}
                                                                     onChange={(e) => handleGradeChange(q.id!, 'points', e.target.value)}
