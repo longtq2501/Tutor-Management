@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from '@tanstack/react-query';
 import { lessonCategoryApi } from '@/lib/services/lesson-category';
-import { AlertTriangle, Check, CheckCircle2, Edit2, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle2, Edit2, ImagePlus, Loader2, Plus, Trash2 } from 'lucide-react';
 import { ActionTooltip } from '@/features/exercises/components/ActionTooltip';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     CreateExerciseRequest,
     ExerciseStatus,
@@ -46,6 +46,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
     const [questions, setQuestions] = useState<QuestionPreview[]>(initialData.questions);
     const [editingQuestion, setEditingQuestion] = useState<{ index: number; data: QuestionPreview } | null>(null);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const questionImageInputRef = useRef<HTMLInputElement | null>(null);
 
     // Verify total points match
     const calculatedTotal = questions.reduce((sum, q) => sum + (q.points || 0), 0);
@@ -115,6 +116,12 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
 
         if (!file.type.startsWith('image/')) {
             toast.error('Invalid file', { description: 'Please select an image file.' });
+            return;
+        }
+
+        const maxSizeInBytes = 10 * 1024 * 1024;
+        if (file.size > maxSizeInBytes) {
+            toast.error('Image too large', { description: 'Please choose an image smaller than 10MB.' });
             return;
         }
 
@@ -269,13 +276,13 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                     </div>
                                     <CardTitle className="text-base mt-2">{q.questionText}</CardTitle>
                                     {q.imageUrl && (
-                                        <div className="mt-3 rounded-md overflow-hidden border border-border">
+                                        <div className="mt-3 rounded-md overflow-hidden border border-border bg-muted/20">
                                             <Image
                                                 src={q.imageUrl}
                                                 alt={`Question ${idx + 1} image`}
                                                 width={900}
                                                 height={500}
-                                                className="w-full h-auto object-contain bg-muted/20"
+                                                className="w-full max-h-64 object-contain"
                                             />
                                         </div>
                                     )}
@@ -316,7 +323,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
 
             {/* Edit Question Dialog */}
             <Dialog open={!!editingQuestion} onOpenChange={(open) => !open && setEditingQuestion(null)}>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit Question</DialogTitle>
                     </DialogHeader>
@@ -352,16 +359,29 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                 <Label>Question Image (Optional)</Label>
                                 {editingQuestion.data.imageUrl ? (
                                     <div className="space-y-2">
-                                        <div className="rounded-md overflow-hidden border border-border">
+                                        <div className="rounded-md overflow-hidden border border-border bg-muted/20">
                                             <Image
                                                 src={editingQuestion.data.imageUrl}
                                                 alt="Question image"
                                                 width={900}
                                                 height={500}
-                                                className="w-full h-auto object-contain bg-muted/20"
+                                                className="w-full max-h-[320px] object-contain"
                                             />
                                         </div>
                                         <div className="flex gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                disabled={isUploadingImage}
+                                                onClick={() => questionImageInputRef.current?.click()}
+                                            >
+                                                {isUploadingImage ? (
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                ) : (
+                                                    <ImagePlus className="h-4 w-4 mr-2" />
+                                                )}
+                                                Replace Image
+                                            </Button>
                                             <Button
                                                 type="button"
                                                 variant="outline"
@@ -374,12 +394,11 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                                 Remove Image
                                             </Button>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2">
                                         <Input
+                                            ref={questionImageInputRef}
                                             type="file"
                                             accept="image/*"
+                                            className="hidden"
                                             disabled={isUploadingImage}
                                             onChange={async (e) => {
                                                 const file = e.target.files?.[0];
@@ -389,7 +408,41 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                                 e.currentTarget.value = '';
                                             }}
                                         />
-                                        {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border border-dashed border-primary/40 bg-primary/[0.04] p-4">
+                                        <Input
+                                            ref={questionImageInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            disabled={isUploadingImage}
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    await handleQuestionImageUpload(file);
+                                                }
+                                                e.currentTarget.value = '';
+                                            }}
+                                        />
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-semibold text-foreground">Add an image to this question</p>
+                                                <p className="text-xs text-muted-foreground">JPG, PNG, WEBP. Max size 10MB.</p>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                onClick={() => questionImageInputRef.current?.click()}
+                                                disabled={isUploadingImage}
+                                            >
+                                                {isUploadingImage ? (
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                ) : (
+                                                    <ImagePlus className="h-4 w-4 mr-2" />
+                                                )}
+                                                {isUploadingImage ? 'Uploading...' : 'Upload Image'}
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                                 <p className="text-xs text-muted-foreground">Supports both MCQ and Essay questions.</p>

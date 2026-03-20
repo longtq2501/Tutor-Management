@@ -9,6 +9,7 @@ import React, { memo, useEffect, useState } from 'react';
 // Types (Giữ nguyên)
 export type View = 'dashboard' | 'students' | 'monthly' | 'documents' | 'parents' | 'unpaid' | 'calendar' | 'homework' | 'lessons' | 'exercises' | 'finance' | 'reports' | 'tutors' | 'live-room' | 'settings';
 export type NavItem = { id: View; label: string; icon: React.ElementType };
+type NavSection = 'hoc-vu' | 'giang-day' | 'danh-gia' | 'van-hanh' | 'khac';
 
 interface SidebarProps {
     currentView: View;
@@ -19,6 +20,37 @@ interface SidebarProps {
 
 // Cấu hình Spring Animation cho cảm giác "Premium"
 const SPRING_CONFIG = { type: "spring", stiffness: 300, damping: 30, mass: 1 } as const;
+
+const SECTION_ORDER: NavSection[] = ['hoc-vu', 'giang-day', 'danh-gia', 'van-hanh', 'khac'];
+
+const SECTION_TITLES: Record<NavSection, string> = {
+    'hoc-vu': 'HỌC VỤ',
+    'giang-day': 'GIẢNG DẠY',
+    'danh-gia': 'ĐÁNH GIÁ',
+    'van-hanh': 'VẬN HÀNH',
+    'khac': 'KHÁC',
+};
+
+const SECTION_BY_VIEW: Record<View, NavSection> = {
+    students: 'hoc-vu',
+    parents: 'hoc-vu',
+    tutors: 'hoc-vu',
+    'live-room': 'hoc-vu',
+
+    lessons: 'giang-day',
+    documents: 'giang-day',
+    calendar: 'giang-day',
+    homework: 'giang-day',
+
+    exercises: 'danh-gia',
+    reports: 'danh-gia',
+
+    dashboard: 'van-hanh',
+    finance: 'van-hanh',
+    monthly: 'van-hanh',
+    unpaid: 'van-hanh',
+    settings: 'van-hanh',
+};
 
 export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked = false }: SidebarProps) => {
     const { isSidebarOpen, setSidebarOpen, isCollapsed, setIsCollapsed } = useUI();
@@ -59,6 +91,65 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
         if (view === 'lessons') return 'nav-lecture';
         if (view === 'exercises') return 'nav-assessment';
         return undefined;
+    };
+
+    const groupedNavItems = SECTION_ORDER
+        .map((section) => ({
+            section,
+            title: SECTION_TITLES[section],
+            items: navItems.filter((item) => (SECTION_BY_VIEW[item.id] ?? 'khac') === section),
+        }))
+        .filter((group) => group.items.length > 0);
+
+    const renderNavButton = (item: NavItem) => {
+        const isActive = currentView === item.id;
+        const Icon = item.icon;
+
+        return (
+            <motion.button
+                key={item.id}
+                layout
+                onClick={() => handleNavClick(item.id)}
+                data-tour={getTourDataAttr(item.id)}
+                className={cn(
+                    "relative flex items-center w-full rounded-2xl transition-colors group h-14",
+                    isActive ? "text-primary" : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
+                    effectiveCollapsed ? "justify-center w-14 mx-auto" : "px-4 w-full"
+                )}
+            >
+                <AnimatePresence>
+                    {isActive && (
+                        <motion.div
+                            layoutId="active-bg"
+                            className="absolute inset-1.5 bg-primary/10 rounded-xl z-0"
+                            transition={SPRING_CONFIG}
+                        />
+                    )}
+                </AnimatePresence>
+
+                <motion.div
+                    layout="position"
+                    className="relative z-10 flex justify-center items-center shrink-0"
+                    style={{ width: 24, height: 24 }}
+                >
+                    <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                </motion.div>
+
+                <AnimatePresence mode="popLayout">
+                    {!effectiveCollapsed && (
+                        <motion.span
+                            layout="position"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            className="relative z-10 ml-4 font-semibold whitespace-nowrap overflow-hidden"
+                        >
+                            {item.label}
+                        </motion.span>
+                    )}
+                </AnimatePresence>
+            </motion.button>
+        );
     };
 
     return (
@@ -131,67 +222,30 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                     {/* Navigation Items */}
                     <nav
                         data-tour="sidebar"
-                        aria-disabled={isLocked}
+                        data-disabled={isLocked ? 'true' : 'false'}
                         className={cn(
-                            'flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar',
+                            'flex-1 px-3 overflow-y-auto no-scrollbar',
                             isLocked && 'pointer-events-none'
                         )}
                     >
-                        {navItems.map((item) => {
-                            const isActive = currentView === item.id;
-                            const Icon = item.icon;
-
-                            return (
-                                <motion.button
-                                    key={item.id}
-                                    layout
-                                    onClick={() => handleNavClick(item.id)}
-                                    data-tour={getTourDataAttr(item.id)}
-                                    className={cn(
-                                        "relative flex items-center w-full rounded-2xl transition-colors group h-14",
-                                        isActive ? "text-primary" : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
-                                        // Khi đóng: w-14 h-14 tạo thành hình vuông. Khi mở: px-4 và w-full
-                                        effectiveCollapsed ? "justify-center w-14 mx-auto" : "px-4 w-full"
-                                    )}
-                                >
-                                    {/* Active Indicator Background */}
-                                    <AnimatePresence>
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="active-bg"
-                                                // Sử dụng inset-1.5 để tạo khoảng cách đều 4 cạnh
-                                                className="absolute inset-1.5 bg-primary/10 rounded-xl z-0"
-                                                transition={SPRING_CONFIG}
-                                            />
-                                        )}
-                                    </AnimatePresence>
-
-                                    {/* Icon Container - Đảm bảo luôn nằm giữa và không bị méo */}
-                                    <motion.div
-                                        layout="position"
-                                        className="relative z-10 flex justify-center items-center shrink-0"
-                                        style={{ width: 24, height: 24 }} // Cố định khung icon
-                                    >
-                                        <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                                    </motion.div>
-
-                                    {/* Label */}
-                                    <AnimatePresence mode="popLayout">
-                                        {!effectiveCollapsed && (
-                                            <motion.span
-                                                layout="position"
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: -10 }}
-                                                className="relative z-10 ml-4 font-semibold whitespace-nowrap overflow-hidden"
-                                            >
-                                                {item.label}
-                                            </motion.span>
-                                        )}
-                                    </AnimatePresence>
-                                </motion.button>
-                            );
-                        })}
+                        {effectiveCollapsed ? (
+                            <div className="space-y-1">
+                                {navItems.map((item) => renderNavButton(item))}
+                            </div>
+                        ) : (
+                            <div className="space-y-5 pb-4">
+                                {groupedNavItems.map((group, index) => (
+                                    <div key={group.section} className={cn(index > 0 && 'pt-4 border-t border-border/70')}>
+                                        <p className="px-3 pb-2 text-[11px] font-bold tracking-wider text-muted-foreground/70 uppercase">
+                                            {group.title}
+                                        </p>
+                                        <div className="space-y-1">
+                                            {group.items.map((item) => renderNavButton(item))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </nav>
 
                     {/* Footer / Profile slot (hiện tại bỏ trống để tránh UI dư thừa) */}
