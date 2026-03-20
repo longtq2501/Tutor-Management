@@ -1,9 +1,7 @@
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Question, QuestionType } from '@/features/exercise-import/types/exercise.types';
+import { Question } from '@/features/exercise-import/types/exercise.types';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
@@ -22,7 +20,7 @@ export const MCQQuestion: React.FC<MCQQuestionProps> = ({
         <div className="w-full space-y-6">
             <div className="space-y-4">
                 <div className="flex justify-between items-start gap-4">
-                    <h3 className="text-xl md:text-2xl font-bold leading-tight tracking-tight text-foreground">
+                    <h3 className="text-xl md:text-2xl font-bold leading-tight tracking-tight text-foreground whitespace-pre-wrap break-words">
                         {question.questionText}
                     </h3>
                     <Badge variant="secondary" className="shrink-0 mt-1 px-3 py-1 text-sm font-bold bg-primary/10 text-primary border-primary/20">

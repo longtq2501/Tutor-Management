@@ -29,7 +29,7 @@ interface SidebarProps {
 // Cấu hình Spring Animation cho cảm giác "Premium"
 const SPRING_CONFIG = { type: "spring", stiffness: 300, damping: 30, mass: 1 } as const;
 
-const SECTION_ORDER: NavSection[] = ['hoc-vu', 'giang-day', 'danh-gia', 'van-hanh', 'khac'];
+const SECTION_ORDER: NavSection[] = ['van-hanh', 'hoc-vu', 'giang-day', 'danh-gia', 'khac'];
 
 const SECTION_TITLES: Record<NavSection, string> = {
     'hoc-vu': 'HỌC VỤ',

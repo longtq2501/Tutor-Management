@@ -21,7 +21,7 @@ export const EssayQuestion: React.FC<EssayQuestionProps> = ({
         <div className="w-full space-y-6">
             <div className="space-y-4">
                 <div className="flex justify-between items-start gap-4">
-                    <h3 className="text-xl md:text-2xl font-bold leading-tight tracking-tight text-foreground">
+                    <h3 className="text-xl md:text-2xl font-bold leading-tight tracking-tight text-foreground whitespace-pre-wrap break-words">
                         {question.questionText}
                     </h3>
                     <Badge variant="secondary" className="shrink-0 mt-1 px-3 py-1 text-sm font-bold bg-primary/10 text-primary border-primary/20">
