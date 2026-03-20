@@ -274,7 +274,9 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                             </ActionTooltip>
                                         </div>
                                     </div>
-                                    <CardTitle className="text-base mt-2">{q.questionText}</CardTitle>
+                                    <CardTitle className="text-base mt-2 whitespace-pre-wrap leading-relaxed break-words">
+                                        {q.questionText}
+                                    </CardTitle>
                                     {q.imageUrl && (
                                         <div className="mt-3 rounded-md overflow-hidden border border-border bg-muted/20">
                                             <Image
@@ -311,7 +313,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                     ) : (
                                         <div className="mt-2 text-sm bg-muted p-3 rounded">
                                             <p className="font-semibold mb-1">Rubric:</p>
-                                            <p>{q.rubric || 'No rubric provided'}</p>
+                                            <p className="whitespace-pre-wrap leading-relaxed break-words">{q.rubric || 'No rubric provided'}</p>
                                         </div>
                                     )}
                                 </CardContent>

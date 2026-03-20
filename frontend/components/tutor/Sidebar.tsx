@@ -1,10 +1,18 @@
 'use client';
 
 import { useUI } from '@/contexts/UIContext';
+import {
+    getSidebarCollapsedWidth,
+    getSidebarExpandedWidth,
+    isMobileViewport,
+    resolveSidebarDensity,
+    SIDEBAR_DENSITY_PRESETS,
+    type ResponsiveDensity,
+} from '@/lib/ui/responsive';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { ChevronLeft, GraduationCap } from 'lucide-react';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
 // Types (Giữ nguyên)
 export type View = 'dashboard' | 'students' | 'monthly' | 'documents' | 'parents' | 'unpaid' | 'calendar' | 'homework' | 'lessons' | 'exercises' | 'finance' | 'reports' | 'tutors' | 'live-room' | 'settings';
@@ -55,14 +63,15 @@ const SECTION_BY_VIEW: Record<View, NavSection> = {
 export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked = false }: SidebarProps) => {
     const { isSidebarOpen, setSidebarOpen, isCollapsed, setIsCollapsed } = useUI();
     const [isMobile, setIsMobile] = useState(false);
-    const [isLargeDesktop, setIsLargeDesktop] = useState(false);
+    const [viewportWidth, setViewportWidth] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(0);
 
     useEffect(() => {
         const checkMobile = () => {
-            const mobile = window.innerWidth < 1024;
-            const largeDesktop = window.innerWidth >= 1920;
+            const mobile = isMobileViewport(window.innerWidth);
             setIsMobile(mobile);
-            setIsLargeDesktop(largeDesktop);
+            setViewportWidth(window.innerWidth);
+            setViewportHeight(window.innerHeight);
             if (!mobile && isSidebarOpen) setSidebarOpen(false);
         };
         checkMobile();
@@ -78,10 +87,6 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
 
     const effectiveCollapsed = isMobile ? false : isCollapsed;
 
-    // Responsive widths: Smaller for laptop/tablet, larger for big desktop
-    const expandedWidth = isLargeDesktop ? 280 : 220; // 220px for laptop, 280px for 29" desktop
-    const collapsedWidth = isLargeDesktop ? 80 : 64;  // 64px for laptop, 80px for 29" desktop
-
     const getTourDataAttr = (view: View): string | undefined => {
         if (view === 'calendar') return 'nav-calendar';
         if (view === 'finance') return 'nav-finance';
@@ -93,13 +98,32 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
         return undefined;
     };
 
-    const groupedNavItems = SECTION_ORDER
-        .map((section) => ({
-            section,
-            title: SECTION_TITLES[section],
-            items: navItems.filter((item) => (SECTION_BY_VIEW[item.id] ?? 'khac') === section),
-        }))
-        .filter((group) => group.items.length > 0);
+    const groupedNavItems = useMemo(() => {
+        return SECTION_ORDER
+            .map((section) => ({
+                section,
+                title: SECTION_TITLES[section],
+                items: navItems.filter((item) => (SECTION_BY_VIEW[item.id] ?? 'khac') === section),
+            }))
+            .filter((group) => group.items.length > 0);
+    }, [navItems]);
+
+    const responsiveConfig = useMemo(() => {
+        const expandedWidth = getSidebarExpandedWidth(viewportWidth);
+        const collapsedWidth = getSidebarCollapsedWidth(viewportWidth);
+        const density: ResponsiveDensity = resolveSidebarDensity({
+            itemCount: navItems.length,
+            sectionCount: groupedNavItems.length,
+            viewportHeight,
+        });
+
+        return {
+            expandedWidth,
+            collapsedWidth,
+            density,
+            ...SIDEBAR_DENSITY_PRESETS[density],
+        };
+    }, [groupedNavItems.length, navItems.length, viewportHeight, viewportWidth]);
 
     const renderNavButton = (item: NavItem) => {
         const isActive = currentView === item.id;
@@ -112,7 +136,8 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                 onClick={() => handleNavClick(item.id)}
                 data-tour={getTourDataAttr(item.id)}
                 className={cn(
-                    "relative flex items-center w-full rounded-2xl transition-colors group h-14",
+                    "relative flex items-center w-full rounded-2xl transition-colors group",
+                    responsiveConfig.navItemHeightClass,
                     isActive ? "text-primary" : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
                     effectiveCollapsed ? "justify-center w-14 mx-auto" : "px-4 w-full"
                 )}
@@ -132,7 +157,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                     className="relative z-10 flex justify-center items-center shrink-0"
                     style={{ width: 24, height: 24 }}
                 >
-                    <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                    <Icon size={responsiveConfig.iconSize} strokeWidth={isActive ? 2.5 : 2} />
                 </motion.div>
 
                 <AnimatePresence mode="popLayout">
@@ -172,8 +197,8 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                     layout
                     initial={false}
                     animate={{
-                        width: effectiveCollapsed ? collapsedWidth : expandedWidth,
-                        x: isMobile && !isSidebarOpen ? -expandedWidth : 0,
+                        width: effectiveCollapsed ? responsiveConfig.collapsedWidth : responsiveConfig.expandedWidth,
+                        x: isMobile && !isSidebarOpen ? -responsiveConfig.expandedWidth : 0,
                     }}
                     transition={SPRING_CONFIG}
                     className={cn(
@@ -197,13 +222,14 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                     )}
 
                     {/* Logo Header - Smooth Scaling */}
-                    <div className="h-20 flex items-center px-6 mb-2 overflow-hidden shrink-0">
+                    <div className={cn('flex items-center overflow-hidden shrink-0', responsiveConfig.headerClass)}>
                         <div className="flex items-center gap-4 min-w-max">
                             <motion.div
                                 layout
-                                className="w-10 h-10 bg-primary/10 flex items-center justify-center rounded-xl text-primary"
+                                className="bg-primary/10 flex items-center justify-center rounded-xl text-primary"
+                                style={{ width: responsiveConfig.logoBoxSize, height: responsiveConfig.logoBoxSize }}
                             >
-                                <GraduationCap size={24} />
+                                <GraduationCap size={responsiveConfig.logoIconSize} />
                             </motion.div>
 
                             {!effectiveCollapsed && (
@@ -225,6 +251,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                         data-disabled={isLocked ? 'true' : 'false'}
                         className={cn(
                             'flex-1 px-3 overflow-y-auto no-scrollbar',
+                            responsiveConfig.navVerticalPaddingClass,
                             isLocked && 'pointer-events-none'
                         )}
                     >
@@ -233,10 +260,10 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                                 {navItems.map((item) => renderNavButton(item))}
                             </div>
                         ) : (
-                            <div className="space-y-5 pb-4">
+                            <div className={cn(responsiveConfig.sectionGapClass, 'pb-2')}>
                                 {groupedNavItems.map((group, index) => (
-                                    <div key={group.section} className={cn(index > 0 && 'pt-4 border-t border-border/70')}>
-                                        <p className="px-3 pb-2 text-[11px] font-bold tracking-wider text-muted-foreground/70 uppercase">
+                                    <div key={group.section} className={cn(index > 0 && responsiveConfig.sectionTopPaddingClass, index > 0 && 'border-t border-border/70')}>
+                                        <p className={cn('px-3 text-[11px] font-bold tracking-wider text-muted-foreground/70 uppercase', responsiveConfig.sectionTitlePaddingClass)}>
                                             {group.title}
                                         </p>
                                         <div className="space-y-1">
@@ -249,7 +276,7 @@ export const Sidebar = memo(({ currentView, setCurrentView, navItems, isLocked =
                     </nav>
 
                     {/* Footer / Profile slot (hiện tại bỏ trống để tránh UI dư thừa) */}
-                    <div className="mt-auto p-4 border-t border-border" />
+                    <div className={cn('mt-auto border-t border-border', responsiveConfig.footerClass)} />
                 </motion.aside>
             </LayoutGroup>
         </>
