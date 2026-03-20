@@ -1,14 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import {
     Select,
     SelectContent,
@@ -18,9 +17,9 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from '@tanstack/react-query';
 import { lessonCategoryApi } from '@/lib/services/lesson-category';
-import { AlertTriangle, Check, CheckCircle2, Edit2, Plus, Save, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle2, Edit2, Loader2, Plus, Trash2 } from 'lucide-react';
 import { ActionTooltip } from '@/features/exercises/components/ActionTooltip';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     CreateExerciseRequest,
     ExerciseStatus,
@@ -28,6 +27,7 @@ import {
     QuestionPreview,
     QuestionType
 } from '../types/exercise.types';
+import { exerciseService } from '../services/exerciseService';
 
 interface ImportPreviewStepProps {
     initialData: ImportPreviewResponse;
@@ -45,6 +45,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
     const [metadata, setMetadata] = useState(initialData.metadata);
     const [questions, setQuestions] = useState<QuestionPreview[]>(initialData.questions);
     const [editingQuestion, setEditingQuestion] = useState<{ index: number; data: QuestionPreview } | null>(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     // Verify total points match
     const calculatedTotal = questions.reduce((sum, q) => sum + (q.points || 0), 0);
@@ -84,6 +85,7 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
         const questionRequests = questions.map((q, idx) => ({
             type: q.type,
             questionText: q.questionText,
+            imageUrl: q.imageUrl,
             points: q.points,
             orderIndex: idx, // Re-index to ensure order
             rubric: q.rubric,
@@ -106,6 +108,29 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
         };
 
         onSave(request);
+    };
+
+    const handleQuestionImageUpload = async (file: File) => {
+        if (!editingQuestion) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Invalid file', { description: 'Please select an image file.' });
+            return;
+        }
+
+        try {
+            setIsUploadingImage(true);
+            const imageUrl = await exerciseService.uploadQuestionImage(file);
+            setEditingQuestion({
+                ...editingQuestion,
+                data: { ...editingQuestion.data, imageUrl }
+            });
+            toast.success('Image uploaded', { description: 'Question image has been attached.' });
+        } catch {
+            toast.error('Upload failed', { description: 'Could not upload question image.' });
+        } finally {
+            setIsUploadingImage(false);
+        }
     };
 
     return (
@@ -243,6 +268,17 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                         </div>
                                     </div>
                                     <CardTitle className="text-base mt-2">{q.questionText}</CardTitle>
+                                    {q.imageUrl && (
+                                        <div className="mt-3 rounded-md overflow-hidden border border-border">
+                                            <Image
+                                                src={q.imageUrl}
+                                                alt={`Question ${idx + 1} image`}
+                                                width={900}
+                                                height={500}
+                                                className="w-full h-auto object-contain bg-muted/20"
+                                            />
+                                        </div>
+                                    )}
                                 </CardHeader>
                                 <CardContent>
                                     {q.type === QuestionType.MCQ ? (
@@ -312,6 +348,53 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                                 </div>
                             </div>
 
+                            <div className="space-y-2">
+                                <Label>Question Image (Optional)</Label>
+                                {editingQuestion.data.imageUrl ? (
+                                    <div className="space-y-2">
+                                        <div className="rounded-md overflow-hidden border border-border">
+                                            <Image
+                                                src={editingQuestion.data.imageUrl}
+                                                alt="Question image"
+                                                width={900}
+                                                height={500}
+                                                className="w-full h-auto object-contain bg-muted/20"
+                                            />
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="text-red-600 hover:text-red-700"
+                                                onClick={() => setEditingQuestion({
+                                                    ...editingQuestion,
+                                                    data: { ...editingQuestion.data, imageUrl: undefined }
+                                                })}
+                                            >
+                                                Remove Image
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="file"
+                                            accept="image/*"
+                                            disabled={isUploadingImage}
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    await handleQuestionImageUpload(file);
+                                                }
+                                                e.currentTarget.value = '';
+                                            }}
+                                        />
+                                        {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                                    </div>
+                                )}
+                                <p className="text-xs text-muted-foreground">Supports both MCQ and Essay questions.</p>
+                            </div>
+
                             {editingQuestion.data.type === QuestionType.MCQ && (
                                 <div className="space-y-2">
                                     <Label>Options</Label>
@@ -367,7 +450,10 @@ export const ImportPreviewStep: React.FC<ImportPreviewStepProps> = ({
                     )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditingQuestion(null)}>Cancel</Button>
-                        <Button onClick={handleSaveQuestion}>Save Changes</Button>
+                        <Button onClick={handleSaveQuestion} disabled={isUploadingImage}>
+                            {isUploadingImage && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                            {isUploadingImage ? 'Uploading...' : 'Save Changes'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

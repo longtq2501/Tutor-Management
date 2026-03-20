@@ -20,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/hooks/useQueryKeys';
+import Image from 'next/image';
 
 interface GradingViewProps {
     submissionId: string;
@@ -260,6 +261,17 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                     <div className="font-medium leading-normal text-base text-foreground break-words">
                                                         {q.questionText}
                                                     </div>
+                                                    {q.imageUrl && (
+                                                        <div className="mt-3 rounded-md overflow-hidden border border-border bg-muted/20 max-w-2xl">
+                                                            <Image
+                                                                src={q.imageUrl}
+                                                                alt={`Question ${idx + 1} image`}
+                                                                width={1200}
+                                                                height={700}
+                                                                className="w-full h-auto object-contain"
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <div className="flex flex-wrap gap-2 mt-2">
                                                         <Badge variant="secondary" className="text-xs font-normal">
                                                             {q.type === QuestionType.MCQ ? 'Trắc nghiệm' : 'Tự luận'}

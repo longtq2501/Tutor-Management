@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Question, QuestionType } from '@/features/exercise-import/types/exercise.types';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Circle } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 
 interface MCQQuestionProps {
@@ -28,6 +29,17 @@ export const MCQQuestion: React.FC<MCQQuestionProps> = ({
                         {question.points} điểm
                     </Badge>
                 </div>
+                {question.imageUrl && (
+                    <div className="rounded-2xl overflow-hidden border border-border/40 bg-muted/20">
+                        <Image
+                            src={question.imageUrl}
+                            alt="Question illustration"
+                            width={1200}
+                            height={700}
+                            className="w-full h-auto object-contain"
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="grid gap-3">

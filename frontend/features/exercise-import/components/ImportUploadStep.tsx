@@ -32,6 +32,7 @@ Tổng điểm: 100
 
 === PHẦN 1: TRẮC NGHIỆM ===
 [MCQ-1] Thủ đô của Việt Nam là gì?
+IMAGE: https://res.cloudinary.com/demo/image/upload/sample.jpg
 A. Hà Nội
 B. Hồ Chí Minh
 C. Đà Nẵng
@@ -41,6 +42,7 @@ POINTS: 10
 
 === PHẦN 2: TỰ LUẬN ===
 [ESSAY-1] Viết một đoạn văn giới thiệu bản thân.
+IMAGE: https://res.cloudinary.com/demo/image/upload/sample.jpg
 POINTS: 20
 RUBRIC: Ngữ pháp (10), Nội dung (10)`;
 
@@ -90,6 +92,7 @@ export const ImportUploadStep: React.FC<ImportUploadStepProps> = ({ onParse, isL
                                         <li>Metadata section is required at the top.</li>
                                         <li>MCQ questions must have 4 options (A, B, C, D) and an ANSWER field.</li>
                                         <li>Points usually sum up to the Total Points defined in metadata.</li>
+                                        <li>Bạn có thể thêm ảnh cho câu hỏi bằng dòng <strong>IMAGE:</strong> ngay dưới nội dung câu hỏi.</li>
                                         <li>Keywords like &quot;=== PHẦN&quot;, &quot;ANSWER:&quot;, &quot;POINTS:&quot; are case-sensitive helpers.</li>
                                     </ul>
                                 </div>

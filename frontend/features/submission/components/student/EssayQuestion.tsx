@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Question } from '@/features/exercise-import/types/exercise.types';
-import { Save } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 
 interface EssayQuestionProps {
@@ -28,6 +28,17 @@ export const EssayQuestion: React.FC<EssayQuestionProps> = ({
                         {question.points} điểm
                     </Badge>
                 </div>
+                {question.imageUrl && (
+                    <div className="rounded-2xl overflow-hidden border border-border/40 bg-muted/20">
+                        <Image
+                            src={question.imageUrl}
+                            alt="Question illustration"
+                            width={1200}
+                            height={700}
+                            className="w-full h-auto object-contain"
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="space-y-4">
@@ -43,31 +54,11 @@ export const EssayQuestion: React.FC<EssayQuestionProps> = ({
                 </div>
 
                 <div className="flex justify-between items-center px-2">
-                    {question.rubric && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full border border-border/40">
-                            <span className="font-bold text-primary/70">Rubric sẵn có</span>
-                        </div>
-                    )}
                     <div className="text-xs font-medium text-muted-foreground flex items-center gap-2">
                         <span className="h-1.5 w-1.5 rounded-full bg-primary/40" />
                         {wordCount} từ
                     </div>
                 </div>
-
-                {question.rubric && (
-                    <div className="mt-6 p-5 rounded-2xl bg-primary/5 border border-primary/10 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Save className="h-12 w-12" />
-                        </div>
-                        <h4 className="font-bold text-sm text-primary mb-2 flex items-center gap-2">
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            Gợi ý chấm điểm (Rubric)
-                        </h4>
-                        <p className="whitespace-pre-wrap text-sm text-muted-foreground leading-relaxed">
-                            {question.rubric}
-                        </p>
-                    </div>
-                )}
             </div>
         </div>
     );

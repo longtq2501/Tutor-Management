@@ -64,6 +64,12 @@ public class Question implements Persistable<String> {
      */
     @Column(name = "question_text", nullable = false, columnDefinition = "TEXT")
     private String questionText;
+
+    /**
+     * Optional image URL attached to the question prompt.
+     */
+    @Column(name = "image_url", length = 2048)
+    private String imageUrl;
     
     /**
      * Scoring weight for this question.

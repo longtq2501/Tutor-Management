@@ -22,6 +22,7 @@ public class QuestionResponse {
     private String id;
     private QuestionType type;
     private String questionText;
+    private String imageUrl;
     private Double points;
     private Integer orderIndex;
     

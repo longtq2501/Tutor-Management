@@ -33,6 +33,11 @@ public class QuestionRequest {
      */
     @NotBlank(message = "Nội dung câu hỏi không được để trống")
     private String questionText;
+
+    /**
+     * Optional image URL attached to the question prompt.
+     */
+    private String imageUrl;
     
     /**
      * Scoring weight for this item.

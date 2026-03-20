@@ -25,6 +25,7 @@ import com.tutor_management.backend.modules.notification.event.ExerciseUpdatedEv
 import com.tutor_management.backend.modules.submission.entity.Submission;
 import com.tutor_management.backend.modules.submission.entity.SubmissionStatus;
 import com.tutor_management.backend.modules.submission.repository.SubmissionRepository;
+import com.tutor_management.backend.modules.shared.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,6 +34,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -58,6 +60,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     private final com.tutor_management.backend.modules.tutor.repository.TutorRepository tutorRepository;
     private final SecurityContextUtils securityContextUtils;
     private final ApplicationEventPublisher eventPublisher;
+    private final CloudinaryService cloudinaryService;
 
     private Long getTutorId(String teacherId) {
         if (teacherId == null) return null;
@@ -76,6 +79,25 @@ public class ExerciseServiceImpl implements ExerciseService {
     public ImportPreviewResponse previewImport(ImportExerciseRequest request) {
         log.info("Requesting preview for ingested text (length: {})", request.getContent().length());
         return parserService.parseFromText(request.getContent());
+    }
+
+    @Override
+    public String uploadQuestionImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Không thể tải lên file rỗng");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Chỉ hỗ trợ tải lên file ảnh");
+        }
+
+        try {
+            return cloudinaryService.uploadFile(file);
+        } catch (Exception e) {
+            log.error("Failed to upload question image", e);
+            throw new RuntimeException("Không thể tải ảnh câu hỏi lên", e);
+        }
     }
 
     @Override
@@ -490,6 +512,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                     .exercise(exercise)
                     .type(qReq.getType())
                     .questionText(qReq.getQuestionText())
+                    .imageUrl(qReq.getImageUrl())
                     .points(qReq.getPoints())
                     .orderIndex(qReq.getOrderIndex())
                     .rubric(qReq.getRubric())
@@ -644,6 +667,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                 .id(question.getId())
                 .type(question.getType())
                 .questionText(question.getQuestionText())
+                .imageUrl(question.getImageUrl())
                 .points(question.getPoints())
                 .orderIndex(question.getOrderIndex())
                 .rubric(question.getRubric())

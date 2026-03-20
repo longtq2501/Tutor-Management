@@ -55,6 +55,9 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
     
     private static final Pattern POINTS_PATTERN = 
         Pattern.compile("POINTS:\\s*(\\d+(?:\\.\\d+)?)", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern IMAGE_PATTERN =
+        Pattern.compile("IMAGE:\\s*(https?://\\S+)", Pattern.CASE_INSENSITIVE);
     
     private static final Pattern ESSAY_QUESTION_PATTERN = 
         Pattern.compile("\\[ESSAY-(\\d+)\\]\\s*(.+?)(?=POINTS:)", Pattern.DOTALL);
@@ -176,7 +179,8 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
         }
         
         String questionRef = questionMatcher.group(1);
-        String questionText = questionMatcher.group(2).trim();
+        String questionText = cleanQuestionText(questionMatcher.group(2));
+        String imageUrl = extractField(block, IMAGE_PATTERN);
         List<OptionPreview> options = extractOptions(block);
         
         String correctAnswer = extractField(block, ANSWER_PATTERN);
@@ -199,6 +203,7 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
         return QuestionPreview.builder()
             .type(QuestionType.MCQ)
             .questionText(questionText)
+            .imageUrl(imageUrl)
             .points(points)
             .orderIndex(sequenceIndex)
             .options(options)
@@ -268,7 +273,8 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
         }
         
         String questionRef = questionMatcher.group(1);
-        String questionText = questionMatcher.group(2).trim();
+        String questionText = cleanQuestionText(questionMatcher.group(2));
+        String imageUrl = extractField(block, IMAGE_PATTERN);
         Double points = extractDoubleField(block, POINTS_PATTERN);
         
         if (points == null || points <= 0) {
@@ -281,6 +287,7 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
         return QuestionPreview.builder()
             .type(QuestionType.ESSAY)
             .questionText(questionText)
+            .imageUrl(imageUrl)
             .points(points)
             .orderIndex(sequenceIndex)
             .rubric(rubric != null ? rubric.trim() : null)
@@ -316,6 +323,16 @@ public class ExerciseParserServiceImpl implements ExerciseParserService {
     private String extractField(String content, Pattern pattern) {
         Matcher matcher = pattern.matcher(content);
         return matcher.find() ? matcher.group(1).trim() : null;
+    }
+
+    private String cleanQuestionText(String rawQuestionText) {
+        if (rawQuestionText == null) {
+            return null;
+        }
+
+        return rawQuestionText
+            .replaceAll("(?im)^\\s*IMAGE:\\s*\\S+\\s*$", "")
+            .trim();
     }
     
     private Integer extractIntField(String content, Pattern pattern) {

@@ -9,6 +9,7 @@ import com.tutor_management.backend.modules.exercise.dto.response.ImportPreviewR
 import com.tutor_management.backend.modules.exercise.dto.response.TutorStudentSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,11 @@ public interface ExerciseService {
      * @return Structured preview data for tutor verification.
      */
     ImportPreviewResponse previewImport(ImportExerciseRequest request);
+
+    /**
+     * Uploads an image and returns the public URL for question attachment.
+     */
+    String uploadQuestionImage(MultipartFile file);
     
     /**
      * Persists a new exercise resource in the system.

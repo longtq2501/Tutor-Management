@@ -21,6 +21,7 @@ public class QuestionPreview {
     
     private QuestionType type;
     private String questionText;
+    private String imageUrl;
     private Double points;
     private Integer orderIndex;
     private String rubric;

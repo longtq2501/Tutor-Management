@@ -22,6 +22,7 @@ export interface Question {
     exerciseId?: string;
     type: QuestionType;
     questionText: string;
+    imageUrl?: string;
     points: number;
     orderIndex: number;
     rubric?: string;
@@ -64,6 +65,7 @@ export interface CreateExerciseRequest {
 export interface QuestionRequest {
     type: QuestionType;
     questionText: string;
+    imageUrl?: string;
     points: number;
     orderIndex: number;
     options?: OptionRequest[];
@@ -91,6 +93,7 @@ export interface OptionPreview {
 export interface QuestionPreview {
     type: QuestionType;
     questionText: string;
+    imageUrl?: string;
     points: number;
     orderIndex: number;
     rubric?: string;

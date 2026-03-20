@@ -22,6 +22,20 @@ export const exerciseService = {
     },
 
     /**
+     * Upload image for question prompt and return public URL.
+     */
+    uploadQuestionImage: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post<ApiResponse<string>>('/exercises/question-image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data.data;
+    },
+
+    /**
      * Create a new exercise
      */
     create: async (data: CreateExerciseRequest): Promise<Exercise> => {
