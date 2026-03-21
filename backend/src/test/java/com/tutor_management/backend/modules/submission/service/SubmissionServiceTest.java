@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +73,8 @@ class SubmissionServiceTest {
         // mock assignment repository to avoid null pointer
         lenient().when(assignmentRepository.findByExerciseIdAndStudentId(any(), any()))
                 .thenReturn(Optional.empty());
+        lenient().when(submissionRepository.findExpiredByStatuses(any(LocalDateTime.class), anyList()))
+            .thenReturn(List.of());
     }
 
     @Test
@@ -267,4 +270,106 @@ class SubmissionServiceTest {
         assertEquals(8.0, response.getEssayScore());
         assertEquals(15.0, response.getTotalScore());
     }
+
+        @Test
+        void autoSubmitExpiredSubmissions_onlyMcq_shouldAutoSubmitAndPersistResult() {
+        Submission expiredDraft = Submission.builder()
+            .id("sub-expired-mcq")
+            .exerciseId(exerciseId)
+            .studentId(studentId)
+            .status(SubmissionStatus.DRAFT)
+            .answers(new ArrayList<>())
+            .build();
+
+        com.tutor_management.backend.modules.exercise.domain.Exercise ex = new com.tutor_management.backend.modules.exercise.domain.Exercise();
+        ex.setId(exerciseId);
+        ex.setTitle("Bai kiem tra MCQ");
+        ex.setCreatedBy("10");
+        ex.setTotalPoints(10);
+
+        com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment assignment =
+            com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment.builder()
+                .exerciseId(exerciseId)
+                .studentId(studentId)
+                .assignedBy("10")
+                .status(com.tutor_management.backend.modules.exercise.domain.AssignmentStatus.PENDING)
+                .build();
+
+        when(submissionRepository.findExpiredByStatuses(any(LocalDateTime.class), anyList()))
+            .thenReturn(List.of(expiredDraft));
+        when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId)))
+            .thenReturn(List.of(Question.builder().id("q1").type(QuestionType.MCQ).points(10.0).build()));
+        when(exerciseRepository.findById(eq(exerciseId))).thenReturn(Optional.of(ex));
+        when(assignmentRepository.findByExerciseIdAndStudentId(eq(exerciseId), eq(studentId)))
+            .thenReturn(Optional.of(assignment));
+
+        doAnswer(invocation -> {
+            Submission submission = invocation.getArgument(0);
+            submission.setMcqScore(0.0);
+            submission.setEssayScore(0.0);
+            submission.setTotalScore(0.0);
+            return 0.0;
+        }).when(autoGradingService).gradeSubmission(any(Submission.class));
+
+        submissionService.autoSubmitExpiredSubmissions();
+
+        assertEquals(SubmissionStatus.GRADED, expiredDraft.getStatus());
+        assertNotNull(expiredDraft.getSubmittedAt());
+        assertNotNull(expiredDraft.getGradedAt());
+
+        verify(submissionRepository, atLeastOnce()).save(any(Submission.class));
+        verify(assignmentRepository).save(any(com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment.class));
+        assertEquals(com.tutor_management.backend.modules.exercise.domain.AssignmentStatus.GRADED, assignment.getStatus());
+        }
+
+        @Test
+        void autoSubmitExpiredSubmissions_withEssay_shouldRemainSubmittedAndPersistResult() {
+        Submission expiredPending = Submission.builder()
+            .id("sub-expired-essay")
+            .exerciseId(exerciseId)
+            .studentId(studentId)
+            .status(SubmissionStatus.PENDING)
+            .answers(new ArrayList<>())
+            .build();
+
+        com.tutor_management.backend.modules.exercise.domain.Exercise ex = new com.tutor_management.backend.modules.exercise.domain.Exercise();
+        ex.setId(exerciseId);
+        ex.setTitle("Bai kiem tra Essay");
+        ex.setCreatedBy("10");
+        ex.setTotalPoints(10);
+
+        com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment assignment =
+            com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment.builder()
+                .exerciseId(exerciseId)
+                .studentId(studentId)
+                .assignedBy("10")
+                .status(com.tutor_management.backend.modules.exercise.domain.AssignmentStatus.PENDING)
+                .build();
+
+        when(submissionRepository.findExpiredByStatuses(any(LocalDateTime.class), anyList()))
+            .thenReturn(List.of(expiredPending));
+        when(questionRepository.findByExerciseIdOrderByOrderIndex(eq(exerciseId)))
+            .thenReturn(List.of(Question.builder().id("qEssay").type(QuestionType.ESSAY).points(10.0).build()));
+        when(exerciseRepository.findById(eq(exerciseId))).thenReturn(Optional.of(ex));
+        when(assignmentRepository.findByExerciseIdAndStudentId(eq(exerciseId), eq(studentId)))
+            .thenReturn(Optional.of(assignment));
+
+        doAnswer(invocation -> {
+            Submission submission = invocation.getArgument(0);
+            submission.setMcqScore(0.0);
+            submission.setEssayScore(0.0);
+            submission.setTotalScore(0.0);
+            return 0.0;
+        }).when(autoGradingService).gradeSubmission(any(Submission.class));
+
+        submissionService.autoSubmitExpiredSubmissions();
+
+        assertEquals(SubmissionStatus.SUBMITTED, expiredPending.getStatus());
+        assertNotNull(expiredPending.getSubmittedAt());
+        assertNull(expiredPending.getGradedAt());
+
+        verify(submissionRepository, atLeastOnce()).save(any(Submission.class));
+        verify(assignmentRepository).save(any(com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment.class));
+        assertEquals(com.tutor_management.backend.modules.exercise.domain.AssignmentStatus.SUBMITTED, assignment.getStatus());
+        }
 }

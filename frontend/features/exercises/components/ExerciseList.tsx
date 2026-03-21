@@ -175,6 +175,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                             <div className="rounded-xl border border-border/70 bg-muted/10 p-2 flex justify-center">
                                                 <Calendar
+                                                    className="[--cell-size:2.25rem] md:[--cell-size:2.4rem]"
                                                     mode="single"
                                                     selected={selectedDeadlineDate}
                                                     onSelect={setSelectedDeadlineDate}

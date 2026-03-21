@@ -44,6 +44,19 @@ public interface SubmissionRepository extends JpaRepository<Submission, String> 
      */
     List<Submission> findByStudentIdAndExerciseIdIn(String studentId, List<String> exerciseIds);
 
+        /**
+         * Finds non-finalized submissions whose assignment-level or exercise-level deadline has passed.
+         */
+        @Query("SELECT s FROM Submission s " +
+            "JOIN com.tutor_management.backend.modules.exercise.domain.ExerciseAssignment ea " +
+            "ON ea.exerciseId = s.exerciseId AND ea.studentId = s.studentId " +
+            "LEFT JOIN com.tutor_management.backend.modules.exercise.domain.Exercise e ON e.id = s.exerciseId " +
+            "WHERE s.status IN :statuses " +
+            "AND ((ea.deadline IS NOT NULL AND ea.deadline <= :now) " +
+            "OR (ea.deadline IS NULL AND e.deadline IS NOT NULL AND e.deadline <= :now))")
+        List<Submission> findExpiredByStatuses(@Param("now") LocalDateTime now,
+                             @Param("statuses") List<SubmissionStatus> statuses);
+
     /**
      * Hard deletes all answer records for a specific exercise's submissions.
      */

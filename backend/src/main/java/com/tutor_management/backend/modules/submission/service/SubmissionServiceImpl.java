@@ -25,6 +25,7 @@ import com.tutor_management.backend.modules.notification.event.ExamSubmittedEven
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,51 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final QuestionRepository questionRepository;
     private final com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository assignmentRepository;
     private final ApplicationEventPublisher eventPublisher;
+
+    @Scheduled(fixedDelayString = "${app.submission.auto-submit.interval-ms:60000}")
+    public void autoSubmitExpiredSubmissions() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Submission> expiredSubmissions = submissionRepository.findExpiredByStatuses(
+                now,
+                List.of(SubmissionStatus.PENDING, SubmissionStatus.DRAFT)
+        );
+
+        if (expiredSubmissions.isEmpty()) {
+            return;
+        }
+
+        log.info("Auto-submit triggered for {} expired submissions", expiredSubmissions.size());
+
+        for (Submission submission : expiredSubmissions) {
+            try {
+                if (submission.getStatus() == SubmissionStatus.SUBMITTED || submission.getStatus() == SubmissionStatus.GRADED) {
+                    continue;
+                }
+
+                submission.setStatus(SubmissionStatus.SUBMITTED);
+                submission.setSubmittedAt(now);
+
+                autoGradingService.gradeSubmission(submission);
+
+                List<Question> questions = questionRepository.findByExerciseIdOrderByOrderIndex(submission.getExerciseId());
+                boolean hasEssay = questions.stream().anyMatch(question -> question.getType() == QuestionType.ESSAY);
+                if (!hasEssay) {
+                    submission.setStatus(SubmissionStatus.GRADED);
+                    submission.setGradedAt(now);
+                }
+
+                Submission saved = submissionRepository.save(submission);
+                syncAssignmentStatus(saved);
+                publishSubmissionEvent(saved, saved.getStudentId());
+
+                if (!hasEssay) {
+                    publishGradingEvent(saved);
+                }
+            } catch (Exception exception) {
+                log.error("Auto-submit failed for submission {}: {}", submission.getId(), exception.getMessage(), exception);
+            }
+        }
+    }
     
     // --- Public API Implementations ---
     @Override

@@ -1,14 +1,10 @@
 package com.tutor_management.backend.modules.exercise.service;
 
-import com.tutor_management.backend.util.SecurityContextUtils;
-
-import com.tutor_management.backend.modules.exercise.domain.AssignmentStatus;
 import com.tutor_management.backend.modules.exercise.dto.response.TutorStudentSummaryResponse;
 import com.tutor_management.backend.modules.exercise.repository.ExerciseAssignmentRepository;
 import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.student.entity.Student;
 import com.tutor_management.backend.modules.student.repository.StudentRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
