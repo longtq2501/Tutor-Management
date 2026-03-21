@@ -64,7 +64,7 @@ export function LibrarySelection({
     };
 
     return (
-        <div className="space-y-3 pt-3 border-t border-border/60 flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="h-full min-h-0 space-y-3 pt-3 border-t border-border/60 flex flex-col overflow-hidden">
             {/* Stats Bar */}
             <div className="grid grid-cols-3 gap-2 px-1">
                 <div className="flex flex-col items-center p-1.5 sm:p-2 bg-primary/5 rounded-lg border border-primary/10">
@@ -152,7 +152,7 @@ export function LibrarySelection({
             {/* Virtualized List - Dynamic Height */}
             <div
                 ref={parentRef}
-                className="flex-1 overflow-auto border border-border/60 rounded-xl bg-muted/20 min-h-[150px] no-scrollbar relative"
+                className="flex-1 overflow-auto border border-border/60 rounded-xl bg-muted/20 min-h-[240px] lg:min-h-0 no-scrollbar relative"
             >
                 {filteredItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8 animate-in fade-in zoom-in-95 duration-300">

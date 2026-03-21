@@ -3,6 +3,7 @@ package com.tutor_management.backend.modules.report.service;
 import com.tutor_management.backend.exception.ResourceNotFoundException;
 import com.tutor_management.backend.modules.feedback.entity.SessionFeedback;
 import com.tutor_management.backend.modules.feedback.repository.SessionFeedbackRepository;
+import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.finance.LessonStatus;
 import com.tutor_management.backend.modules.finance.entity.SessionRecord;
 import com.tutor_management.backend.modules.finance.repository.SessionRecordRepository;
@@ -42,6 +43,7 @@ public class ReportService {
     private final RecurringScheduleRepository recurringScheduleRepository;
     private final StudentRepository studentRepository;
     private final TutorRepository tutorRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public MonthlyReportDataDTO getReportData(Long tutorUserId, Long studentId, Integer month, Integer year) {
@@ -79,8 +81,12 @@ public class ReportService {
         }
         double attendanceRate = totalSessions > 0 ? (attendedSessions * 100.0) / totalSessions : 0.0;
 
+        String submissionStudentId = userRepository.findByStudentId(studentId)
+            .map(user -> String.valueOf(user.getId()))
+            .orElse(String.valueOf(studentId));
+
         List<Object[]> currentAssessmentRows = submissionRepository.findGradedSummariesForMonthlyReport(
-                String.valueOf(studentId), tutor.getId(), startDateTime, endDateTime
+            submissionStudentId, tutor.getId(), startDateTime, endDateTime
         );
         List<MonthlyReportDataDTO.AssessmentSummary> assessments = mapAssessments(currentAssessmentRows);
 
@@ -90,7 +96,7 @@ public class ReportService {
 
         YearMonth previousYearMonth = currentYearMonth.minusMonths(1);
         List<Object[]> previousAssessmentRows = submissionRepository.findGradedSummariesForMonthlyReport(
-                String.valueOf(studentId),
+            submissionStudentId,
                 tutor.getId(),
                 previousYearMonth.atDay(1).atStartOfDay(),
                 previousYearMonth.atEndOfMonth().atTime(23, 59, 59)

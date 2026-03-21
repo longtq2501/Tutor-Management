@@ -100,7 +100,7 @@ export function LessonDetailModal(props: LessonDetailModalProps) {
                     )}>
                         <div className={cn(
                             "flex-1 p-4 sm:p-6",
-                            mode === 'edit' ? "flex flex-col h-full overflow-y-auto sm:overflow-hidden gap-4 sm:gap-6" : "overflow-y-auto space-y-6"
+                            mode === 'edit' ? "flex flex-col h-full overflow-y-auto gap-4 sm:gap-6" : "overflow-y-auto space-y-6"
                         )}>
                             <StudentCard session={localSession} />
 

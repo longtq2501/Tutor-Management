@@ -15,7 +15,7 @@ export function ModalHeader({ session, onClose }: ModalHeaderProps) {
 
     return (
         <div className={cn(
-            "relative p-2.5 sm:p-6 transition-all duration-500 shrink-0 sticky top-0 z-50",
+            "relative p-2.5 sm:p-6 transition-all duration-500 shrink-0",
             isPaid ? "bg-gradient-to-r from-emerald-600 to-teal-600" : "bg-gradient-to-r from-blue-600 to-indigo-600",
             isCancelled ? "from-slate-600 to-slate-700" : ""
         )}>
