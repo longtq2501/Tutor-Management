@@ -41,9 +41,9 @@ export default function ExerciseDashboard() {
 
         setSelectedExerciseId(ex.id);
         if (action === 'GRADE') setViewMode('GRADE');
-        if (action === 'REVIEW') {
-            setSelectedSubmissionId(ex.submissionId || ex.id);
-            setViewMode('REVIEW');
+                if (action === 'REVIEW') {
+                    setSelectedSubmissionId(ex.submissionId || ex.id);
+                    setViewMode(isTeacher ? 'GRADE' : 'REVIEW');
         }
     };
 
@@ -129,7 +129,7 @@ export default function ExerciseDashboard() {
                     <GradingView
                         submissionId={(selectedSubmissionId || selectedExerciseId)!}
                         onBack={handleBack}
-                        isReviewMode={true}
+                        isReviewMode={!isTeacher}
                     />
                 )}
 

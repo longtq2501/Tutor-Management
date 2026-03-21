@@ -258,7 +258,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                     {idx + 1}
                                                 </Badge>
                                                 <div className="min-w-0">
-                                                    <div className="font-medium leading-normal text-base text-foreground break-words">
+                                                    <div className="font-medium leading-normal text-base text-foreground break-words whitespace-pre-wrap">
                                                         {q.questionText}
                                                     </div>
                                                     {q.imageUrl && (
@@ -348,7 +348,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                 </div>
 
                                                 {q.rubric && (
-                                                    <div className="text-sm bg-blue-500/10 text-blue-700 dark:text-blue-300 p-3 rounded border border-blue-500/20">
+                                                    <div className="text-sm bg-blue-500/10 text-blue-700 dark:text-blue-300 p-3 rounded border border-blue-500/20 whitespace-pre-wrap">
                                                         <strong>Gợi ý chấm điểm (Rubric):</strong> {q.rubric}
                                                     </div>
                                                 )}
@@ -378,7 +378,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                     <div className="w-full space-y-1.5">
                                                         <Label className="text-xs">Nhận xét</Label>
                                                         {isReviewMode ? (
-                                                            <div className="min-h-[80px] p-3 border rounded-md bg-muted/30 text-sm italic">
+                                                            <div className="min-h-[80px] p-3 border rounded-md bg-muted/30 text-sm italic whitespace-pre-wrap break-words">
                                                                 {grade.feedback || 'Không có nhận xét'}
                                                             </div>
                                                         ) : (

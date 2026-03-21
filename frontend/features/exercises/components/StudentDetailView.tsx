@@ -131,7 +131,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
 
                 <div className="lg:pl-8">
                     <PerformanceSection title="Đã nộp & chấm điểm" icon={<Trophy className="h-5 w-5 text-green-500" />} count={graded.length} isLoading={isLoading}>
-                        {graded.map(ex => <ExerciseRowCard key={ex.id} exercise={ex} showScore onClick={() => onViewExercise(ex, 'REVIEW')} />)}
+                        {graded.map(ex => <ExerciseRowCard key={ex.id} exercise={ex} showScore onClick={() => onViewExercise(ex, 'GRADE')} />)}
                     </PerformanceSection>
                 </div>
             </div>
