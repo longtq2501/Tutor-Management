@@ -565,16 +565,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         var subMap = submissions.stream().collect(Collectors.toMap(
                 Submission::getExerciseId,
                 s -> s,
-                (s1, s2) -> {
-                    // Prefer graded over submitted over draft/pending when duplicates exist across legacy IDs.
-                    if (s1.getStatus() == SubmissionStatus.GRADED) return s1;
-                    if (s2.getStatus() == SubmissionStatus.GRADED) return s2;
-                    if (s1.getStatus() == SubmissionStatus.SUBMITTED) return s1;
-                    if (s2.getStatus() == SubmissionStatus.SUBMITTED) return s2;
-                    if (s1.getStatus() == SubmissionStatus.DRAFT) return s1;
-                    if (s2.getStatus() == SubmissionStatus.DRAFT) return s2;
-                    return s1;
-                }
+            this::pickPreferredSubmission
         ));
 
         var deadlineMap = assignments.stream()
@@ -602,6 +593,58 @@ public class ExerciseServiceImpl implements ExerciseService {
                 resp.setSubmissionStatus("PENDING");
             }
         });
+    }
+
+    private Submission pickPreferredSubmission(Submission s1, Submission s2) {
+        int s1Rank = submissionRank(s1);
+        int s2Rank = submissionRank(s2);
+        if (s1Rank != s2Rank) {
+            return s1Rank > s2Rank ? s1 : s2;
+        }
+
+        LocalDateTime s1Ts = submissionRecencyTimestamp(s1);
+        LocalDateTime s2Ts = submissionRecencyTimestamp(s2);
+        if (s1Ts != null && s2Ts != null && !Objects.equals(s1Ts, s2Ts)) {
+            return s1Ts.isAfter(s2Ts) ? s1 : s2;
+        }
+        if (s1Ts != null && s2Ts == null) return s1;
+        if (s2Ts != null && s1Ts == null) return s2;
+
+        double s1Total = Optional.ofNullable(s1.getTotalScore()).orElse(0.0);
+        double s2Total = Optional.ofNullable(s2.getTotalScore()).orElse(0.0);
+        if (Double.compare(s1Total, s2Total) != 0) {
+            return s1Total > s2Total ? s1 : s2;
+        }
+
+        return s1;
+    }
+
+    private int submissionRank(Submission s) {
+        if (s == null || s.getStatus() == null) {
+            return 0;
+        }
+        return switch (s.getStatus()) {
+            case GRADED -> 4;
+            case SUBMITTED -> 3;
+            case DRAFT -> 2;
+            case PENDING -> 1;
+        };
+    }
+
+    private LocalDateTime submissionRecencyTimestamp(Submission s) {
+        if (s == null) {
+            return null;
+        }
+        if (s.getGradedAt() != null) {
+            return s.getGradedAt();
+        }
+        if (s.getSubmittedAt() != null) {
+            return s.getSubmittedAt();
+        }
+        if (s.getUpdatedAt() != null) {
+            return s.getUpdatedAt();
+        }
+        return s.getCreatedAt();
     }
 
     // --- Events & Notifications ---

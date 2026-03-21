@@ -10,6 +10,7 @@ import com.tutor_management.backend.modules.submission.dto.request.AnswerRequest
 import com.tutor_management.backend.modules.submission.dto.request.CreateSubmissionRequest;
 import com.tutor_management.backend.modules.submission.dto.request.EssayGradeRequest;
 import com.tutor_management.backend.modules.submission.dto.request.GradeSubmissionRequest;
+import com.tutor_management.backend.modules.submission.dto.response.SubmissionIdentityReconcileResponse;
 import com.tutor_management.backend.modules.submission.dto.response.StudentAnswerResponse;
 import com.tutor_management.backend.modules.submission.dto.response.SubmissionListItemResponse;
 import com.tutor_management.backend.modules.submission.dto.response.SubmissionResponse;
@@ -154,6 +155,77 @@ public class SubmissionServiceImpl implements SubmissionService {
         return mapToSubmissionResponse(graded);
     }
 
+    @Override
+    public SubmissionIdentityReconcileResponse reconcileStudentIdentitySubmissions(Long studentProfileId, boolean dryRun) {
+        if (studentProfileId == null) {
+            throw new ResourceNotFoundException("Thiếu studentProfileId để đồng bộ bài nộp");
+        }
+
+        String canonicalStudentId = studentProfileId.toString();
+        LinkedHashSet<String> identityCandidates = new LinkedHashSet<>();
+        identityCandidates.add(canonicalStudentId);
+        userRepository.findByStudentId(studentProfileId)
+                .map(User::getId)
+                .ifPresent(userId -> identityCandidates.add(userId.toString()));
+
+        List<Submission> all = identityCandidates.stream()
+                .flatMap(identity -> submissionRepository.findByStudentId(identity).stream())
+                .toList();
+
+        Map<String, List<Submission>> byExercise = all.stream()
+                .collect(Collectors.groupingBy(Submission::getExerciseId));
+
+        int mergedExercises = 0;
+        int deletedSubmissions = 0;
+        int canonicalizedSubmissions = 0;
+
+        for (Map.Entry<String, List<Submission>> entry : byExercise.entrySet()) {
+            List<Submission> candidates = entry.getValue();
+            if (candidates.isEmpty()) {
+                continue;
+            }
+
+            Submission winner = candidates.stream().reduce(this::pickPreferredSubmission).orElse(candidates.get(0));
+            List<Submission> toDelete = candidates.stream()
+                    .filter(s -> !Objects.equals(s.getId(), winner.getId()))
+                    .toList();
+
+            boolean hasDuplicates = !toDelete.isEmpty();
+            boolean needsCanonicalization = !Objects.equals(winner.getStudentId(), canonicalStudentId);
+
+            if (!hasDuplicates && !needsCanonicalization) {
+                continue;
+            }
+
+            mergedExercises++;
+            deletedSubmissions += toDelete.size();
+            if (needsCanonicalization) {
+                canonicalizedSubmissions++;
+            }
+
+            if (!dryRun) {
+                if (needsCanonicalization) {
+                    winner.setStudentId(canonicalStudentId);
+                    submissionRepository.save(winner);
+                }
+                if (!toDelete.isEmpty()) {
+                    submissionRepository.deleteAll(toDelete);
+                }
+            }
+        }
+
+        return SubmissionIdentityReconcileResponse.builder()
+                .canonicalStudentId(canonicalStudentId)
+                .identityCandidates(new ArrayList<>(identityCandidates))
+                .scannedSubmissions(all.size())
+                .affectedExercises(byExercise.size())
+                .mergedExercises(mergedExercises)
+                .deletedSubmissions(deletedSubmissions)
+                .canonicalizedSubmissions(canonicalizedSubmissions)
+                .dryRun(dryRun)
+                .build();
+    }
+
     /**
      * Synchronizes the exercise assignment status with the submission status.
      * Ensures that the tutor dashboard and student views are consistent.
@@ -295,6 +367,58 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private double roundTwoDecimals(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    private Submission pickPreferredSubmission(Submission s1, Submission s2) {
+        int s1Rank = submissionRank(s1);
+        int s2Rank = submissionRank(s2);
+        if (s1Rank != s2Rank) {
+            return s1Rank > s2Rank ? s1 : s2;
+        }
+
+        LocalDateTime s1Ts = submissionRecencyTimestamp(s1);
+        LocalDateTime s2Ts = submissionRecencyTimestamp(s2);
+        if (s1Ts != null && s2Ts != null && !Objects.equals(s1Ts, s2Ts)) {
+            return s1Ts.isAfter(s2Ts) ? s1 : s2;
+        }
+        if (s1Ts != null && s2Ts == null) return s1;
+        if (s2Ts != null && s1Ts == null) return s2;
+
+        double s1Total = Optional.ofNullable(s1.getTotalScore()).orElse(0.0);
+        double s2Total = Optional.ofNullable(s2.getTotalScore()).orElse(0.0);
+        if (Double.compare(s1Total, s2Total) != 0) {
+            return s1Total > s2Total ? s1 : s2;
+        }
+
+        return s1;
+    }
+
+    private int submissionRank(Submission s) {
+        if (s == null || s.getStatus() == null) {
+            return 0;
+        }
+        return switch (s.getStatus()) {
+            case GRADED -> 4;
+            case SUBMITTED -> 3;
+            case DRAFT -> 2;
+            case PENDING -> 1;
+        };
+    }
+
+    private LocalDateTime submissionRecencyTimestamp(Submission s) {
+        if (s == null) {
+            return null;
+        }
+        if (s.getGradedAt() != null) {
+            return s.getGradedAt();
+        }
+        if (s.getSubmittedAt() != null) {
+            return s.getSubmittedAt();
+        }
+        if (s.getUpdatedAt() != null) {
+            return s.getUpdatedAt();
+        }
+        return s.getCreatedAt();
     }
 
     private void publishSubmissionEvent(Submission s, String studentId) {

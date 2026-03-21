@@ -4,6 +4,7 @@ import com.tutor_management.backend.modules.auth.User;
 import com.tutor_management.backend.modules.shared.dto.response.ApiResponse;
 import com.tutor_management.backend.modules.submission.dto.request.CreateSubmissionRequest;
 import com.tutor_management.backend.modules.submission.dto.request.GradeSubmissionRequest;
+import com.tutor_management.backend.modules.submission.dto.response.SubmissionIdentityReconcileResponse;
 import com.tutor_management.backend.modules.submission.dto.response.SubmissionListItemResponse;
 import com.tutor_management.backend.modules.submission.dto.response.SubmissionResponse;
 import com.tutor_management.backend.modules.submission.service.SubmissionService;
@@ -41,7 +42,7 @@ public class SubmissionController {
             @Valid @RequestBody CreateSubmissionRequest request,
             @AuthenticationPrincipal User user) {
         log.info("Student {} saving draft for exercise {}", user.getEmail(), request.getExerciseId());
-        SubmissionResponse submission = submissionService.saveDraft(request, user.getId().toString());
+        SubmissionResponse submission = submissionService.saveDraft(request, resolveStudentSubmissionId(user));
         return ResponseEntity.ok(ApiResponse.success("Đã lưu bản nháp thành công", submission));
     }
     
@@ -55,9 +56,16 @@ public class SubmissionController {
             @Valid @RequestBody CreateSubmissionRequest request,
             @AuthenticationPrincipal User user) {
         log.info("Student {} submitting exercise {}", user.getEmail(), request.getExerciseId());
-        SubmissionResponse submission = submissionService.submit(request, user.getId().toString());
+        SubmissionResponse submission = submissionService.submit(request, resolveStudentSubmissionId(user));
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Nộp bài thành công", submission));
+    }
+
+    private String resolveStudentSubmissionId(User user) {
+        if (user.getStudentId() != null) {
+            return user.getStudentId().toString();
+        }
+        return user.getId().toString();
     }
     
     /**
@@ -114,5 +122,18 @@ public class SubmissionController {
         log.info("Tutor providing feedback for submission {}", id);
         SubmissionResponse submission = submissionService.gradeSubmission(id, request);
         return ResponseEntity.ok(ApiResponse.success("Đã chấm điểm bài nộp thành công", submission));
+    }
+
+    @PostMapping("/reconcile/student/{studentProfileId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TUTOR')")
+    public ResponseEntity<ApiResponse<SubmissionIdentityReconcileResponse>> reconcileStudentSubmissions(
+            @PathVariable Long studentProfileId,
+            @RequestParam(defaultValue = "false") boolean dryRun) {
+        SubmissionIdentityReconcileResponse result = submissionService
+                .reconcileStudentIdentitySubmissions(studentProfileId, dryRun);
+        String message = dryRun
+                ? "Đã quét dữ liệu bài nộp theo identity (dry-run, chưa thay đổi dữ liệu)"
+                : "Đã dọn dữ liệu bài nộp trùng identity thành công";
+        return ResponseEntity.ok(ApiResponse.success(message, result));
     }
 }

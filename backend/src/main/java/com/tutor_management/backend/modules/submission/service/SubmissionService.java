@@ -2,6 +2,7 @@ package com.tutor_management.backend.modules.submission.service;
 
 import com.tutor_management.backend.modules.submission.dto.request.CreateSubmissionRequest;
 import com.tutor_management.backend.modules.submission.dto.request.GradeSubmissionRequest;
+import com.tutor_management.backend.modules.submission.dto.response.SubmissionIdentityReconcileResponse;
 import com.tutor_management.backend.modules.submission.dto.response.SubmissionListItemResponse;
 import com.tutor_management.backend.modules.submission.dto.response.SubmissionResponse;
 
@@ -49,4 +50,10 @@ public interface SubmissionService {
      * Records tutor-provided grades and feedback for essay/written responses.
      */
     SubmissionResponse gradeSubmission(String submissionId, GradeSubmissionRequest request);
+
+    /**
+     * Reconciles duplicate submissions created under mixed student identity keys
+     * (student profile id vs user account id), preserving the best attempt per exercise.
+     */
+    SubmissionIdentityReconcileResponse reconcileStudentIdentitySubmissions(Long studentProfileId, boolean dryRun);
 }
