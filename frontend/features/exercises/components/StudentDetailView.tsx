@@ -49,9 +49,27 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
 
     const exercises: ExerciseListItemResponse[] = (exercisesData as PageResponse<ExerciseListItemResponse>)?.content || [];
     const statusOf = (value?: string) => (value || '').toUpperCase();
+    const deadlineOf = (value?: string) => {
+        if (!value) return null;
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? null : date;
+    };
+    const sortByNearestDeadline = (a: ExerciseListItemResponse, b: ExerciseListItemResponse) => {
+        const aDeadline = deadlineOf(a.deadline);
+        const bDeadline = deadlineOf(b.deadline);
+
+        if (aDeadline && bDeadline) {
+            return aDeadline.getTime() - bDeadline.getTime();
+        }
+        if (aDeadline && !bDeadline) return -1;
+        if (!aDeadline && bDeadline) return 1;
+        return a.title.localeCompare(b.title, 'vi');
+    };
 
     // Categorization
-    const pending = exercises.filter(ex => ['PENDING', 'OVERDUE'].includes(statusOf(ex.submissionStatus)) || !statusOf(ex.submissionStatus));
+    const pending = exercises
+        .filter(ex => ['PENDING', 'OVERDUE'].includes(statusOf(ex.submissionStatus)) || !statusOf(ex.submissionStatus))
+        .sort(sortByNearestDeadline);
     const inProgress = exercises.filter(ex => ['DRAFT', 'SUBMITTED', 'STARTED'].includes(statusOf(ex.submissionStatus)));
     const graded = exercises.filter(ex => statusOf(ex.submissionStatus) === 'GRADED');
 

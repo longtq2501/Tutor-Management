@@ -1,5 +1,6 @@
 package com.tutor_management.backend.modules.report.service;
 
+import com.tutor_management.backend.modules.auth.UserRepository;
 import com.tutor_management.backend.modules.feedback.repository.SessionFeedbackRepository;
 import com.tutor_management.backend.modules.finance.LessonStatus;
 import com.tutor_management.backend.modules.finance.entity.SessionRecord;
@@ -49,6 +50,8 @@ class ReportServiceTest {
     private StudentRepository studentRepository;
     @Mock
     private TutorRepository tutorRepository;
+        @Mock
+        private UserRepository userRepository;
 
     @InjectMocks
     private ReportService reportService;
@@ -84,6 +87,7 @@ class ReportServiceTest {
 
         when(tutorRepository.findByUserId(100L)).thenReturn(Optional.of(tutor));
         when(studentRepository.findByIdAndTutorId(20L, 10L)).thenReturn(Optional.of(student));
+        when(userRepository.findByStudentId(20L)).thenReturn(Optional.empty());
         when(sessionRecordRepository.findByTutorIdAndStudentIdAndSessionDateBetween(eq(10L), eq(20L), any(), any()))
                 .thenReturn(List.of(attended, absent));
         when(submissionRepository.findGradedSummariesForMonthlyReport(eq("20"), eq(10L), any(), any()))

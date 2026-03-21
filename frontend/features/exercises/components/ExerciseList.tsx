@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, CalendarDays } from 'lucide-react';
 import { ExerciseListItemResponse } from '@/features/exercise-import/types/exercise.types';
 import { ExerciseFilterBar } from './ExerciseFilterBar';
 import { ExerciseTable } from './ExerciseTable';
@@ -17,6 +17,7 @@ import { ExercisePagination } from './ExercisePagination';
 import { StudentExerciseCard } from './StudentExerciseCard';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
 
 interface ExerciseListProps {
     role: 'STUDENT' | 'TEACHER' | 'ADMIN';
@@ -43,6 +44,21 @@ const EmptyState = () => (
 export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExercise, onCreateNew }) => {
     const l = useExerciseListLogic(role);
     const getSubmissionStatus = (submissionStatus?: string) => (submissionStatus || '').toUpperCase();
+    const parseDeadline = (value?: string) => {
+        if (!value) return null;
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? null : date;
+    };
+    const toDateKey = (value: Date) => {
+        const year = value.getFullYear();
+        const month = String(value.getMonth() + 1).padStart(2, '0');
+        const day = String(value.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    const getStudentAction = (exercise: ExerciseListItemResponse): 'PLAY' | 'REVIEW' => {
+        const status = getSubmissionStatus(exercise.submissionStatus);
+        return status === 'SUBMITTED' || status === 'GRADED' ? 'REVIEW' : 'PLAY';
+    };
 
     const studentExerciseGroups = {
         // Any status that is not explicitly submitted/graded should remain visible in pending.
@@ -53,6 +69,50 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
         submitted: l.exercises.filter(ex => getSubmissionStatus(ex.submissionStatus) === 'SUBMITTED'),
         graded: l.exercises.filter(ex => getSubmissionStatus(ex.submissionStatus) === 'GRADED')
     };
+
+    const studentExercisesByDeadline = React.useMemo(() => {
+        return l.exercises
+            .map(exercise => {
+                const deadlineDate = parseDeadline(exercise.deadline);
+                return deadlineDate ? { exercise, deadlineDate } : null;
+            })
+            .filter((entry): entry is { exercise: ExerciseListItemResponse; deadlineDate: Date } => entry !== null)
+            .sort((a, b) => a.deadlineDate.getTime() - b.deadlineDate.getTime());
+    }, [l.exercises]);
+
+    const [selectedDeadlineDate, setSelectedDeadlineDate] = React.useState<Date | undefined>(undefined);
+
+    React.useEffect(() => {
+        if (role !== 'STUDENT') {
+            return;
+        }
+        if (studentExercisesByDeadline.length === 0) {
+            setSelectedDeadlineDate(undefined);
+            return;
+        }
+        setSelectedDeadlineDate(prev => prev ?? studentExercisesByDeadline[0].deadlineDate);
+    }, [role, studentExercisesByDeadline]);
+
+    const exercisesByDateMap = React.useMemo(() => {
+        const map = new Map<string, { exercise: ExerciseListItemResponse; deadlineDate: Date }[]>();
+        studentExercisesByDeadline.forEach(entry => {
+            const key = toDateKey(entry.deadlineDate);
+            const list = map.get(key) || [];
+            list.push(entry);
+            map.set(key, list);
+        });
+        return map;
+    }, [studentExercisesByDeadline]);
+
+    const deadlineDates = React.useMemo(
+        () => studentExercisesByDeadline.map(entry => entry.deadlineDate),
+        [studentExercisesByDeadline]
+    );
+
+    const selectedDayAssignments = React.useMemo(() => {
+        if (!selectedDeadlineDate) return [];
+        return exercisesByDateMap.get(toDateKey(selectedDeadlineDate)) || [];
+    }, [selectedDeadlineDate, exercisesByDateMap]);
 
     if (l.isExercisesLoading) {
         return (
@@ -96,6 +156,76 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                     {l.exercises.length === 0 ? <EmptyState /> : (
                         role === 'STUDENT' ? (
                             <div className="p-4 md:p-6 space-y-8">
+                                <div className="rounded-2xl border border-border/70 bg-background/80 backdrop-blur-sm p-4 md:p-5">
+                                    <div className="flex items-center justify-between gap-3 mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <CalendarDays className="h-4 w-4 text-primary" />
+                                            <p className="text-sm md:text-base font-black tracking-tight">Lịch hạn nộp bài</p>
+                                        </div>
+                                        <Badge variant="secondary" className="h-6 px-2.5 text-xs font-black">
+                                            {studentExercisesByDeadline.length}
+                                        </Badge>
+                                    </div>
+
+                                    {studentExercisesByDeadline.length === 0 ? (
+                                        <div className="rounded-xl border border-dashed border-border px-3 py-8 text-center text-xs text-muted-foreground">
+                                            Chưa có bài tập có hạn nộp
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                            <div className="rounded-xl border border-border/70 bg-muted/10 p-2 flex justify-center">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={selectedDeadlineDate}
+                                                    onSelect={setSelectedDeadlineDate}
+                                                    onDayClick={(day) => {
+                                                        const dayAssignments = exercisesByDateMap.get(toDateKey(day)) || [];
+                                                        setSelectedDeadlineDate(day);
+
+                                                        if (dayAssignments.length === 1) {
+                                                            const target = dayAssignments[0].exercise;
+                                                            onSelectExercise(target, getStudentAction(target));
+                                                        }
+                                                    }}
+                                                    modifiers={{ hasDeadline: deadlineDates }}
+                                                    modifiersClassNames={{
+                                                        hasDeadline: 'bg-primary/15 text-primary font-bold rounded-md',
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="rounded-xl border border-border/70 bg-background/70 p-3 md:p-4 space-y-3">
+                                                <p className="text-xs uppercase tracking-[0.14em] font-black text-muted-foreground">
+                                                    {selectedDeadlineDate
+                                                        ? `Bài tập ngày ${selectedDeadlineDate.toLocaleDateString('vi-VN')}`
+                                                        : 'Chọn ngày để xem bài tập'}
+                                                </p>
+                                                {selectedDayAssignments.length === 0 ? (
+                                                    <div className="rounded-lg border border-dashed border-border px-3 py-6 text-xs text-muted-foreground text-center">
+                                                        Không có bài tập trong ngày này
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-2.5">
+                                                        {selectedDayAssignments.map(({ exercise, deadlineDate }) => (
+                                                            <button
+                                                                key={exercise.id}
+                                                                type="button"
+                                                                onClick={() => onSelectExercise(exercise, getStudentAction(exercise))}
+                                                                className="w-full text-left rounded-xl border border-border/70 bg-muted/10 hover:bg-primary/5 transition-colors px-3 py-2.5"
+                                                            >
+                                                                <p className="text-sm font-bold leading-tight line-clamp-2">{exercise.title}</p>
+                                                                <p className="text-xs text-muted-foreground mt-1">
+                                                                    Hạn nộp: {deadlineDate.toLocaleString('vi-VN')}
+                                                                </p>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
                                     {[
                                         {
@@ -136,8 +266,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                                             key={ex.id}
                                                             exercise={ex}
                                                             onClick={() => {
-                                                                const action = (ex.submissionStatus === 'SUBMITTED' || ex.submissionStatus === 'GRADED') ? 'REVIEW' : 'PLAY';
-                                                                onSelectExercise(ex, action);
+                                                                onSelectExercise(ex, getStudentAction(ex));
                                                             }}
                                                         />
                                                     ))}
