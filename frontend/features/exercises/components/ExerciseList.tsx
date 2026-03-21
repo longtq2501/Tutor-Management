@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, CalendarDays } from 'lucide-react';
+import { Plus, FileText, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ExerciseListItemResponse } from '@/features/exercise-import/types/exercise.types';
 import { ExerciseFilterBar } from './ExerciseFilterBar';
 import { ExerciseTable } from './ExerciseTable';
@@ -17,7 +17,6 @@ import { ExercisePagination } from './ExercisePagination';
 import { StudentExerciseCard } from './StudentExerciseCard';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
 
 interface ExerciseListProps {
     role: 'STUDENT' | 'TEACHER' | 'ADMIN';
@@ -43,6 +42,7 @@ const EmptyState = () => (
  */
 export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExercise, onCreateNew }) => {
     const l = useExerciseListLogic(role);
+    const WEEK_DAYS = ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'];
     const getSubmissionStatus = (submissionStatus?: string) => (submissionStatus || '').toUpperCase();
     const parseDeadline = (value?: string) => {
         if (!value) return null;
@@ -81,6 +81,10 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
     }, [l.exercises]);
 
     const [selectedDeadlineDate, setSelectedDeadlineDate] = React.useState<Date | undefined>(undefined);
+    const [deadlineCalendarMonth, setDeadlineCalendarMonth] = React.useState<Date>(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+    });
 
     React.useEffect(() => {
         if (role !== 'STUDENT') {
@@ -93,6 +97,11 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
         setSelectedDeadlineDate(prev => prev ?? studentExercisesByDeadline[0].deadlineDate);
     }, [role, studentExercisesByDeadline]);
 
+    React.useEffect(() => {
+        if (!selectedDeadlineDate) return;
+        setDeadlineCalendarMonth(new Date(selectedDeadlineDate.getFullYear(), selectedDeadlineDate.getMonth(), 1));
+    }, [selectedDeadlineDate]);
+
     const exercisesByDateMap = React.useMemo(() => {
         const map = new Map<string, { exercise: ExerciseListItemResponse; deadlineDate: Date }[]>();
         studentExercisesByDeadline.forEach(entry => {
@@ -104,15 +113,49 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
         return map;
     }, [studentExercisesByDeadline]);
 
-    const deadlineDates = React.useMemo(
-        () => studentExercisesByDeadline.map(entry => entry.deadlineDate),
-        [studentExercisesByDeadline]
-    );
-
     const selectedDayAssignments = React.useMemo(() => {
         if (!selectedDeadlineDate) return [];
         return exercisesByDateMap.get(toDateKey(selectedDeadlineDate)) || [];
     }, [selectedDeadlineDate, exercisesByDateMap]);
+
+    const deadlineCalendarDays = React.useMemo(() => {
+        const year = deadlineCalendarMonth.getFullYear();
+        const month = deadlineCalendarMonth.getMonth();
+
+        const firstDayOfMonth = new Date(year, month, 1);
+        const firstDayWeekIndex = firstDayOfMonth.getDay();
+        const firstGridDate = new Date(year, month, 1 - firstDayWeekIndex);
+        const today = new Date();
+        const todayKey = toDateKey(today);
+        const selectedKey = selectedDeadlineDate ? toDateKey(selectedDeadlineDate) : '';
+
+        return Array.from({ length: 42 }, (_, index) => {
+            const date = new Date(firstGridDate);
+            date.setDate(firstGridDate.getDate() + index);
+            const dateKey = toDateKey(date);
+            const assignments = exercisesByDateMap.get(dateKey) || [];
+
+            return {
+                date,
+                dateKey,
+                assignments,
+                isCurrentMonth: date.getMonth() === month,
+                isToday: dateKey === todayKey,
+                isSelected: selectedKey === dateKey,
+            };
+        });
+    }, [deadlineCalendarMonth, exercisesByDateMap, selectedDeadlineDate]);
+
+    const handleSelectDeadlineDay = React.useCallback((day: Date) => {
+        const dayAssignments = exercisesByDateMap.get(toDateKey(day)) || [];
+        setSelectedDeadlineDate(day);
+        setDeadlineCalendarMonth(new Date(day.getFullYear(), day.getMonth(), 1));
+
+        if (dayAssignments.length === 1) {
+            const target = dayAssignments[0].exercise;
+            onSelectExercise(target, getStudentAction(target));
+        }
+    }, [exercisesByDateMap, onSelectExercise]);
 
     if (l.isExercisesLoading) {
         return (
@@ -173,26 +216,96 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                            <div className="rounded-xl border border-border/70 bg-muted/10 p-2 flex justify-center">
-                                                <Calendar
-                                                    className="[--cell-size:2.25rem] md:[--cell-size:2.4rem]"
-                                                    mode="single"
-                                                    selected={selectedDeadlineDate}
-                                                    onSelect={setSelectedDeadlineDate}
-                                                    onDayClick={(day) => {
-                                                        const dayAssignments = exercisesByDateMap.get(toDateKey(day)) || [];
-                                                        setSelectedDeadlineDate(day);
+                                            <div className="rounded-xl border border-border/70 bg-muted/10 p-2 md:p-3">
+                                                <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+                                                    <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-muted/30">
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 rounded-lg"
+                                                            onClick={() => setDeadlineCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))}
+                                                        >
+                                                            <ChevronLeft className="h-4 w-4" />
+                                                        </Button>
+                                                        <p className="text-sm font-black tracking-tight capitalize">
+                                                            {deadlineCalendarMonth.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
+                                                        </p>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 rounded-lg"
+                                                            onClick={() => setDeadlineCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}
+                                                        >
+                                                            <ChevronRight className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
 
-                                                        if (dayAssignments.length === 1) {
-                                                            const target = dayAssignments[0].exercise;
-                                                            onSelectExercise(target, getStudentAction(target));
-                                                        }
-                                                    }}
-                                                    modifiers={{ hasDeadline: deadlineDates }}
-                                                    modifiersClassNames={{
-                                                        hasDeadline: 'bg-primary/15 text-primary font-bold rounded-md',
-                                                    }}
-                                                />
+                                                    <div className="grid grid-cols-7 border-b border-border/60 bg-background">
+                                                        {WEEK_DAYS.map((dayLabel, index) => (
+                                                            <div
+                                                                key={dayLabel}
+                                                                className={cn(
+                                                                    'py-2 text-center text-[10px] font-black uppercase tracking-[0.14em]',
+                                                                    index === 0 ? 'text-red-500' : 'text-muted-foreground'
+                                                                )}
+                                                            >
+                                                                {dayLabel}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-7">
+                                                        {deadlineCalendarDays.map((day) => (
+                                                            <button
+                                                                key={day.dateKey}
+                                                                type="button"
+                                                                onClick={() => handleSelectDeadlineDay(day.date)}
+                                                                className={cn(
+                                                                    'h-[64px] border-r border-b border-border/40 px-1.5 py-1.5 text-left transition-colors hover:bg-primary/5',
+                                                                    !day.isCurrentMonth && 'bg-muted/15 text-muted-foreground/60',
+                                                                    day.isSelected && 'bg-primary/10',
+                                                                    day.isToday && 'ring-1 ring-inset ring-primary/40'
+                                                                )}
+                                                            >
+                                                                <div className="flex items-start justify-between">
+                                                                    <span
+                                                                        className={cn(
+                                                                            'h-6 w-6 rounded-full text-xs font-bold flex items-center justify-center',
+                                                                            day.isToday
+                                                                                ? 'bg-primary text-primary-foreground'
+                                                                                : day.isSelected
+                                                                                    ? 'bg-primary/15 text-primary'
+                                                                                    : 'text-foreground'
+                                                                        )}
+                                                                    >
+                                                                        {day.date.getDate()}
+                                                                    </span>
+                                                                    {day.assignments.length > 0 && (
+                                                                        <span className="text-[10px] font-black text-primary">
+                                                                            {day.assignments.length}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                {day.assignments.length > 0 && (
+                                                                    <div className="mt-2 flex flex-wrap gap-1">
+                                                                        {day.assignments.slice(0, 3).map((item) => (
+                                                                            <span
+                                                                                key={`${day.dateKey}-${item.exercise.id}`}
+                                                                                className="h-1.5 w-1.5 rounded-full bg-primary/70"
+                                                                            />
+                                                                        ))}
+                                                                        {day.assignments.length > 3 && (
+                                                                            <span className="text-[10px] leading-none text-muted-foreground">+{day.assignments.length - 3}</span>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div className="rounded-xl border border-border/70 bg-background/70 p-3 md:p-4 space-y-3">
