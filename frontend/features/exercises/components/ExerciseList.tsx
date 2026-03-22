@@ -44,8 +44,48 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
     const l = useExerciseListLogic(role);
     const WEEK_DAYS = ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'];
     const getSubmissionStatus = (submissionStatus?: string) => (submissionStatus || '').toUpperCase();
+    const hasCompletedSubmission = (submissionStatus?: string) => {
+        const status = getSubmissionStatus(submissionStatus);
+        return status === 'SUBMITTED' || status === 'GRADED';
+    };
+    const formatDeadline = (value?: string) => {
+        if (!value) return 'N/A';
+
+        // Prefer preserving backend local date-time strings as-is to avoid timezone drift.
+        const localDateTimeMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+        if (localDateTimeMatch) {
+            const [, year, month, day, hour, minute] = localDateTimeMatch;
+            return `${hour}:${minute} ${day}/${month}/${year}`;
+        }
+
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return value;
+        return parsed.toLocaleString('vi-VN', {
+            hour12: false,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
     const parseDeadline = (value?: string) => {
         if (!value) return null;
+
+        const localDateTimeMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?/);
+        if (localDateTimeMatch) {
+            const [, year, month, day, hour, minute, second = '00'] = localDateTimeMatch;
+            const date = new Date(
+                Number(year),
+                Number(month) - 1,
+                Number(day),
+                Number(hour),
+                Number(minute),
+                Number(second)
+            );
+            return Number.isNaN(date.getTime()) ? null : date;
+        }
+
         const date = new Date(value);
         return Number.isNaN(date.getTime()) ? null : date;
     };
@@ -74,9 +114,24 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
         return l.exercises
             .map(exercise => {
                 const deadlineDate = parseDeadline(exercise.deadline);
-                return deadlineDate ? { exercise, deadlineDate } : null;
+                if (!deadlineDate) return null;
+
+                const status = getSubmissionStatus(exercise.submissionStatus);
+                const isCompleted = hasCompletedSubmission(exercise.submissionStatus);
+                const isOverdue = !isCompleted && deadlineDate.getTime() < Date.now();
+                const tone: 'graded' | 'submitted' | 'overdue' | 'pending' =
+                    status === 'GRADED' ? 'graded'
+                        : status === 'SUBMITTED' ? 'submitted'
+                            : isOverdue ? 'overdue'
+                                : 'pending';
+
+                return {
+                    exercise,
+                    deadlineDate,
+                    tone,
+                };
             })
-            .filter((entry): entry is { exercise: ExerciseListItemResponse; deadlineDate: Date } => entry !== null)
+            .filter((entry): entry is { exercise: ExerciseListItemResponse; deadlineDate: Date; tone: 'graded' | 'submitted' | 'overdue' | 'pending' } => entry !== null)
             .sort((a, b) => a.deadlineDate.getTime() - b.deadlineDate.getTime());
     }, [l.exercises]);
 
@@ -103,7 +158,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
     }, [selectedDeadlineDate]);
 
     const exercisesByDateMap = React.useMemo(() => {
-        const map = new Map<string, { exercise: ExerciseListItemResponse; deadlineDate: Date }[]>();
+        const map = new Map<string, { exercise: ExerciseListItemResponse; deadlineDate: Date; tone: 'graded' | 'submitted' | 'overdue' | 'pending' }[]>();
         studentExercisesByDeadline.forEach(entry => {
             const key = toDateKey(entry.deadlineDate);
             const list = map.get(key) || [];
@@ -257,7 +312,13 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                                     </div>
 
                                                     <div className="grid grid-cols-7">
-                                                        {deadlineCalendarDays.map((day) => (
+                                                        {deadlineCalendarDays.map((day) => {
+                                                            const hasOverdue = day.assignments.some(item => item.tone === 'overdue');
+                                                            const hasPending = day.assignments.some(item => item.tone === 'pending');
+                                                            const hasSubmitted = day.assignments.some(item => item.tone === 'submitted');
+                                                            const hasGraded = day.assignments.some(item => item.tone === 'graded');
+
+                                                            return (
                                                             <button
                                                                 key={day.dateKey}
                                                                 type="button"
@@ -265,6 +326,9 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                                                 className={cn(
                                                                     'h-[64px] border-r border-b border-border/40 px-1.5 py-1.5 text-left transition-colors hover:bg-primary/5',
                                                                     !day.isCurrentMonth && 'bg-muted/15 text-muted-foreground/60',
+                                                                    hasOverdue && !day.isSelected && 'bg-rose-500/10 hover:bg-rose-500/15',
+                                                                    !hasOverdue && hasPending && !day.isSelected && 'bg-amber-500/10 hover:bg-amber-500/15',
+                                                                    !hasOverdue && !hasPending && (hasSubmitted || hasGraded) && !day.isSelected && 'bg-emerald-500/10 hover:bg-emerald-500/15',
                                                                     day.isSelected && 'bg-primary/10',
                                                                     day.isToday && 'ring-1 ring-inset ring-primary/40'
                                                                 )}
@@ -294,7 +358,13 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                                                         {day.assignments.slice(0, 3).map((item) => (
                                                                             <span
                                                                                 key={`${day.dateKey}-${item.exercise.id}`}
-                                                                                className="h-1.5 w-1.5 rounded-full bg-primary/70"
+                                                                                className={cn(
+                                                                                    'h-1.5 w-1.5 rounded-full',
+                                                                                    item.tone === 'graded' && 'bg-emerald-500',
+                                                                                    item.tone === 'submitted' && 'bg-blue-500',
+                                                                                    item.tone === 'overdue' && 'bg-rose-500',
+                                                                                    item.tone === 'pending' && 'bg-amber-500',
+                                                                                )}
                                                                             />
                                                                         ))}
                                                                         {day.assignments.length > 3 && (
@@ -303,7 +373,8 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                                                     </div>
                                                                 )}
                                                             </button>
-                                                        ))}
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>
@@ -320,16 +391,33 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ role, onSelectExerci
                                                     </div>
                                                 ) : (
                                                     <div className="space-y-2.5">
-                                                        {selectedDayAssignments.map(({ exercise, deadlineDate }) => (
+                                                        {selectedDayAssignments.map(({ exercise, tone }) => (
                                                             <button
                                                                 key={exercise.id}
                                                                 type="button"
                                                                 onClick={() => onSelectExercise(exercise, getStudentAction(exercise))}
                                                                 className="w-full text-left rounded-xl border border-border/70 bg-muted/10 hover:bg-primary/5 transition-colors px-3 py-2.5"
                                                             >
-                                                                <p className="text-sm font-bold leading-tight line-clamp-2">{exercise.title}</p>
+                                                                <div className="flex items-start justify-between gap-2">
+                                                                    <p className="text-sm font-bold leading-tight line-clamp-2">{exercise.title}</p>
+                                                                    <Badge
+                                                                        variant="secondary"
+                                                                        className={cn(
+                                                                            'h-5 px-1.5 text-[10px] font-black whitespace-nowrap',
+                                                                            tone === 'graded' && 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30',
+                                                                            tone === 'submitted' && 'bg-blue-500/15 text-blue-700 border border-blue-500/30',
+                                                                            tone === 'overdue' && 'bg-rose-500/15 text-rose-700 border border-rose-500/30',
+                                                                            tone === 'pending' && 'bg-amber-500/15 text-amber-700 border border-amber-500/30',
+                                                                        )}
+                                                                    >
+                                                                        {tone === 'graded' && 'Đã chấm'}
+                                                                        {tone === 'submitted' && 'Đã nộp'}
+                                                                        {tone === 'overdue' && 'Trễ hạn'}
+                                                                        {tone === 'pending' && 'Chưa làm'}
+                                                                    </Badge>
+                                                                </div>
                                                                 <p className="text-xs text-muted-foreground mt-1">
-                                                                    Hạn nộp: {deadlineDate.toLocaleString('vi-VN')}
+                                                                    Hạn nộp: {formatDeadline(exercise.deadline)}
                                                                 </p>
                                                             </button>
                                                         ))}

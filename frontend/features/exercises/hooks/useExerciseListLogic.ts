@@ -34,6 +34,30 @@ export const useExerciseListLogic = (role: string) => {
     const [assignDeadline, setAssignDeadline] = useState<string>('');
     const [isAssigning, setIsAssigning] = useState(false);
 
+    const toDateTimeLocalValue = (value?: string) => {
+        if (!value) return '';
+
+        const directMatch = value.match(/^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2})/);
+        if (directMatch) {
+            return `${directMatch[1]}T${directMatch[2]}`;
+        }
+
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mi = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    };
+
+    const toApiLocalDateTime = (value?: string) => {
+        if (!value) return undefined;
+        return value.length === 16 ? `${value}:00` : value;
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(searchTerm);
@@ -109,7 +133,7 @@ export const useExerciseListLogic = (role: string) => {
     const handleOpenAssign = (ex: ExerciseListItemResponse, e: React.MouseEvent) => {
         e.stopPropagation();
         setSelectedExercise(ex);
-        setAssignDeadline(ex.deadline ? new Date(ex.deadline).toISOString().slice(0, 16) : '');
+        setAssignDeadline(toDateTimeLocalValue(ex.deadline));
         setIsAssignDialogOpen(true);
     };
 
@@ -119,7 +143,7 @@ export const useExerciseListLogic = (role: string) => {
             setIsAssigning(true);
             await exerciseService.assign(selectedExercise.id, {
                 studentId: assignStudentId,
-                deadline: assignDeadline ? new Date(assignDeadline).toISOString() : undefined
+                deadline: toApiLocalDateTime(assignDeadline)
             });
             toast.success("Đã giao bài tập thành công");
             setIsAssignDialogOpen(false);
