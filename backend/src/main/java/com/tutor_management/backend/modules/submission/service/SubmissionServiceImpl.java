@@ -369,19 +369,28 @@ public class SubmissionServiceImpl implements SubmissionService {
         double essay = 0.0;
         int mappedMcqAnswers = 0;
         int mappedEssayAnswers = 0;
+        int mcqAnswersWithPointData = 0;
+        int essayAnswersWithPointData = 0;
 
         for (StudentAnswer a : s.getAnswers()) {
             Question question = questionMap.get(a.getQuestionId());
             QuestionType type = typeMap.get(a.getQuestionId());
-            double rawPoints = Optional.ofNullable(a.getPoints()).orElse(0.0);
+            Double originalPoints = a.getPoints();
+            double rawPoints = Optional.ofNullable(originalPoints).orElse(0.0);
             double maxPoints = question != null ? Optional.ofNullable(question.getPoints()).orElse(0.0) : rawPoints;
             double pts = Math.max(0.0, Math.min(rawPoints, maxPoints));
             a.setPoints(roundTwoDecimals(pts));
 
             if (type == QuestionType.MCQ) {
+                if (originalPoints != null) {
+                    mcqAnswersWithPointData++;
+                }
                 mcq += pts;
                 mappedMcqAnswers++;
             } else if (type == QuestionType.ESSAY) {
+                if (originalPoints != null) {
+                    essayAnswersWithPointData++;
+                }
                 essay += pts;
                 mappedEssayAnswers++;
             }
@@ -393,9 +402,21 @@ public class SubmissionServiceImpl implements SubmissionService {
             mcq = previousMcq;
         }
 
+        if (mappedMcqAnswers > 0 && mcqAnswersWithPointData == 0 && previousMcq > 0) {
+            log.warn("MCQ answers in submission {} have no point data. Preserving previous MCQ score {}",
+                s.getId(), previousMcq);
+            mcq = previousMcq;
+        }
+
         if (mappedEssayAnswers == 0 && previousEssay > 0) {
             log.warn("No mappable essay answers found while grading submission {}. Preserving previous essay score {}",
                     s.getId(), previousEssay);
+            essay = previousEssay;
+        }
+
+        if (mappedEssayAnswers > 0 && essayAnswersWithPointData == 0 && previousEssay > 0) {
+            log.warn("Essay answers in submission {} have no point data. Preserving previous essay score {}",
+                s.getId(), previousEssay);
             essay = previousEssay;
         }
 

@@ -39,6 +39,11 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
     const [teacherComment, setTeacherComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const normalizeEssayText = (text?: string) => {
+        if (!text) return '(Chưa làm bài)';
+        return text.normalize('NFC');
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -342,8 +347,8 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
                                                     <Label className="text-muted-foreground text-xs uppercase font-bold">Bài làm của học sinh</Label>
-                                                    <div className="p-4 bg-muted/30 rounded-lg border min-h-[100px] whitespace-pre-wrap font-serif text-foreground/90 leading-relaxed">
-                                                        {answer?.essayText || '(Chưa làm bài)'}
+                                                    <div className="p-4 bg-muted/30 rounded-lg border min-h-[100px] whitespace-pre-wrap break-words font-sans text-foreground/90 leading-relaxed">
+                                                        {normalizeEssayText(answer?.essayText)}
                                                     </div>
                                                 </div>
 
