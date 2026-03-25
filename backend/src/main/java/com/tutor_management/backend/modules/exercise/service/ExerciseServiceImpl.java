@@ -403,40 +403,10 @@ public class ExerciseServiceImpl implements ExerciseService {
             identityKeyMap.get(profileId).add(linkedUser.getId().toString());
         }
 
-        List<String> studentIds = identityKeyMap.values().stream()
-                .flatMap(List::stream)
-                .distinct()
-                .toList();
-
-        if (studentIds.isEmpty()) {
-            return Page.empty(pageable);
-        }
-
-        // Multi-tenancy count: only count assignments associated with exercises owned by this tutor
-        // Uses LEFT JOIN with submissions to handle tasks without submission records
-        var rawStats = assignmentRepository.countAssignmentsWithSubmissionStatus(studentIds, activeTutorId);
-        
-        // Map stats by studentId
-        Map<String, Map<com.tutor_management.backend.modules.submission.entity.SubmissionStatus, Integer>> statsMap = new HashMap<>(); 
-        for (Object[] row : rawStats) {
-            String studentId = (String) row[0];
-            // If submission record is missing, treat as PENDING
-            com.tutor_management.backend.modules.submission.entity.SubmissionStatus status = 
-                (row[1] != null) ? (com.tutor_management.backend.modules.submission.entity.SubmissionStatus) row[1] : 
-                com.tutor_management.backend.modules.submission.entity.SubmissionStatus.PENDING;
-            Integer count = ((Long) row[2]).intValue();
-            
-            statsMap.computeIfAbsent(studentId, k -> new HashMap<>())
-                    .merge(status, count, Integer::sum);
-        }
-        
         List<TutorStudentSummaryResponse> content = studentsPage.getContent().stream().map(student -> {
             String sId = student.getId().toString();
-            Map<com.tutor_management.backend.modules.submission.entity.SubmissionStatus, Integer> counts = new HashMap<>();
-            for (String key : identityKeyMap.getOrDefault(sId, List.of(sId))) {
-                var keyCounts = statsMap.getOrDefault(key, Collections.emptyMap());
-                keyCounts.forEach((status, count) -> counts.merge(status, count, Integer::sum));
-            }
+            Map<com.tutor_management.backend.modules.submission.entity.SubmissionStatus, Integer> counts =
+                    aggregateStudentStatusesByExercise(identityKeyMap.getOrDefault(sId, List.of(sId)), activeTutorId);
             
             int pending = counts.getOrDefault(com.tutor_management.backend.modules.submission.entity.SubmissionStatus.PENDING, 0);
             int submitted = counts.getOrDefault(com.tutor_management.backend.modules.submission.entity.SubmissionStatus.SUBMITTED, 0) + 
@@ -456,6 +426,50 @@ public class ExerciseServiceImpl implements ExerciseService {
         }).collect(Collectors.toList());
 
         return new PageImpl<>(content, pageable, studentsPage.getTotalElements());
+    }
+
+    private Map<SubmissionStatus, Integer> aggregateStudentStatusesByExercise(List<String> identityKeys, Long tutorId) {
+        List<String> normalizedKeys = (identityKeys == null ? List.<String>of() : identityKeys.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList());
+
+        if (normalizedKeys.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<ExerciseAssignment> assignments = assignmentRepository.findAllByStudentIdsAndTutorId(normalizedKeys, tutorId);
+        if (assignments.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, ExerciseAssignment> assignmentByExercise = new LinkedHashMap<>();
+        for (ExerciseAssignment assignment : assignments) {
+            assignmentByExercise.putIfAbsent(assignment.getExerciseId(), assignment);
+        }
+
+        List<String> exerciseIds = new ArrayList<>(assignmentByExercise.keySet());
+        List<Submission> submissions = normalizedKeys.stream()
+                .flatMap(identity -> submissionRepository.findByStudentIdAndExerciseIdIn(identity, exerciseIds).stream())
+                .toList();
+
+        Map<String, Submission> submissionByExercise = submissions.stream().collect(Collectors.toMap(
+                Submission::getExerciseId,
+                s -> s,
+                this::pickPreferredSubmission
+        ));
+
+        Map<SubmissionStatus, Integer> counts = new EnumMap<>(SubmissionStatus.class);
+        for (String exerciseId : assignmentByExercise.keySet()) {
+            SubmissionStatus status = Optional.ofNullable(submissionByExercise.get(exerciseId))
+                    .map(Submission::getStatus)
+                    .orElse(SubmissionStatus.PENDING);
+            counts.merge(status, 1, Integer::sum);
+        }
+
+        return counts;
     }
 
     // --- Private Business Helpers ---

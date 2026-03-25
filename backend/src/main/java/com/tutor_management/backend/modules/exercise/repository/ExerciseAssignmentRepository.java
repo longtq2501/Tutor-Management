@@ -46,6 +46,15 @@ public interface ExerciseAssignmentRepository extends JpaRepository<ExerciseAssi
     org.springframework.data.domain.Page<ExerciseAssignment> findByStudentIdsAndTutorId(@Param("studentIds") List<String> studentIds, @Param("tutorId") Long tutorId, org.springframework.data.domain.Pageable pageable);
 
     /**
+     * Lists all assignments for any provided student identity keys, with optional tutor filter.
+     * Used by tutor summary aggregation to dedupe status per exercise.
+     */
+    @Query("SELECT ea FROM ExerciseAssignment ea, Exercise e " +
+           "WHERE ea.exerciseId = e.id AND ea.studentId IN :studentIds " +
+           "AND (:tutorId IS NULL OR e.tutorId = :tutorId)")
+    List<ExerciseAssignment> findAllByStudentIdsAndTutorId(@Param("studentIds") List<String> studentIds, @Param("tutorId") Long tutorId);
+
+    /**
      * Lists all assignments for a specific student.
      */
     List<ExerciseAssignment> findByStudentId(String studentId);
