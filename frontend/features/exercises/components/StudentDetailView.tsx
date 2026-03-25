@@ -66,12 +66,18 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
         return a.title.localeCompare(b.title, 'vi');
     };
 
-    // Categorization
+    // Categorization uses a strict partition so detail counts match summary cards.
+    const isGraded = (status: string) => status === 'GRADED';
+    const isSubmittedBucket = (status: string) => ['DRAFT', 'SUBMITTED', 'STARTED'].includes(status);
+
     const pending = exercises
-        .filter(ex => ['PENDING', 'OVERDUE'].includes(statusOf(ex.submissionStatus)) || !statusOf(ex.submissionStatus))
+        .filter(ex => {
+            const status = statusOf(ex.submissionStatus);
+            return !isGraded(status) && !isSubmittedBucket(status);
+        })
         .sort(sortByNearestDeadline);
-    const inProgress = exercises.filter(ex => ['DRAFT', 'SUBMITTED', 'STARTED'].includes(statusOf(ex.submissionStatus)));
-    const graded = exercises.filter(ex => statusOf(ex.submissionStatus) === 'GRADED');
+    const inProgress = exercises.filter(ex => isSubmittedBucket(statusOf(ex.submissionStatus)));
+    const graded = exercises.filter(ex => isGraded(statusOf(ex.submissionStatus)));
 
     const handleRevokeAssignment = async (exercise: ExerciseListItemResponse) => {
         const confirmed = await confirm({
@@ -140,7 +146,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({
                 </div>
 
                 <div className="lg:px-8 lg:border-r lg:border-dashed lg:border-muted-foreground/20">
-                    <PerformanceSection title="Đang làm" icon={<FileText className="h-5 w-5 text-sky-500" />} count={inProgress.length} isLoading={isLoading}>
+                    <PerformanceSection title="Đã nộp / đang làm" icon={<FileText className="h-5 w-5 text-sky-500" />} count={inProgress.length} isLoading={isLoading}>
                         {inProgress.map(ex => (
                             <ExerciseRowCard key={ex.id} exercise={ex} label={ex.submissionStatus === 'SUBMITTED' ? 'Đã nộp bài' : 'Đang thực hiện'} onClick={() => onViewExercise(ex, 'GRADE')} />
                         ))}

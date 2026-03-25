@@ -408,6 +408,15 @@ public class SubmissionServiceImpl implements SubmissionService {
             mcq = previousMcq;
         }
 
+        if (mappedMcqAnswers > 0
+                && mcqAnswersWithPointData < mappedMcqAnswers
+                && previousMcq > 0
+                && mcq < previousMcq) {
+            log.warn("MCQ point data is partially missing in submission {}. Preserving previous MCQ score {} instead of recalculated {}",
+                    s.getId(), previousMcq, mcq);
+            mcq = previousMcq;
+        }
+
         if (mappedEssayAnswers == 0 && previousEssay > 0) {
             log.warn("No mappable essay answers found while grading submission {}. Preserving previous essay score {}",
                     s.getId(), previousEssay);
