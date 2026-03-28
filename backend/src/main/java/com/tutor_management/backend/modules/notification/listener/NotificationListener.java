@@ -79,9 +79,10 @@ public class NotificationListener {
         log.info("Processing ExamGradedEvent for submission: {}", event.getSubmissionId());
         
         try {
-            Long studentId = Long.parseLong(event.getStudentId());
-            User student = userRepository.findById(studentId)
-                    .orElseThrow(() -> new RuntimeException("Student user not found for ID: " + studentId));
+            Long studentIdentity = Long.parseLong(event.getStudentId());
+            User student = userRepository.findByStudentId(studentIdentity)
+                    .or(() -> userRepository.findById(studentIdentity))
+                    .orElseThrow(() -> new RuntimeException("Student user not found for identity: " + studentIdentity));
 
             notificationService.createAndSend(
                     student,

@@ -352,7 +352,7 @@ export const GradingView: React.FC<GradingViewProps> = ({ submissionId, onBack, 
                                                     </div>
                                                 </div>
 
-                                                {q.rubric && (
+                                                {!isReviewMode && q.rubric && (
                                                     <div className="text-sm bg-blue-500/10 text-blue-700 dark:text-blue-300 p-3 rounded border border-blue-500/20 whitespace-pre-wrap">
                                                         <strong>Gợi ý chấm điểm (Rubric):</strong> {q.rubric}
                                                     </div>

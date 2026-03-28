@@ -364,6 +364,9 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         double previousMcq = Optional.ofNullable(s.getMcqScore()).orElse(0.0);
         double previousEssay = Optional.ofNullable(s.getEssayScore()).orElse(0.0);
+        double previousTotal = Optional.ofNullable(s.getTotalScore()).orElse(0.0);
+        double mcqFallbackFromTotal = Math.max(0.0, previousTotal - previousEssay);
+        double previousMcqBaseline = Math.max(previousMcq, mcqFallbackFromTotal);
 
         double mcq = 0.0;
         double essay = 0.0;
@@ -396,25 +399,25 @@ public class SubmissionServiceImpl implements SubmissionService {
             }
         }
 
-        if (mappedMcqAnswers == 0 && previousMcq > 0) {
-            log.warn("No mappable MCQ answers found while grading submission {}. Preserving previous MCQ score {}",
-                    s.getId(), previousMcq);
-            mcq = previousMcq;
+        if (mappedMcqAnswers == 0 && previousMcqBaseline > 0) {
+            log.warn("No mappable MCQ answers found while grading submission {}. Preserving previous MCQ baseline score {}",
+                    s.getId(), previousMcqBaseline);
+            mcq = previousMcqBaseline;
         }
 
-        if (mappedMcqAnswers > 0 && mcqAnswersWithPointData == 0 && previousMcq > 0) {
-            log.warn("MCQ answers in submission {} have no point data. Preserving previous MCQ score {}",
-                s.getId(), previousMcq);
-            mcq = previousMcq;
+        if (mappedMcqAnswers > 0 && mcqAnswersWithPointData == 0 && previousMcqBaseline > 0) {
+            log.warn("MCQ answers in submission {} have no point data. Preserving previous MCQ baseline score {}",
+                s.getId(), previousMcqBaseline);
+            mcq = previousMcqBaseline;
         }
 
         if (mappedMcqAnswers > 0
                 && mcqAnswersWithPointData < mappedMcqAnswers
-                && previousMcq > 0
-                && mcq < previousMcq) {
-            log.warn("MCQ point data is partially missing in submission {}. Preserving previous MCQ score {} instead of recalculated {}",
-                    s.getId(), previousMcq, mcq);
-            mcq = previousMcq;
+                && previousMcqBaseline > 0
+                && mcq < previousMcqBaseline) {
+            log.warn("MCQ point data is partially missing in submission {}. Preserving previous MCQ baseline score {} instead of recalculated {}",
+                    s.getId(), previousMcqBaseline, mcq);
+            mcq = previousMcqBaseline;
         }
 
         if (mappedEssayAnswers == 0 && previousEssay > 0) {
@@ -518,7 +521,17 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private Map<Long, User> fetchStudentMap(List<Submission> sub) {
         List<Long> ids = sub.stream().map(s -> safeParseLong(s.getStudentId())).filter(Objects::nonNull).distinct().toList();
-        return userRepository.findAllById(ids).stream().collect(Collectors.toMap(User::getId, u -> u));
+        Map<Long, User> byIdentity = new HashMap<>();
+
+        userRepository.findByStudentIdIn(ids).forEach(user -> {
+            if (user.getStudentId() != null) {
+                byIdentity.put(user.getStudentId(), user);
+            }
+        });
+
+        userRepository.findAllById(ids).forEach(user -> byIdentity.putIfAbsent(user.getId(), user));
+
+        return byIdentity;
     }
 
     private Long safeParseLong(String s) {
@@ -528,7 +541,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     // --- Mappers ---
 
     private SubmissionResponse mapToSubmissionResponse(Submission s) {
-        String studentName = userRepository.findById(safeParseLong(s.getStudentId())).map(User::getFullName).orElse("N/A");
+        String studentName = resolveStudentName(s.getStudentId());
         return SubmissionResponse.builder()
             .id(s.getId()).exerciseId(s.getExerciseId()).studentId(s.getStudentId()).studentName(studentName)
             .status(s.getStatus()).mcqScore(s.getMcqScore()).essayScore(s.getEssayScore()).totalScore(s.getTotalScore())
@@ -548,9 +561,21 @@ public class SubmissionServiceImpl implements SubmissionService {
     private SubmissionListItemResponse mapToListItemResponse(Submission s, Map<Long, User> studentMap) {
         User u = studentMap.get(safeParseLong(s.getStudentId()));
         return SubmissionListItemResponse.builder()
-            .id(s.getId()).studentId(s.getStudentId()).studentName(u != null ? u.getFullName() : "N/A")
+            .id(s.getId()).studentId(s.getStudentId()).studentName(u != null ? u.getFullName() : resolveStudentName(s.getStudentId()))
             .status(s.getStatus()).mcqScore(s.getMcqScore()).essayScore(s.getEssayScore()).totalScore(s.getTotalScore())
             .submittedAt(s.getSubmittedAt()).gradedAt(s.getGradedAt())
             .build();
+    }
+
+    private String resolveStudentName(String storedStudentId) {
+        Long parsed = safeParseLong(storedStudentId);
+        if (parsed == null) {
+            return "N/A";
+        }
+
+        return userRepository.findByStudentId(parsed)
+                .or(() -> userRepository.findById(parsed))
+                .map(User::getFullName)
+                .orElse("N/A");
     }
 }
