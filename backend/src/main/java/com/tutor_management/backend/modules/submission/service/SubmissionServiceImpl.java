@@ -364,71 +364,54 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         double previousMcq = Optional.ofNullable(s.getMcqScore()).orElse(0.0);
         double previousEssay = Optional.ofNullable(s.getEssayScore()).orElse(0.0);
-        double previousTotal = Optional.ofNullable(s.getTotalScore()).orElse(0.0);
-        double mcqFallbackFromTotal = Math.max(0.0, previousTotal - previousEssay);
-        double previousMcqBaseline = Math.max(previousMcq, mcqFallbackFromTotal);
 
         double mcq = 0.0;
         double essay = 0.0;
         int mappedMcqAnswers = 0;
         int mappedEssayAnswers = 0;
         int mcqAnswersWithPointData = 0;
-        int essayAnswersWithPointData = 0;
 
         for (StudentAnswer a : s.getAnswers()) {
             Question question = questionMap.get(a.getQuestionId());
             QuestionType type = typeMap.get(a.getQuestionId());
-            Double originalPoints = a.getPoints();
-            double rawPoints = Optional.ofNullable(originalPoints).orElse(0.0);
-            double maxPoints = question != null ? Optional.ofNullable(question.getPoints()).orElse(0.0) : rawPoints;
-            double pts = Math.max(0.0, Math.min(rawPoints, maxPoints));
-            a.setPoints(roundTwoDecimals(pts));
 
             if (type == QuestionType.MCQ) {
-                if (originalPoints != null) {
+                // MCQ points are set by AutoGradingService — read-only here, never overwrite
+                double pts = Optional.ofNullable(a.getPoints()).orElse(0.0);
+                if (a.getPoints() != null) {
                     mcqAnswersWithPointData++;
                 }
                 mcq += pts;
                 mappedMcqAnswers++;
             } else if (type == QuestionType.ESSAY) {
-                if (originalPoints != null) {
-                    essayAnswersWithPointData++;
-                }
+                // Essay points are set by tutor — clamp within question max
+                Double originalPoints = a.getPoints();
+                double rawPoints = Optional.ofNullable(originalPoints).orElse(0.0);
+                double maxPoints = question != null ? Optional.ofNullable(question.getPoints()).orElse(0.0) : rawPoints;
+                double pts = Math.max(0.0, Math.min(rawPoints, maxPoints));
+                a.setPoints(roundTwoDecimals(pts));
                 essay += pts;
                 mappedEssayAnswers++;
             }
         }
 
-        if (mappedMcqAnswers == 0 && previousMcqBaseline > 0) {
-            log.warn("No mappable MCQ answers found while grading submission {}. Preserving previous MCQ baseline score {}",
-                    s.getId(), previousMcqBaseline);
-            mcq = previousMcqBaseline;
+        // Fallback: preserve previous MCQ score if answers couldn't be mapped properly
+        if (mappedMcqAnswers == 0 && previousMcq > 0) {
+            log.warn("No mappable MCQ answers found while grading submission {}. Preserving previous MCQ score {}",
+                    s.getId(), previousMcq);
+            mcq = previousMcq;
         }
 
-        if (mappedMcqAnswers > 0 && mcqAnswersWithPointData == 0 && previousMcqBaseline > 0) {
-            log.warn("MCQ answers in submission {} have no point data. Preserving previous MCQ baseline score {}",
-                s.getId(), previousMcqBaseline);
-            mcq = previousMcqBaseline;
+        if (mappedMcqAnswers > 0 && mcqAnswersWithPointData == 0 && previousMcq > 0) {
+            log.warn("MCQ answers in submission {} have no point data. Preserving previous MCQ score {}",
+                s.getId(), previousMcq);
+            mcq = previousMcq;
         }
 
-        if (mappedMcqAnswers > 0
-                && mcqAnswersWithPointData < mappedMcqAnswers
-                && previousMcqBaseline > 0
-                && mcq < previousMcqBaseline) {
-            log.warn("MCQ point data is partially missing in submission {}. Preserving previous MCQ baseline score {} instead of recalculated {}",
-                    s.getId(), previousMcqBaseline, mcq);
-            mcq = previousMcqBaseline;
-        }
-
+        // Fallback: preserve previous essay score if no essay answers were found
         if (mappedEssayAnswers == 0 && previousEssay > 0) {
             log.warn("No mappable essay answers found while grading submission {}. Preserving previous essay score {}",
                     s.getId(), previousEssay);
-            essay = previousEssay;
-        }
-
-        if (mappedEssayAnswers > 0 && essayAnswersWithPointData == 0 && previousEssay > 0) {
-            log.warn("Essay answers in submission {} have no point data. Preserving previous essay score {}",
-                s.getId(), previousEssay);
             essay = previousEssay;
         }
 
