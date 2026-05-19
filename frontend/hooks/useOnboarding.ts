@@ -9,25 +9,17 @@ export const useOnboarding = () => {
   const [showTour, setShowTour] = useState(false);
   const [dismissedInSession, setDismissedInSession] = useState(false);
 
+  const shouldShowTour =
+    user?.role === 'TUTOR' && getTourStatus(user.tourCompleted) === false;
+
   useEffect(() => {
-    if (loading) {
-      return;
-    }
-
-    if (!user || dismissedInSession) {
-      setShowTour(false);
-      return;
-    }
-
-    const shouldShowTour = user.role === 'TUTOR' && getTourStatus(user.tourCompleted) === false;
-    if (!shouldShowTour) {
-      setShowTour(false);
+    if (loading || !user || dismissedInSession || !shouldShowTour) {
       return;
     }
 
     const timer = window.setTimeout(() => setShowTour(true), 800);
     return () => window.clearTimeout(timer);
-  }, [dismissedInSession, loading, user]);
+  }, [dismissedInSession, loading, user, shouldShowTour]);
 
   const handleTourComplete = (didPersist = true) => {
     if (didPersist) {
@@ -38,5 +30,7 @@ export const useOnboarding = () => {
     setShowTour(false);
   };
 
-  return { showTour, handleTourComplete };
+  const isTourVisible = showTour && shouldShowTour && !dismissedInSession;
+
+  return { showTour: isTourVisible, handleTourComplete };
 };

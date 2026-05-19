@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/tutor_management?rewriteBatchedStatements=true}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/tutor_management_db?rewriteBatchedStatements=true}
     username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:root_password_vps}
+    password: ${SPRING_DATASOURCE_PASSWORD:Admin@123}
     driver-class-name: com.mysql.cj.jdbc.Driver
   security:
     oauth2:
@@ -28,7 +28,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
-    open-in-view: false  # ✅ PERF: Release connections immediately after transaction
+    open-in-view: false  
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -42,7 +42,7 @@ spring:
         default_batch_fetch_size: 20
         query:
           in_clause_parameter_padding: true
-          timeout: 10000  # ✅ PERF: 10s query timeout for safety
+          timeout: 10000 
 
   servlet:
     multipart:
@@ -73,10 +73,10 @@ app:
     from: ${APP_MAIL_FROM:tonquynhlong@gmail.com}
     from-name: ${APP_MAIL_FROM_NAME:Thầy Quỳnh Long}
   init-data:
-    enabled: ${INIT_DATA_ENABLED:false} # ✅ DEPLOY: Disable by default for faster startup on Render
+    enabled: ${INIT_DATA_ENABLED:false} 
     default-password: password123
   online-session:
-    early-join-minutes: ${EARLY_JOIN_MINUTES:0}  # ✅ FIX: Allow joining anytime (set via env var for flexibility)
+    early-join-minutes: ${EARLY_JOIN_MINUTES:0}  
     jwt:
       secret: ${ONLINE_SESSION_JWT_SECRET:your_online_session_random_secret_string}
       expiration: 300000 # 5 minutes
@@ -207,6 +207,11 @@ spring:
   config:
     activate:
       on-profile: prod
+  datasource:
+    # In production, datasource credentials must come from environment variables.
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
 logging:
   level:
