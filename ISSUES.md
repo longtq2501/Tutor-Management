@@ -9,10 +9,8 @@
 ---
 
 ## Completed Work (Archive)
-- **[P0-Critical] Backend local compilation failure (Java 21 target)**
-  - **Resolution**: Changed the target Java version from `21` to `17` in `pom.xml` to match the local OpenJDK 17 installation. Verified the backend builds successfully with `mvnw compile`.
-- **[P0-Critical] Test compilation failure (getFirst method not found)**
-  - **Resolution**: Replaced Java 21's `.getFirst()` Sequenced Collections list method with Java 17 compatible `.get(0)` calls in `TutorRepositoryTest`, `ChatServiceTest`, and `OnlineSessionServiceTest`. Verified that all 105 tests build and pass successfully.
+- **[P0-Critical] Revert to Java 21 Target & Restored getFirst()**
+  - **Resolution**: Reverted the target Java version from `17` back to `21` in `pom.xml` and restored all `.getFirst()` calls. This ensures compatibility with the production build environment and deployment pipeline (which runs on JDK 21), resolving the 502 Bad Gateway / CORS errors caused by compilation failures on the GitHub Actions runner.
 - **[P1-High] ESLint error in useOnboarding.ts**
   - **Resolution**: Refactored the `useOnboarding` hook to dynamically compute the `isTourVisible` state in render phase, removing synchronous `setState` updates from the `useEffect` body. Resolved all lint errors.
 - **[P1-High] Avoid unnecessary re-renders or state changes during page transitions**

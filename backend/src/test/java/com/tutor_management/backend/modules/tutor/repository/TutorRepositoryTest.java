@@ -109,7 +109,7 @@ class TutorServiceTest {
 
         // Then
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getEmail()).isEqualTo("tutor@test.com");
+        assertThat(result.getContent().getFirst().getEmail()).isEqualTo("tutor@test.com");
         verify(tutorRepository).findAll(pageable);
     }
 
