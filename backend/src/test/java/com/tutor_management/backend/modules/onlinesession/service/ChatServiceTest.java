@@ -123,7 +123,7 @@ class ChatServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        assertEquals("Test Content", result.getContent().getFirst().getContent());
+        assertEquals("Test Content", result.getContent().get(0).getContent());
         verify(chatMessageRepository).findByRoomIdOrderByTimestampDesc(roomId, pageable);
     }
 

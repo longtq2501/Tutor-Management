@@ -750,8 +750,8 @@ class OnlineSessionServiceTest {
 
         // Then
         assertFalse(results.isEmpty());
-        assertEquals("room-1", results.getContent().getFirst().getRoomId());
-        assertTrue(results.getContent().getFirst().isCanJoinNow());  // ✅ UPDATED: Allow joining anytime (except ENDED)
+        assertEquals("room-1", results.getContent().get(0).getRoomId());
+        assertTrue(results.getContent().get(0).isCanJoinNow());  // ✅ UPDATED: Allow joining anytime (except ENDED)
     }
 
     @Test
