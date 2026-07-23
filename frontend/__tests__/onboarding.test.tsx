@@ -1,7 +1,14 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, renderHook, act } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { TourStep } from '@/components/onboarding/TourStep';
 import { TourOverlay } from '@/components/onboarding/TourOverlay';
+import { useOnboarding } from '@/hooks/useOnboarding';
+
+const mockUseAuth = vi.fn();
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
 
 vi.mock('@/components/onboarding/useTour', () => ({
   useTour: () => ({
@@ -140,3 +147,88 @@ describe('TourOverlay', () => {
     expect(screen.getByText('Mô tả test')).toBeInTheDocument();
   });
 });
+
+describe('useOnboarding', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('does not show tour if user is loading', () => {
+    mockUseAuth.mockReturnValue({
+      user: null,
+      loading: true,
+      markTourCompleted: vi.fn(),
+    });
+
+    const { result } = renderHook(() => useOnboarding());
+    expect(result.current.showTour).toBe(false);
+  });
+
+  it('does not show tour if user is not TUTOR', () => {
+    mockUseAuth.mockReturnValue({
+      user: { role: 'STUDENT', tourCompleted: false },
+      loading: false,
+      markTourCompleted: vi.fn(),
+    });
+
+    const { result } = renderHook(() => useOnboarding());
+    expect(result.current.showTour).toBe(false);
+  });
+
+  it('does not show tour if tourCompleted is true', () => {
+    mockUseAuth.mockReturnValue({
+      user: { role: 'TUTOR', tourCompleted: true },
+      loading: false,
+      markTourCompleted: vi.fn(),
+    });
+
+    const { result } = renderHook(() => useOnboarding());
+    expect(result.current.showTour).toBe(false);
+  });
+
+  it('shows tour after 800ms delay if user is TUTOR and has not completed tour', () => {
+    mockUseAuth.mockReturnValue({
+      user: { role: 'TUTOR', tourCompleted: false },
+      loading: false,
+      markTourCompleted: vi.fn(),
+    });
+
+    const { result } = renderHook(() => useOnboarding());
+    expect(result.current.showTour).toBe(false);
+
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    expect(result.current.showTour).toBe(true);
+  });
+
+  it('hides tour and marks completed when handleTourComplete is called', async () => {
+    const markTourCompletedMock = vi.fn();
+    mockUseAuth.mockReturnValue({
+      user: { role: 'TUTOR', tourCompleted: false },
+      loading: false,
+      markTourCompleted: markTourCompletedMock,
+    });
+
+    const { result } = renderHook(() => useOnboarding());
+
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(result.current.showTour).toBe(true);
+
+    act(() => {
+      result.current.handleTourComplete();
+    });
+
+    expect(result.current.showTour).toBe(false);
+    expect(markTourCompletedMock).toHaveBeenCalledTimes(1);
+  });
+});
+

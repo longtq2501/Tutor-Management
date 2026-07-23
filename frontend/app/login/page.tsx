@@ -141,8 +141,7 @@ function LoginForm() {
         disabled={loading}
         onClick={() => {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-          const redirectUri = `${window.location.origin}/auth/success`;
-          window.location.href = `${apiUrl.replace(/\/$/, '')}/oauth2/authorization/google?redirect_uri=${encodeURIComponent(redirectUri)}`;
+          window.location.href = `${apiUrl.replace(/\/$/, '')}/oauth2/authorization/google`;
         }}
       >
         <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">

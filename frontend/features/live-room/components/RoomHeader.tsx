@@ -5,7 +5,9 @@ import { BillableTimer } from './BillableTimer';
 import { ParticipantPresence } from './ParticipantPresence';
 import { ModeToggle } from '@/components/shared/ModeToggle';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 interface RoomHeaderProps {
     roomId: string;
@@ -23,11 +25,16 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
     isRecording
 }) => {
     const [copied, setCopied] = React.useState(false);
+    const router = useRouter();
 
     const handleCopy = () => {
         navigator.clipboard.writeText(roomId);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleLeaveRoom = () => {
+        router.push('/dashboard?view=live-room');
     };
 
     return (
@@ -72,6 +79,20 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                     {isConnected ? '● Đã kết nối' : '○ Đang kết nối...'}
                 </span>
                 <ModeToggle />
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleLeaveRoom}
+                            className="h-9 w-9 p-0 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                            aria-label="Rời phòng học"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Rời phòng</TooltipContent>
+                </Tooltip>
             </div>
         </header>
     );

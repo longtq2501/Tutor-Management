@@ -71,6 +71,32 @@ services:
     networks:
       - tutor-network
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx_prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      # Mount SSL certificates (adjust path to your cert location on VPS)
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+      - /etc/ssl/private:/etc/ssl/private:ro
+      # Optional: mount logs directory
+      - ./logs/nginx:/var/log/nginx:rw
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - tutor-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
 networks:
   tutor-network:
     driver: bridge

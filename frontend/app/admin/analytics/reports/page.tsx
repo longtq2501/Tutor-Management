@@ -1,118 +1,87 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, FileSpreadsheet, Download, Calendar } from 'lucide-react';
-import { analyticsApi } from '@/lib/services';
+import { useState, useCallback } from 'react';
+import { ReportConfigSection } from '../components/ReportConfigSection';
+import { ReportDownloadHistory, type ReportHistoryItem } from '../components/ReportDownloadHistory';
 
+/**
+ * Admin Reports Page
+ * Centralized report generation and download management for system analytics
+ * Handles: Financial reports, Performance reports, and download history
+ *
+ * Standards compliance:
+ * - Client component ('use client') for interactivity
+ * - Error boundaries via toast notifications
+ * - Loading states for async operations
+ * - Type-safe component props
+ */
 export default function ReportsPage() {
-    const [reportType, setReportType] = useState<string>('finance');
-    const [format, setFormat] = useState<'csv' | 'xlsx'>('xlsx');
-    const [month, setMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [reportHistory, setReportHistory] = useState<ReportHistoryItem[]>([]);
 
-    const handleDownload = () => {
-        analyticsApi.exportReport(reportType as 'finance' | 'performance', format, month);
-    };
+  const handleDownloadStart = useCallback(() => {
+    setIsDownloading(true);
+  }, []);
 
-    return (
-        <div className="p-6 space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Trung Tâm Báo Cáo</h1>
-                <p className="text-muted-foreground">Xuất dữ liệu hệ thống ra các định dạng văn phòng.</p>
-            </div>
+  const handleDownloadComplete = useCallback(() => {
+    setIsDownloading(false);
+    // TODO: Fetch updated history after successful download (Task 2)
+    // const history = await reportApi.getHistory();
+    // setReportHistory(history);
+  }, []);
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Cấu Hình Báo Cáo</CardTitle>
-                        <CardDescription>Chọn loại dữ liệu và định dạng bạn muốn xuất.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Loại Báo Cáo</label>
-                            <Select value={reportType} onValueChange={setReportType}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="finance">Báo Cáo Tài Chính (Doanh thu & Hoa hồng)</SelectItem>
-                                    <SelectItem value="performance">Báo Cáo Hiệu Suất (Giáo viên & Học sinh)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+  const handleReDownload = useCallback((id: string) => {
+    // TODO: Implement re-download functionality (Task 2)
+    console.log('Re-download report:', id);
+  }, []);
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Thời Gian</label>
-                            <Select value={month} onValueChange={setMonth}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="2026-02">Tháng 02/2026</SelectItem>
-                                    <SelectItem value="2026-01">Tháng 01/2026</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Định Dạng</label>
-                            <div className="flex gap-4">
-                                <Button
-                                    variant={format === 'xlsx' ? 'default' : 'outline'}
-                                    className="flex-1"
-                                    onClick={() => setFormat('xlsx')}
-                                >
-                                    <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel (.xlsx)
-                                </Button>
-                                <Button
-                                    variant={format === 'csv' ? 'default' : 'outline'}
-                                    className="flex-1"
-                                    onClick={() => setFormat('csv')}
-                                >
-                                    <FileText className="mr-2 h-4 w-4" /> CSV (.csv)
-                                </Button>
-                            </div>
-                        </div>
-
-                        <Button className="w-full mt-4" size="lg" onClick={handleDownload}>
-                            <Download className="mr-2 h-5 w-5" /> Tải Xuống Báo Cáo
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Báo Cáo Gần Đây</CardTitle>
-                        <CardDescription>Lịch sử các lần xuất dữ liệu của bạn.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {[
-                                { name: 'finance-report-2026-02.xlsx', date: '10 phút trước', size: '24 KB' },
-                                { name: 'performance-report.csv', date: 'Hôm qua', size: '12 KB' },
-                                { name: 'finance-report-2026-01.xlsx', date: '15/02/2026', size: '45 KB' },
-                            ].map((report, i) => (
-                                <div key={i} className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-background rounded-md">
-                                            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium">{report.name}</p>
-                                            <p className="text-xs text-muted-foreground">{report.date} • {report.size}</p>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" size="icon">
-                                        <Download className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="p-6 space-y-6 max-w-6xl mx-auto">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Trung Tâm Báo Cáo</h1>
+          <p className="text-muted-foreground mt-1">
+            Quản lý, xuất dữ liệu hệ thống và xem lịch sử báo cáo của bạn.
+          </p>
         </div>
-    );
+
+        {/* Report Config and History Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Config Section - Takes 2/3 on large screens */}
+          <div className="lg:col-span-2">
+            <ReportConfigSection
+              onDownloadStart={handleDownloadStart}
+              onDownloadComplete={handleDownloadComplete}
+            />
+          </div>
+
+          {/* History Section - Takes 1/3 on large screens */}
+          <div className="lg:col-span-1">
+            <ReportDownloadHistory
+              items={reportHistory}
+              isLoading={isDownloading}
+              onDownload={handleReDownload}
+            />
+          </div>
+        </div>
+
+        {/* Info Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <h3 className="font-semibold text-sm mb-2">Báo Cáo Tài Chính</h3>
+            <p className="text-sm text-muted-foreground">
+              Doanh thu toàn hệ thống, hoa hồng giáo viên, và phân tích tài chính chi tiết theo tutor.
+            </p>
+          </div>
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <h3 className="font-semibold text-sm mb-2">Báo Cáo Hiệu Suất</h3>
+            <p className="text-sm text-muted-foreground">
+              Đánh giá học sinh, tỷ lệ hoàn thành, xếp hạng giáo viên, và các chỉ số hiệu suất khác.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
