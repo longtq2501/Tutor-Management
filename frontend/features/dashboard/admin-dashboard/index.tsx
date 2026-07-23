@@ -128,13 +128,8 @@ export default function AdminDashboard() {
         <StatCard
           title="Tổng Thu Nhập"
           value={safeStats.totalRevenueAllTime || safeStats.totalPaidAllTime}
-          subtitle={`${paidPercentage}% trên dự kiến`}
           icon={<CheckCircle />}
           variant="green"
-          progressBar={{
-            percentage: paidPercentage,
-            color: 'green'
-          }}
           isLoading={isGlobalLoading}
         />
 
@@ -147,13 +142,8 @@ export default function AdminDashboard() {
             </div>
           }
           value={safeStats.totalDebtAllTime || safeStats.totalUnpaidAllTime}
-          subtitle={`${unpaidPercentage}% trên dự kiến`}
           icon={<XCircle />}
           variant="red"
-          progressBar={{
-            percentage: unpaidPercentage,
-            color: 'red'
-          }}
           isLoading={isGlobalLoading}
         />
       </div>
